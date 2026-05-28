@@ -210,7 +210,6 @@
             margin-top: 10px;
         }
         
-        /* Rating stars */
         .rating {
             display: flex;
             align-items: center;
@@ -246,7 +245,6 @@
             color: #5a6e7a;
         }
         
-        /* Popular tabs */
         .popular-tabs {
             display: flex;
             gap: 20px;
@@ -486,7 +484,6 @@
             flex: 1;
         }
         
-        /* Modales */
         .modal {
             display: none;
             position: fixed;
@@ -586,7 +583,6 @@
             object-fit: cover;
         }
         
-        /* Rating modal */
         .rating-modal {
             text-align: center;
         }
@@ -672,7 +668,6 @@
             margin-top: 10px;
         }
         
-        /* Admin panel */
         .admin-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -816,7 +811,7 @@
             <button class="btn btn-outline" id="btnLogin"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
             <button class="btn btn-primary" id="btnPublicar" style="display: none;"><i class="fas fa-plus-circle"></i> Publicar Servicio</button>
             <button class="btn btn-outline" id="btnCompartir" style="display: none;"><i class="fas fa-qrcode"></i> Compartir</button>
-            <button class="btn btn-admin" id="btnAdmin"><i class="fas fa-crown"></i> <span id="adminBadge">Admin</span></button>
+            <button class="btn btn-admin" id="btnAdmin" style="display: none;"><i class="fas fa-crown"></i> <span id="adminBadge">Admin</span></button>
             <button class="btn btn-danger" id="btnLogout" style="display: none;"><i class="fas fa-sign-out-alt"></i> Salir</button>
         </div>
     </div>
@@ -1103,7 +1098,6 @@ function escapeHtml(text) {
     });
 }
 
-// Renderizar estrellas
 function renderStars(promedio, total) {
     if (!promedio && promedio !== 0) return '<div class="rating"><span class="rating-count">Sin reseñas aún</span></div>';
     const fullStars = Math.floor(promedio);
@@ -1115,7 +1109,6 @@ function renderStars(promedio, total) {
     return `<div class="rating"><div class="stars">${starsHtml}</div><span class="rating-value">${promedio.toFixed(1)}</span><span class="rating-count">(${total} ${total === 1 ? 'reseña' : 'reseñas'})</span></div>`;
 }
 
-// Subir imagen
 async function subirImagen(file, userId) {
     if (!file) return null;
     const ext = file.name.split('.').pop();
@@ -1132,7 +1125,6 @@ async function subirImagen(file, userId) {
     }
 }
 
-// MAPA
 function actualizarMapa() {
     if (!mapaInstance) {
         mapaInstance = L.map('mapa').setView([23.1, -82.4], 11);
@@ -1158,7 +1150,6 @@ function actualizarMapa() {
     });
 }
 
-// VER PERFIL
 window.verPerfil = async function(servicioId) {
     const servicio = todosLosServicios.find(s => s.id === servicioId);
     if (!servicio) return;
@@ -1170,7 +1161,6 @@ window.verPerfil = async function(servicioId) {
     if (adminAuthenticated) adminNotice.style.display = 'block';
     else adminNotice.style.display = 'none';
     
-    // Cargar reseñas
     const { data: reseñas } = await supabase
         .from('calificaciones')
         .select('*')
@@ -1216,7 +1206,6 @@ window.verPerfil = async function(servicioId) {
     modal.style.display = 'flex';
 };
 
-// CALIFICACIONES
 window.mostrarModalCalificar = async function(servicioId, servicioNombre) {
     if (!currentUser) {
         mostrarToast('Debes iniciar sesión para calificar', 'error');
@@ -1281,7 +1270,6 @@ async function enviarCalificacion() {
     }
 }
 
-// CARGAR PROFESIONALES
 async function cargarProfesionales() {
     try {
         const { data, error } = await supabase.from('oferentes').select('*').order('created_at', { ascending: false });
@@ -1292,7 +1280,6 @@ async function cargarProfesionales() {
         document.getElementById('totalProfesionales').textContent = aprobados;
         document.getElementById('totalPendientes').textContent = pendientes;
         
-        // Populares
         const categoriasCount = {};
         todosLosServicios.forEach(s => { if (s.estado === 'aprobado') categoriasCount[s.categoria] = (categoriasCount[s.categoria] || 0) + 1; });
         const categoriasOrdenadas = Object.entries(categoriasCount).sort((a,b) => b[1] - a[1]).slice(0, 6);
@@ -1344,7 +1331,6 @@ async function cargarProfesionales() {
     } catch (err) { mostrarToast('Error al cargar profesionales', 'error'); }
 }
 
-// PUBLICAR
 async function publicarServicio() {
     const nombre = document.getElementById('pubNombre').value.trim();
     const categoria = document.getElementById('pubCategoria').value;
@@ -1375,10 +1361,8 @@ document.getElementById('fotoPerfil')?.addEventListener('change', (e) => {
     if (file) { const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('previewFoto').innerHTML = `<img src="${ev.target.result}" alt="preview">`; }; reader.readAsDataURL(file); }
 });
 
-// QR
 function generarQR() { const url = window.location.href; document.getElementById('shareUrl').value = url; document.getElementById('qrContainer').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}" style="margin:0 auto;border-radius:16px;background:white;padding:10px;">`; }
 
-// AUTENTICACIÓN
 let loginMode = 'login';
 async function manejarAuth() {
     const email = document.getElementById('loginEmail').value.trim();
@@ -1408,8 +1392,7 @@ async function manejarAuth() {
 }
 async function logout() { await supabase.auth.signOut(); currentUser = null; adminAuthenticated = false; sessionStorage.removeItem('adminAutenticado'); actualizarUI(); await cargarProfesionales(); mostrarToast('Sesión cerrada', 'info'); }
 
-// ==================== FUNCIÓN ACTUALIZAR UI CORREGIDA ====================
-// El botón Admin ahora es SIEMPRE visible
+// ==================== FUNCIÓN ACTUALIZAR UI - BOTÓN ADMIN SOLO PARA TU CORREO ====================
 function actualizarUI() {
     const userInfo = document.getElementById('userInfo');
     const userName = document.getElementById('userName');
@@ -1419,6 +1402,9 @@ function actualizarUI() {
     const btnAdmin = document.getElementById('btnAdmin');
     const btnLogout = document.getElementById('btnLogout');
     
+    // SOLO este correo verá el botón de Administrador
+    const ADMIN_EMAIL = 'ch361892@gmail.com';
+    
     if (currentUser) {
         userInfo.style.display = 'flex';
         userName.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email.split('@')[0]}`;
@@ -1426,18 +1412,23 @@ function actualizarUI() {
         btnPublicar.style.display = 'inline-block';
         btnCompartir.style.display = 'inline-block';
         btnLogout.style.display = 'inline-block';
-        btnAdmin.style.display = 'inline-block';  // SIEMPRE visible cuando hay sesión
+        
+        // VERIFICACIÓN: Solo mostrar botón Admin si el email es el del administrador
+        if (currentUser.email === ADMIN_EMAIL) {
+            btnAdmin.style.display = 'inline-block';
+        } else {
+            btnAdmin.style.display = 'none';
+        }
     } else {
         userInfo.style.display = 'none';
         btnLogin.style.display = 'inline-block';
         btnPublicar.style.display = 'none';
         btnCompartir.style.display = 'none';
-        btnAdmin.style.display = 'inline-block';  // SIEMPRE visible aunque no haya sesión
+        btnAdmin.style.display = 'none';
         btnLogout.style.display = 'none';
     }
 }
 
-// ADMIN
 function verificarAdminPassword() {
     const password = document.getElementById('adminPasswordInput').value;
     if (password === ADMIN_PASSWORD) {
@@ -1446,12 +1437,14 @@ function verificarAdminPassword() {
         actualizarStatsAdmin(); cargarAdminPendientes(); actualizarUI();
     } else { mostrarToast('❌ Contraseña incorrecta', 'error'); }
 }
+
 function checkAdminSession() {
     if (sessionStorage.getItem('adminAutenticado') === 'true') {
         adminAuthenticated = true; document.getElementById('passwordSection').style.display = 'none'; document.getElementById('adminPanelSection').style.display = 'block';
         actualizarStatsAdmin(); cargarAdminPendientes(); actualizarUI();
     }
 }
+
 window.aprobarServicio = async function(id) { if (!confirm('¿Aprobar?')) return; await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id); mostrarToast('✅ Aprobado', 'success'); cargarAdminPendientes(); cargarProfesionales(); actualizarStatsAdmin(); };
 window.rechazarServicio = async function(id) { if (!confirm('¿Rechazar?')) return; await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id); mostrarToast('❌ Rechazado', 'info'); cargarAdminPendientes(); cargarProfesionales(); actualizarStatsAdmin(); };
 window.eliminarServicio = async function(id) { if (!confirm('¿Eliminar?')) return; await supabase.from('oferentes').delete().eq('id', id); mostrarToast('🗑️ Eliminado', 'success'); cargarAdminActual(); cargarProfesionales(); actualizarStatsAdmin(); };
@@ -1503,7 +1496,6 @@ document.getElementById('shareTelegram').onclick = () => window.open(`https://t.
 document.getElementById('copyLinkBtn').onclick = () => { navigator.clipboard.writeText(window.location.href); mostrarToast('✅ Enlace copiado', 'success'); };
 document.getElementById('btnAdmin').onclick = () => { 
     document.getElementById('modalAdmin').style.display = 'flex';
-    // Si ya está autenticado, mostrar panel directamente
     if (adminAuthenticated) {
         document.getElementById('passwordSection').style.display = 'none';
         document.getElementById('adminPanelSection').style.display = 'block';
@@ -1522,7 +1514,6 @@ document.getElementById('adminTabTodos').onclick = cargarAdminTodos;
 document.getElementById('switchAuthMode').onclick = (e) => { e.preventDefault(); if (loginMode === 'login') { loginMode = 'register'; document.getElementById('modalLoginTitle').innerHTML = '<i class="fas fa-user-plus"></i> Crear Cuenta'; document.getElementById('btnLoginSubmit').innerHTML = '<i class="fas fa-user-plus"></i> Registrarse'; document.getElementById('switchAuthMode').innerHTML = '¿Ya tienes cuenta? Inicia sesión'; } else { loginMode = 'login'; document.getElementById('modalLoginTitle').innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión'; document.getElementById('btnLoginSubmit').innerHTML = '<i class="fas fa-arrow-right"></i> Ingresar'; document.getElementById('switchAuthMode').innerHTML = '¿No tienes cuenta? Regístrate'; } };
 window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 
-// INICIAR
 async function init() { const { data: { session } } = await supabase.auth.getSession(); currentUser = session?.user || null; actualizarUI(); await cargarProfesionales(); checkAdminSession(); initRatingStars(); }
 init();
 </script>
