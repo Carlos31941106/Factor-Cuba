@@ -16,6 +16,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- QR Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
     
     <style>
@@ -41,6 +44,12 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
         
         .container {
@@ -77,6 +86,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            cursor: pointer;
         }
         
         .logo-icon {
@@ -146,14 +156,30 @@
             font-size: 12px;
         }
         
-        .hero {
+        .btn-large {
+            padding: 15px 40px;
+            font-size: 18px;
+        }
+        
+        /* Landing Page */
+        .landing {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            padding: 60px 0 40px;
+            padding: 80px 20px;
             animation: fadeInUp 0.8s ease;
         }
         
-        .hero h1 {
-            font-size: 48px;
+        .hero-landing {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero-landing h1 {
+            font-size: 64px;
             font-weight: 800;
             margin-bottom: 20px;
             background: linear-gradient(135deg, #ffffff, #2ec76b);
@@ -161,11 +187,94 @@
             -webkit-text-fill-color: transparent;
         }
         
-        .hero p {
-            font-size: 18px;
+        .hero-landing p {
+            font-size: 20px;
             color: #a0b0a8;
-            max-width: 600px;
+            margin-bottom: 40px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+        }
+        
+        .feature-card {
+            background: rgba(13, 31, 22, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(46, 199, 107, 0.2);
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .feature-card:nth-child(2) { animation-delay: 0.5s; }
+        .feature-card:nth-child(3) { animation-delay: 1s; }
+        .feature-card:nth-child(4) { animation-delay: 1.5s; }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: #2ec76b;
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            color: #2ec76b;
+            margin-bottom: 20px;
+        }
+        
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .feature-card p {
+            color: #b0c4b0;
+            line-height: 1.5;
+        }
+        
+        .mission-section {
+            background: rgba(46, 199, 107, 0.1);
+            border-radius: 30px;
+            padding: 50px;
+            margin: 50px 0;
+            border: 1px solid rgba(46, 199, 107, 0.3);
+        }
+        
+        .mission-section h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #2ec76b;
+        }
+        
+        .mission-section p {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #b0c4b0;
+            max-width: 800px;
             margin: 0 auto;
+        }
+        
+        .frase-motivadora {
+            font-size: 24px;
+            font-style: italic;
+            margin: 40px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(46, 199, 107, 0.2), rgba(26, 122, 65, 0.1));
+            border-radius: 30px;
+            border-left: 5px solid #2ec76b;
+        }
+        
+        /* Main App Section */
+        .main-app {
+            display: none;
+        }
+        
+        .main-app.active {
+            display: block;
         }
         
         .stats-grid {
@@ -203,7 +312,6 @@
             margin-top: 10px;
         }
         
-        /* Mapa */
         .map-container {
             margin: 30px 0;
             border-radius: 20px;
@@ -252,7 +360,7 @@
         
         .professionals-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 25px;
             margin: 40px 0;
         }
@@ -324,11 +432,35 @@
             color: #2ec76b;
         }
         
+        /* Galería de imágenes */
+        .image-gallery {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .gallery-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s;
+            border: 2px solid rgba(46, 199, 107, 0.3);
+        }
+        
+        .gallery-img:hover {
+            transform: scale(1.05);
+            border-color: #2ec76b;
+        }
+        
         .card-footer {
             padding: 15px 20px;
             border-top: 1px solid rgba(46, 199, 107, 0.2);
         }
         
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -413,6 +545,20 @@
             border-color: #2ec76b;
         }
         
+        .image-preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .image-preview img {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+        
         .admin-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -487,7 +633,6 @@
             gap: 12px;
         }
         
-        /* QR Code */
         .qr-container {
             text-align: center;
             padding: 20px;
@@ -508,7 +653,6 @@
             margin-top: 20px;
         }
         
-        /* Password section */
         .password-container {
             background: #0a150f;
             border-radius: 16px;
@@ -517,12 +661,25 @@
             border: 1px solid rgba(46, 199, 107, 0.3);
         }
         
+        .back-to-landing {
+            background: transparent;
+            border: none;
+            color: #2ec76b;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 20px;
+        }
+        
+        .back-to-landing:hover {
+            text-decoration: underline;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 0 15px;
             }
             
-            .hero h1 {
+            .hero-landing h1 {
                 font-size: 32px;
             }
             
@@ -540,6 +697,14 @@
             
             #mapa {
                 height: 300px;
+            }
+            
+            .mission-section {
+                padding: 30px 20px;
+            }
+            
+            .frase-motivadora {
+                font-size: 18px;
             }
         }
         
@@ -561,13 +726,13 @@
 
 <header class="header">
     <div class="container header-content">
-        <div class="logo">
+        <div class="logo" id="logoHome">
             <div class="logo-icon">
                 <i class="fas fa-handshake"></i>
             </div>
             <span>Factor <span style="color:#2ec76b;">Cuba</span></span>
         </div>
-        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
             <div id="userInfo" style="display: none; align-items: center; gap: 15px;">
                 <span id="userName" style="color: #2ec76b;"></span>
             </div>
@@ -576,62 +741,103 @@
             <button class="btn btn-outline" id="btnCompartir" style="display: none;"><i class="fas fa-qrcode"></i> Compartir</button>
             <button class="btn btn-admin" id="btnAdmin" style="display: none;"><i class="fas fa-crown"></i> <span id="adminBadge">Admin</span></button>
             <button class="btn btn-danger" id="btnLogout" style="display: none;"><i class="fas fa-sign-out-alt"></i> Salir</button>
+            <button class="back-to-landing" id="btnBackToLanding" style="display: none;"><i class="fas fa-home"></i> Inicio</button>
         </div>
     </div>
 </header>
 
-<section class="hero">
+<!-- LANDING PAGE -->
+<div id="landingPage" class="landing">
     <div class="container">
-        <h1><i class="fas fa-star" style="color: #e8c96a;"></i> Conectamos Talento Cubano <i class="fas fa-star" style="color: #e8c96a;"></i></h1>
-        <p>Encuentra los mejores profesionales de confianza o publica tu servicio y haz crecer tu negocio</p>
+        <div class="hero-landing">
+            <h1><i class="fas fa-star" style="color: #e8c96a;"></i> Conectamos Talento Cubano <i class="fas fa-star" style="color: #e8c96a;"></i></h1>
+            <p>La plataforma que une a los mejores profesionales con quienes más los necesitan</p>
+            <button class="btn btn-primary btn-large" id="btnExplorar"><i class="fas fa-search"></i> Explorar Profesionales</button>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-hard-hat"></i></div>
+                <h3>Construcción</h3>
+                <p>Albañiles, constructores y maestros de obra con experiencia y calidad garantizada</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                <h3>Electricidad</h3>
+                <p>Instalaciones, reparaciones y mantenimiento eléctrico por profesionales certificados</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-wrench"></i></div>
+                <h3>Reparaciones</h3>
+                <p>Todo tipo de reparaciones del hogar: electrodomésticos, fontanería y más</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-truck"></i></div>
+                <h3>Transporte</h3>
+                <p>Servicios de mudanzas, fletes y transporte de carga confiables</p>
+            </div>
+        </div>
+        
+        <div class="mission-section">
+            <h2><i class="fas fa-heart" style="color: #2ec76b;"></i> Nuestra Misión</h2>
+            <p>En Factor Cuba nos dedicamos a conectar a los mejores profesionales del país con los clientes que buscan calidad, confianza y resultados. Nuestro objetivo es que cada persona que confíe en nosotros se sienta satisfecha, cómoda y segura con el trabajo recibido. Porque tu tranquilidad es nuestra mayor motivación.</p>
+        </div>
+        
+        <div class="frase-motivadora">
+            <i class="fas fa-quote-left" style="color: #2ec76b; margin-right: 15px;"></i>
+            El trabajo bien hecho no es un gasto, es una inversión en tu tranquilidad. En Factor Cuba, conectamos talento con excelencia.
+            <i class="fas fa-quote-right" style="color: #2ec76b; margin-left: 15px;"></i>
+        </div>
     </div>
-</section>
+</div>
 
-<div class="container">
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-number" id="totalProfesionales">0</div>
-            <div class="stat-label">Profesionales Activos</div>
+<!-- MAIN APP (Buscador de profesionales) -->
+<div id="mainApp" class="main-app">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalProfesionales">0</div>
+                <div class="stat-label">Profesionales Activos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalPendientes">0</div>
+                <div class="stat-label">Pendientes de Aprobación</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">7</div>
+                <div class="stat-label">Categorías</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">Posibilidades</div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number" id="totalPendientes">0</div>
-            <div class="stat-label">Pendientes de Aprobación</div>
+        
+        <div class="map-container">
+            <div id="mapa"></div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">7</div>
-            <div class="stat-label">Categorías</div>
+        
+        <div class="filters">
+            <i class="fas fa-search" style="align-self: center; color: #2ec76b;"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, oficio o zona...">
+            <select id="categoriaFilter">
+                <option value="">Todas las categorías</option>
+                <option value="carpinteria">🪵 Carpintería</option>
+                <option value="construccion">🏗️ Construcción</option>
+                <option value="electricidad">⚡ Electricidad</option>
+                <option value="soldadura">⚙️ Soldadura</option>
+                <option value="reparaciones">🔧 Reparaciones</option>
+                <option value="transporte">🚚 Transporte</option>
+                <option value="otros">📦 Otros Servicios</option>
+            </select>
+            <button class="btn btn-primary" id="btnBuscar"><i class="fas fa-search"></i> Buscar</button>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">∞</div>
-            <div class="stat-label">Posibilidades</div>
-        </div>
-    </div>
-    
-    <!-- MAPA -->
-    <div class="map-container">
-        <div id="mapa"></div>
-    </div>
-    
-    <div class="filters">
-        <i class="fas fa-search" style="align-self: center; color: #2ec76b;"></i>
-        <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, oficio o zona...">
-        <select id="categoriaFilter">
-            <option value="">Todas las categorías</option>
-            <option value="carpinteria">🪵 Carpintería</option>
-            <option value="construccion">🏗️ Construcción</option>
-            <option value="electricidad">⚡ Electricidad</option>
-            <option value="soldadura">⚙️ Soldadura</option>
-            <option value="reparaciones">🔧 Reparaciones</option>
-            <option value="transporte">🚚 Transporte</option>
-            <option value="otros">📦 Otros Servicios</option>
-        </select>
-        <button class="btn btn-primary" id="btnBuscar"><i class="fas fa-search"></i> Buscar</button>
-    </div>
-    
-    <div class="professionals-grid" id="listaProfesionales">
-        <div style="text-align: center; padding: 60px;">
-            <i class="fas fa-spinner fa-pulse" style="font-size: 48px; color: #2ec76b;"></i>
-            <p>Cargando profesionales...</p>
+        
+        <div class="professionals-grid" id="listaProfesionales">
+            <div style="text-align: center; padding: 60px;">
+                <i class="fas fa-spinner fa-pulse" style="font-size: 48px; color: #2ec76b;"></i>
+                <p>Cargando profesionales...</p>
+            </div>
         </div>
     </div>
 </div>
@@ -658,7 +864,7 @@
     </div>
 </div>
 
-<!-- MODAL PUBLICAR SERVICIO -->
+<!-- MODAL PUBLICAR SERVICIO CON IMÁGENES -->
 <div id="modalPublicar" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -691,7 +897,13 @@
         </div>
         <div class="form-group">
             <label><i class="fas fa-info-circle"></i> Descripción del Servicio</label>
-            <textarea id="pubDescripcion" rows="4" placeholder="Describe tu experiencia, servicios que ofreces, etc."></textarea>
+            <textarea id="pubDescripcion" rows="3" placeholder="Describe tu experiencia, servicios que ofreces, etc."></textarea>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-images"></i> Imágenes de tus trabajos (hasta 3)</label>
+            <input type="file" id="pubImagenes" accept="image/*" multiple>
+            <div class="image-preview" id="imagePreview"></div>
+            <small style="color: #a0b0a8;">Puedes seleccionar hasta 3 imágenes mostrando tu trabajo</small>
         </div>
         <button class="btn btn-primary" id="btnGuardarServicio" style="width: 100%;"><i class="fas fa-cloud-upload-alt"></i> Publicar Servicio</button>
         <p style="font-size: 12px; color: #a0b0a8; margin-top: 15px; text-align: center;">
@@ -726,7 +938,7 @@
     </div>
 </div>
 
-<!-- MODAL ADMIN - CON CONTRASEÑA DENTRO -->
+<!-- MODAL ADMIN -->
 <div id="modalAdmin" class="modal">
     <div class="modal-content" style="max-width: 800px;">
         <div class="modal-header">
@@ -734,7 +946,6 @@
             <button class="close-modal" id="btnCloseAdmin">&times;</button>
         </div>
         
-        <!-- Campo de contraseña dentro de la aplicación -->
         <div class="password-container" id="passwordSection">
             <h3 style="margin-bottom: 15px;"><i class="fas fa-lock"></i> Verificación de Administrador</h3>
             <div class="form-group">
@@ -747,7 +958,6 @@
             </p>
         </div>
         
-        <!-- Panel admin (oculto hasta verificar contraseña) -->
         <div id="adminPanelSection" style="display: none;">
             <div class="admin-stats">
                 <div class="admin-stat">
@@ -787,48 +997,15 @@ const SUPABASE_ANON_KEY = 'sb_publishable_FkeG4_g-P6g3Nqi1YYgFBQ_7nrnIW-P';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ==================== CONTRASEÑA ADMIN ====================
-// ⚠️ CAMBIA ESTA CONTRASEÑA POR LA QUE QUIERAS ⚠️
 const ADMIN_PASSWORD = "FactorCuba2025";
 
 let adminAuthenticated = false;
-
-function verificarAdminPassword() {
-    const passwordInput = document.getElementById('adminPasswordInput');
-    const password = passwordInput ? passwordInput.value : '';
-    
-    if (password === ADMIN_PASSWORD) {
-        adminAuthenticated = true;
-        sessionStorage.setItem('adminAutenticado', 'true');
-        mostrarToast('✅ Acceso de administrador concedido', 'success');
-        
-        document.getElementById('passwordSection').style.display = 'none';
-        document.getElementById('adminPanelSection').style.display = 'block';
-        
-        actualizarStatsAdmin();
-        cargarAdminPendientes();
-        return true;
-    } else {
-        mostrarToast('❌ Contraseña incorrecta', 'error');
-        return false;
-    }
-}
-
-function checkAdminSession() {
-    if (sessionStorage.getItem('adminAutenticado') === 'true') {
-        adminAuthenticated = true;
-        document.getElementById('passwordSection').style.display = 'none';
-        document.getElementById('adminPanelSection').style.display = 'block';
-        actualizarStatsAdmin();
-        cargarAdminPendientes();
-    }
-}
-
-// ==================== VARIABLES ====================
 let currentUser = null;
 let todosLosServicios = [];
 let mapaInstance = null;
+let imagenesSeleccionadas = [];
 
-// Coordenadas de zonas en Cuba para el mapa
+// Coordenadas de zonas en Cuba
 const ZONAS_COORDS = {
     'Centro Habana': [23.1365, -82.3810],
     'Playa': [23.0949, -82.4485],
@@ -863,6 +1040,66 @@ function escapeHtml(text) {
         if (m === '>') return '&gt;';
         return m;
     });
+}
+
+// ==================== NAVEGACIÓN ENTRE LANDING Y APP ====================
+function mostrarLanding() {
+    document.getElementById('landingPage').style.display = 'flex';
+    document.getElementById('mainApp').classList.remove('active');
+    document.getElementById('btnBackToLanding').style.display = 'none';
+}
+
+function mostrarApp() {
+    document.getElementById('landingPage').style.display = 'none';
+    document.getElementById('mainApp').classList.add('active');
+    document.getElementById('btnBackToLanding').style.display = currentUser ? 'inline-block' : 'none';
+    cargarProfesionales();
+}
+
+// ==================== MANEJO DE IMÁGENES ====================
+document.getElementById('pubImagenes')?.addEventListener('change', function(e) {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    imagenesSeleccionadas = [];
+    
+    const files = Array.from(e.target.files);
+    if (files.length > 3) {
+        mostrarToast('Solo puedes seleccionar hasta 3 imágenes', 'error');
+        this.value = '';
+        return;
+    }
+    
+    files.forEach(file => {
+        if (file.type.startsWith('image/')) {
+            imagenesSeleccionadas.push(file);
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = document.createElement('img');
+                img.src = event.target.result;
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+
+async function subirImagenes(servicioId, files) {
+    const urls = [];
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileName = `${servicioId}/${Date.now()}_${i}.jpg`;
+        const { data, error } = await supabase.storage
+            .from('imagenes-servicios')
+            .upload(fileName, file);
+        
+        if (!error && data) {
+            const { data: { publicUrl } } = supabase.storage
+                .from('imagenes-servicios')
+                .getPublicUrl(fileName);
+            urls.push(publicUrl);
+        }
+    }
+    return urls;
 }
 
 // ==================== MAPA ====================
@@ -958,27 +1195,40 @@ async function cargarProfesionales() {
             return;
         }
         
-        container.innerHTML = serviciosMostrar.map(s => `
-            <div class="professional-card">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas ${getCategoriaIcon(s.categoria)}"></i>
+        container.innerHTML = serviciosMostrar.map(s => {
+            let imagenesHtml = '';
+            if (s.imagenes && s.imagenes.length > 0) {
+                const urls = typeof s.imagenes === 'string' ? JSON.parse(s.imagenes) : s.imagenes;
+                imagenesHtml = `
+                    <div class="image-gallery">
+                        ${urls.map(url => `<img src="${url}" class="gallery-img" onclick="window.open('${url}')" alt="Trabajo realizado">`).join('')}
                     </div>
-                    <h3>${escapeHtml(s.nombre)}</h3>
-                    <span class="card-badge">${escapeHtml(s.especialidad || s.categoria)}</span>
+                `;
+            }
+            
+            return `
+                <div class="professional-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas ${getCategoriaIcon(s.categoria)}"></i>
+                        </div>
+                        <h3>${escapeHtml(s.nombre)}</h3>
+                        <span class="card-badge">${escapeHtml(s.especialidad || s.categoria)}</span>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(s.zona)}</p>
+                        <p><i class="fab fa-whatsapp"></i> ${escapeHtml(s.telefono)}</p>
+                        ${s.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(s.descripcion.substring(0, 100))}${s.descripcion.length > 100 ? '...' : ''}</p>` : ''}
+                        ${imagenesHtml}
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary" style="width: 100%; background: #25D366;" onclick="window.open('https://wa.me/${s.telefono.replace(/[^0-9]/g, '')}')">
+                            <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+                        </button>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(s.zona)}</p>
-                    <p><i class="fab fa-whatsapp"></i> ${escapeHtml(s.telefono)}</p>
-                    ${s.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(s.descripcion.substring(0, 100))}${s.descripcion.length > 100 ? '...' : ''}</p>` : ''}
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-primary" style="width: 100%; background: #25D366;" onclick="window.open('https://wa.me/${s.telefono.replace(/[^0-9]/g, '')}')">
-                        <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
-                    </button>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
         
         actualizarMapa();
         
@@ -1001,7 +1251,7 @@ function getCategoriaIcon(categoria) {
     return icons[categoria] || 'fa-user';
 }
 
-// ==================== PUBLICAR SERVICIO ====================
+// ==================== PUBLICAR SERVICIO CON IMÁGENES ====================
 async function publicarServicio() {
     const nombre = document.getElementById('pubNombre').value.trim();
     const categoria = document.getElementById('pubCategoria').value;
@@ -1017,15 +1267,26 @@ async function publicarServicio() {
     const categoriaTexto = document.getElementById('pubCategoria').options[document.getElementById('pubCategoria').selectedIndex]?.text || categoria;
     
     try {
-        const { error } = await supabase.from('oferentes').insert([{
+        // Primero insertar el servicio
+        const { data: servicioData, error: insertError } = await supabase.from('oferentes').insert([{
             nombre, categoria, zona, telefono, descripcion,
             especialidad: categoriaTexto,
             estado: 'pendiente',
             user_id: currentUser?.id,
             created_at: new Date().toISOString()
-        }]);
+        }]).select();
         
-        if (error) throw error;
+        if (insertError) throw insertError;
+        
+        const servicioId = servicioData[0].id;
+        
+        // Subir imágenes si hay
+        if (imagenesSeleccionadas.length > 0) {
+            const urlsImagenes = await subirImagenes(servicioId, imagenesSeleccionadas);
+            if (urlsImagenes.length > 0) {
+                await supabase.from('oferentes').update({ imagenes: JSON.stringify(urlsImagenes) }).eq('id', servicioId);
+            }
+        }
         
         mostrarToast('✅ Servicio publicado. Espera aprobación del administrador.', 'success');
         
@@ -1034,6 +1295,9 @@ async function publicarServicio() {
         document.getElementById('pubZona').value = '';
         document.getElementById('pubTelefono').value = '';
         document.getElementById('pubDescripcion').value = '';
+        document.getElementById('pubImagenes').value = '';
+        document.getElementById('imagePreview').innerHTML = '';
+        imagenesSeleccionadas = [];
         
         await cargarProfesionales();
         if (adminAuthenticated) actualizarStatsAdmin();
@@ -1043,22 +1307,53 @@ async function publicarServicio() {
     }
 }
 
-// ==================== COMPARTIR CON QR ====================
+// ==================== COMPARTIR CON QR (CORREGIDO) ====================
 function generarQR() {
     const url = window.location.href;
-    const qrContainer = document.getElementById('qrContainer');
     const shareUrlInput = document.getElementById('shareUrl');
     
     shareUrlInput.value = url;
     
+    const qrContainer = document.getElementById('qrContainer');
     qrContainer.innerHTML = '';
-    const qrImg = document.createElement('img');
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-    qrImg.style.margin = '0 auto';
-    qrImg.style.borderRadius = '16px';
-    qrImg.style.background = 'white';
-    qrImg.style.padding = '10px';
-    qrContainer.appendChild(qrImg);
+    
+    if (window.location.protocol === 'file:') {
+        qrContainer.innerHTML = `
+            <div style="text-align: center; padding: 20px; background: #ffcc0033; border-radius: 16px;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ffcc00;"></i>
+                <p style="margin-top: 15px;"><strong>⚠️ Modo Local Detectado</strong></p>
+                <p>Para que el código QR funcione, necesitas usar la URL de GitHub Pages:</p>
+                <p style="background: #0a150f; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                    https://carlos31941106.github.io/Factor-Cuba/
+                </p>
+                <button class="btn btn-primary" id="copyLocalLinkBtn" style="margin-top: 10px;">
+                    <i class="fas fa-copy"></i> Copiar enlace
+                </button>
+            </div>
+        `;
+        
+        document.getElementById('copyLocalLinkBtn')?.addEventListener('click', () => {
+            navigator.clipboard.writeText('https://carlos31941106.github.io/Factor-Cuba/');
+            mostrarToast('✅ Enlace copiado al portapapeles', 'success');
+        });
+        return;
+    }
+    
+    const qrDiv = document.createElement('div');
+    qrDiv.id = 'qrcode';
+    qrDiv.style.display = 'flex';
+    qrDiv.style.justifyContent = 'center';
+    qrDiv.style.alignItems = 'center';
+    qrContainer.appendChild(qrDiv);
+    
+    new QRCode(qrDiv, {
+        text: url,
+        width: 200,
+        height: 200,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
 }
 
 function abrirCompartir() {
@@ -1280,6 +1575,37 @@ async function actualizarStatsAdmin() {
     }
 }
 
+function verificarAdminPassword() {
+    const passwordInput = document.getElementById('adminPasswordInput');
+    const password = passwordInput ? passwordInput.value : '';
+    
+    if (password === ADMIN_PASSWORD) {
+        adminAuthenticated = true;
+        sessionStorage.setItem('adminAutenticado', 'true');
+        mostrarToast('✅ Acceso de administrador concedido', 'success');
+        
+        document.getElementById('passwordSection').style.display = 'none';
+        document.getElementById('adminPanelSection').style.display = 'block';
+        
+        actualizarStatsAdmin();
+        cargarAdminPendientes();
+        return true;
+    } else {
+        mostrarToast('❌ Contraseña incorrecta', 'error');
+        return false;
+    }
+}
+
+function checkAdminSession() {
+    if (sessionStorage.getItem('adminAutenticado') === 'true') {
+        adminAuthenticated = true;
+        document.getElementById('passwordSection').style.display = 'none';
+        document.getElementById('adminPanelSection').style.display = 'block';
+        actualizarStatsAdmin();
+        cargarAdminPendientes();
+    }
+}
+
 // ==================== AUTENTICACIÓN ====================
 let loginMode = 'login';
 
@@ -1320,7 +1646,9 @@ async function manejarAuth() {
         document.getElementById('loginPassword').value = '';
         
         actualizarUI();
-        await cargarProfesionales();
+        if (document.getElementById('mainApp').classList.contains('active')) {
+            await cargarProfesionales();
+        }
         
     } catch (err) {
         mostrarToast('Error: ' + err.message, 'error');
@@ -1333,7 +1661,7 @@ async function logout() {
     adminAuthenticated = false;
     sessionStorage.removeItem('adminAutenticado');
     actualizarUI();
-    await cargarProfesionales();
+    mostrarLanding();
     mostrarToast('Sesión cerrada', 'info');
 }
 
@@ -1345,6 +1673,7 @@ function actualizarUI() {
     const btnCompartir = document.getElementById('btnCompartir');
     const btnAdmin = document.getElementById('btnAdmin');
     const btnLogout = document.getElementById('btnLogout');
+    const btnBackToLanding = document.getElementById('btnBackToLanding');
     
     if (currentUser) {
         userInfo.style.display = 'flex';
@@ -1354,6 +1683,9 @@ function actualizarUI() {
         btnCompartir.style.display = 'inline-block';
         btnLogout.style.display = 'inline-block';
         btnAdmin.style.display = 'inline-block';
+        if (document.getElementById('mainApp').classList.contains('active')) {
+            btnBackToLanding.style.display = 'inline-block';
+        }
     } else {
         userInfo.style.display = 'none';
         btnLogin.style.display = 'inline-block';
@@ -1361,6 +1693,7 @@ function actualizarUI() {
         btnCompartir.style.display = 'none';
         btnAdmin.style.display = 'none';
         btnLogout.style.display = 'none';
+        btnBackToLanding.style.display = 'none';
     }
 }
 
@@ -1385,6 +1718,9 @@ document.getElementById('btnBuscar').onclick = cargarProfesionales;
 document.getElementById('searchInput').onkeyup = (e) => { if(e.key === 'Enter') cargarProfesionales(); };
 document.getElementById('categoriaFilter').onchange = cargarProfesionales;
 document.getElementById('verifyAdminBtn').onclick = verificarAdminPassword;
+document.getElementById('btnExplorar').onclick = mostrarApp;
+document.getElementById('logoHome').onclick = mostrarLanding;
+document.getElementById('btnBackToLanding').onclick = mostrarLanding;
 
 // Botones de compartir
 document.getElementById('shareWhatsApp').onclick = () => {
@@ -1452,7 +1788,7 @@ async function init() {
     const { data: { session } } = await supabase.auth.getSession();
     currentUser = session?.user || null;
     actualizarUI();
-    await cargarProfesionales();
+    mostrarLanding();
     checkAdminSession();
 }
 
