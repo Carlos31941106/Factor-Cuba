@@ -36,18 +36,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 30px;
         }
         
-        /* Header */
         .header {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -56,7 +50,6 @@
             z-index: 1000;
             border-bottom: 1px solid rgba(90, 125, 154, 0.2);
             padding: 15px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         
         .header-content {
@@ -88,7 +81,6 @@
             color: white;
         }
         
-        /* Botones */
         .btn {
             padding: 10px 24px;
             border-radius: 12px;
@@ -132,7 +124,6 @@
             color: white;
         }
         
-        /* Hero section moderna */
         .hero {
             text-align: center;
             padding: 80px 0 60px;
@@ -185,12 +176,6 @@
             border: 1px solid rgba(90, 125, 154, 0.2);
         }
         
-        .motivational-quote i {
-            color: #e8c96a;
-            margin-right: 8px;
-        }
-        
-        /* Stats */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -211,7 +196,6 @@
         .stat-card:hover {
             transform: translateY(-5px);
             border-color: #5A7D9A;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
         
         .stat-number {
@@ -226,7 +210,43 @@
             margin-top: 10px;
         }
         
-        /* Tabs de servicios populares */
+        /* Rating stars */
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stars {
+            display: flex;
+            gap: 3px;
+        }
+        
+        .star {
+            font-size: 16px;
+            cursor: pointer;
+            color: #ccc;
+            transition: all 0.2s;
+        }
+        
+        .star.active, .star.hover {
+            color: #ffc107;
+        }
+        
+        .rating-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #5A7D9A;
+        }
+        
+        .rating-count {
+            font-size: 12px;
+            color: #5a6e7a;
+        }
+        
+        /* Popular tabs */
         .popular-tabs {
             display: flex;
             gap: 20px;
@@ -252,10 +272,6 @@
             color: white;
         }
         
-        .popular-tab:hover:not(.active) {
-            background: rgba(90, 125, 154, 0.1);
-        }
-        
         .popular-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -271,6 +287,7 @@
             align-items: center;
             gap: 15px;
             border: 1px solid rgba(90, 125, 154, 0.2);
+            cursor: pointer;
             transition: all 0.3s;
         }
         
@@ -289,6 +306,13 @@
             justify-content: center;
             font-size: 24px;
             color: #5A7D9A;
+        }
+        
+        .popular-icon img {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            object-fit: cover;
         }
         
         .popular-info h4 {
@@ -312,7 +336,6 @@
             font-weight: 600;
         }
         
-        /* Mapa */
         .map-container {
             margin: 30px 0;
             border-radius: 20px;
@@ -325,7 +348,6 @@
             width: 100%;
         }
         
-        /* Filtros */
         .filters {
             display: flex;
             gap: 15px;
@@ -345,11 +367,6 @@
             border-radius: 12px;
             color: #1a2a3a;
             font-size: 14px;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: #5A7D9A;
         }
         
         select {
@@ -374,10 +391,9 @@
             margin-right: 10px;
         }
         
-        /* Grid de profesionales */
         .professionals-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 25px;
             margin: 40px 0;
         }
@@ -463,35 +479,11 @@
             border-top: 1px solid rgba(90, 125, 154, 0.2);
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         
         .card-footer button {
             flex: 1;
-        }
-        
-        /* Perfil modal */
-        .profile-detail {
-            text-align: center;
-        }
-        
-        .profile-avatar {
-            width: 100px;
-            height: 100px;
-            background: #5A7D9A;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            color: white;
-            margin: 0 auto 20px;
-            overflow: hidden;
-        }
-        
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
         
         /* Modales */
@@ -514,7 +506,7 @@
             background: white;
             border-radius: 24px;
             padding: 35px;
-            max-width: 500px;
+            max-width: 550px;
             width: 90%;
             max-height: 85vh;
             overflow-y: auto;
@@ -571,13 +563,6 @@
             font-size: 14px;
         }
         
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #5A7D9A;
-        }
-        
         .file-input-label {
             display: flex;
             align-items: center;
@@ -599,6 +584,92 @@
             height: 60px;
             border-radius: 50%;
             object-fit: cover;
+        }
+        
+        /* Rating modal */
+        .rating-modal {
+            text-align: center;
+        }
+        
+        .rating-modal .stars {
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .rating-modal .star {
+            font-size: 40px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+        
+        .reviews-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .review-item {
+            background: #f5f7fa;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #5a6e7a;
+        }
+        
+        .review-stars {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .review-stars .star {
+            font-size: 12px;
+        }
+        
+        .review-comment {
+            font-size: 14px;
+            color: #1a2a3a;
+            margin-top: 5px;
+        }
+        
+        .profile-detail {
+            text-align: center;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: #5A7D9A;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+            margin: 0 auto 20px;
+            overflow: hidden;
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .admin-notice {
+            background: rgba(90, 125, 154, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            color: #5a6e7a;
+            text-align: center;
+            margin-top: 10px;
         }
         
         /* Admin panel */
@@ -693,14 +764,9 @@
             color: #5a6e7a;
         }
         
-        .admin-notice {
-            background: rgba(90, 125, 154, 0.1);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            color: #5a6e7a;
-            text-align: center;
-            margin-top: 10px;
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
         }
         
         @media (max-width: 768px) {
@@ -715,10 +781,6 @@
             }
             .filters {
                 flex-direction: column;
-            }
-            .popular-tabs {
-                flex-direction: column;
-                align-items: stretch;
             }
             #mapa {
                 height: 300px;
@@ -793,22 +855,17 @@
         </div>
     </div>
     
-    <!-- TABS DE SERVICIOS POPULARES -->
     <div class="popular-tabs">
         <button class="popular-tab active" data-tab="servicios">📊 Servicios más utilizados</button>
         <button class="popular-tab" data-tab="profesionales">⭐ Profesionales más solicitados</button>
     </div>
     
     <div id="popularServicios" class="popular-grid">
-        <div style="text-align: center; padding: 40px; width: 100%;">
-            <i class="fas fa-spinner fa-pulse"></i> Cargando...
-        </div>
+        <div style="text-align: center; padding: 40px; width: 100%;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>
     </div>
     
     <div id="popularProfesionales" class="popular-grid" style="display: none;">
-        <div style="text-align: center; padding: 40px; width: 100%;">
-            <i class="fas fa-spinner fa-pulse"></i> Cargando...
-        </div>
+        <div style="text-align: center; padding: 40px; width: 100%;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>
     </div>
     
     <div class="map-container">
@@ -922,7 +979,6 @@
     </div>
 </div>
 
-<!-- MODAL PERFIL -->
 <div id="modalPerfil" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -934,6 +990,28 @@
         </div>
         <div class="admin-notice" id="adminNotice" style="display: none;">
             <i class="fas fa-eye"></i> Nota: El administrador ha accedido a tu perfil para verificar la calidad del servicio.
+        </div>
+    </div>
+</div>
+
+<div id="modalCalificar" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-star"></i> Calificar Servicio</h2>
+            <button class="close-modal" id="btnCloseCalificar">&times;</button>
+        </div>
+        <div class="rating-modal">
+            <h3 id="calificarNombre"></h3>
+            <div class="stars" id="calificarStars">
+                <i class="fas fa-star star" data-rating="1"></i>
+                <i class="fas fa-star star" data-rating="2"></i>
+                <i class="fas fa-star star" data-rating="3"></i>
+                <i class="fas fa-star star" data-rating="4"></i>
+                <i class="fas fa-star star" data-rating="5"></i>
+            </div>
+            <textarea id="calificarComentario" rows="3" placeholder="Escribe tu experiencia con este profesional (opcional)..."></textarea>
+            <button class="btn btn-primary" id="btnEnviarCalificacion" style="width: 100%;">✅ Enviar Calificación</button>
+            <p style="font-size: 12px; margin-top: 10px;">Tu calificación ayuda a otros clientes a elegir mejores profesionales</p>
         </div>
     </div>
 </div>
@@ -997,6 +1075,8 @@ let adminAuthenticated = false;
 let currentUser = null;
 let todosLosServicios = [];
 let mapaInstance = null;
+let servicioActualCalificar = null;
+let puntuacionSeleccionada = 0;
 
 const ZONAS_COORDS = {
     'Centro Habana': [23.1365, -82.3810], 'Playa': [23.0949, -82.4485],
@@ -1023,13 +1103,24 @@ function escapeHtml(text) {
     });
 }
 
-// Subir imagen a Supabase Storage
+// Renderizar estrellas
+function renderStars(promedio, total) {
+    if (!promedio && promedio !== 0) return '<div class="rating"><span class="rating-count">Sin reseñas aún</span></div>';
+    const fullStars = Math.floor(promedio);
+    const hasHalfStar = (promedio - fullStars) >= 0.5;
+    let starsHtml = '';
+    for (let i = 0; i < fullStars; i++) starsHtml += '<i class="fas fa-star" style="color:#ffc107;"></i>';
+    if (hasHalfStar) starsHtml += '<i class="fas fa-star-half-alt" style="color:#ffc107;"></i>';
+    for (let i = 0; i < 5 - fullStars - (hasHalfStar ? 1 : 0); i++) starsHtml += '<i class="far fa-star" style="color:#ffc107;"></i>';
+    return `<div class="rating"><div class="stars">${starsHtml}</div><span class="rating-value">${promedio.toFixed(1)}</span><span class="rating-count">(${total} ${total === 1 ? 'reseña' : 'reseñas'})</span></div>`;
+}
+
+// Subir imagen
 async function subirImagen(file, userId) {
     if (!file) return null;
     const ext = file.name.split('.').pop();
     const fileName = `${userId}_${Date.now()}.${ext}`;
     const filePath = `avatars/${fileName}`;
-    
     try {
         const { error } = await supabase.storage.from('fotos-perfil').upload(filePath, file);
         if (error) throw error;
@@ -1041,19 +1132,15 @@ async function subirImagen(file, userId) {
     }
 }
 
-// ==================== MAPA ====================
+// MAPA
 function actualizarMapa() {
     if (!mapaInstance) {
         mapaInstance = L.map('mapa').setView([23.1, -82.4], 11);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(mapaInstance);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaInstance);
     } else {
         mapaInstance.eachLayer(layer => { if (layer instanceof L.Marker) mapaInstance.removeLayer(layer); });
     }
-    
     const serviciosMostrar = adminAuthenticated ? todosLosServicios : todosLosServicios.filter(s => s.estado === 'aprobado');
-    
     serviciosMostrar.forEach(servicio => {
         let coords = ZONAS_COORDS[servicio.zona];
         if (coords) {
@@ -1071,7 +1158,7 @@ function actualizarMapa() {
     });
 }
 
-// ==================== VER PERFIL ====================
+// VER PERFIL
 window.verPerfil = async function(servicioId) {
     const servicio = todosLosServicios.find(s => s.id === servicioId);
     if (!servicio) return;
@@ -1080,13 +1167,32 @@ window.verPerfil = async function(servicioId) {
     const content = document.getElementById('perfilContent');
     const adminNotice = document.getElementById('adminNotice');
     
-    if (adminAuthenticated) {
-        adminNotice.style.display = 'block';
-        // Registrar que el admin vio el perfil (se puede guardar en una tabla de logs después)
-        console.log(`Admin accedió al perfil de: ${servicio.nombre}`);
-    } else {
-        adminNotice.style.display = 'none';
-    }
+    if (adminAuthenticated) adminNotice.style.display = 'block';
+    else adminNotice.style.display = 'none';
+    
+    // Cargar reseñas
+    const { data: reseñas } = await supabase
+        .from('calificaciones')
+        .select('*')
+        .eq('servicio_id', servicioId)
+        .order('created_at', { ascending: false });
+    
+    const reseñasHtml = reseñas && reseñas.length > 0 ? `
+        <div class="reviews-list">
+            <h4><i class="fas fa-comments"></i> Reseñas de clientes</h4>
+            ${reseñas.map(r => `
+                <div class="review-item">
+                    <div class="review-header">
+                        <span>${new Date(r.created_at).toLocaleDateString()}</span>
+                        <div class="review-stars">
+                            ${[...Array(5)].map((_, i) => `<i class="fas fa-star" style="color:${i < r.puntuacion ? '#ffc107' : '#ccc'}"></i>`).join('')}
+                        </div>
+                    </div>
+                    ${r.comentario ? `<div class="review-comment">"${escapeHtml(r.comentario)}"</div>` : ''}
+                </div>
+            `).join('')}
+        </div>
+    ` : '<p style="margin-top:15px;">📝 Aún no hay reseñas. ¡Sé el primero en calificar!</p>';
     
     content.innerHTML = `
         <div class="profile-detail">
@@ -1095,121 +1201,134 @@ window.verPerfil = async function(servicioId) {
             </div>
             <h3>${escapeHtml(servicio.nombre)}</h3>
             <p><span class="card-badge">${escapeHtml(servicio.especialidad || servicio.categoria)}</span></p>
+            ${renderStars(servicio.promedio_puntuacion, servicio.total_calificaciones)}
             <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(servicio.zona)}</p>
             <p><i class="fab fa-whatsapp"></i> ${escapeHtml(servicio.telefono)}</p>
             ${servicio.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(servicio.descripcion)}</p>` : ''}
             <p><i class="fas fa-calendar"></i> Miembro desde: ${new Date(servicio.created_at).toLocaleDateString()}</p>
-            <button class="btn btn-primary" onclick="window.open('https://wa.me/${servicio.telefono.replace(/[^0-9]/g, '')}')" style="margin-top:20px;width:100%;">
+            ${currentUser ? `<button class="btn btn-outline" onclick="mostrarModalCalificar('${servicio.id}', '${escapeHtml(servicio.nombre)}')" style="margin-top:10px;"><i class="fas fa-star"></i> Calificar este servicio</button>` : ''}
+            <button class="btn btn-primary" onclick="window.open('https://wa.me/${servicio.telefono.replace(/[^0-9]/g, '')}')" style="margin-top:10px;width:100%;">
                 <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
             </button>
+            ${reseñasHtml}
         </div>
     `;
-    
     modal.style.display = 'flex';
 };
 
-// ==================== CARGAR POPULARES ====================
-async function cargarPopulares() {
-    // Servicios más utilizados (por categoría)
-    const categoriasCount = {};
-    todosLosServicios.forEach(s => {
-        if (s.estado === 'aprobado') {
-            const cat = s.categoria;
-            categoriasCount[cat] = (categoriasCount[cat] || 0) + 1;
-        }
+// CALIFICACIONES
+window.mostrarModalCalificar = async function(servicioId, servicioNombre) {
+    if (!currentUser) {
+        mostrarToast('Debes iniciar sesión para calificar', 'error');
+        document.getElementById('modalLogin').style.display = 'flex';
+        return;
+    }
+    const { data: existing } = await supabase
+        .from('calificaciones')
+        .select('*')
+        .eq('servicio_id', servicioId)
+        .eq('usuario_id', currentUser.id);
+    if (existing && existing.length > 0) {
+        mostrarToast('Ya calificaste este servicio anteriormente', 'info');
+        return;
+    }
+    servicioActualCalificar = servicioId;
+    document.getElementById('calificarNombre').innerHTML = `Calificar a: <strong>${escapeHtml(servicioNombre)}</strong>`;
+    document.getElementById('calificarComentario').value = '';
+    puntuacionSeleccionada = 0;
+    document.querySelectorAll('#calificarStars .star').forEach(star => star.classList.remove('active'));
+    document.getElementById('modalCalificar').style.display = 'flex';
+};
+
+function initRatingStars() {
+    const stars = document.querySelectorAll('#calificarStars .star');
+    stars.forEach(star => {
+        star.onmouseenter = () => {
+            const rating = parseInt(star.dataset.rating);
+            stars.forEach((s, i) => { if (i < rating) s.classList.add('hover'); else s.classList.remove('hover'); });
+        };
+        star.onmouseleave = () => {
+            stars.forEach(s => s.classList.remove('hover'));
+            stars.forEach((s, i) => { if (i < puntuacionSeleccionada) s.classList.add('active'); else s.classList.remove('active'); });
+        };
+        star.onclick = () => {
+            puntuacionSeleccionada = parseInt(star.dataset.rating);
+            stars.forEach((s, i) => { if (i < puntuacionSeleccionada) s.classList.add('active'); else s.classList.remove('active'); });
+        };
     });
-    
-    const categoriasOrdenadas = Object.entries(categoriasCount).sort((a,b) => b[1] - a[1]).slice(0, 6);
-    const nombresCategorias = {
-        'carpinteria': 'Carpintería', 'construccion': 'Construcción', 'electricidad': 'Electricidad',
-        'soldadura': 'Soldadura', 'reparaciones': 'Reparaciones', 'transporte': 'Transporte', 'otros': 'Otros'
-    };
-    const iconosCategorias = {
-        'carpinteria': 'fa-hammer', 'construccion': 'fa-hard-hat', 'electricidad': 'fa-bolt',
-        'soldadura': 'fa-wrench', 'reparaciones': 'fa-tools', 'transporte': 'fa-truck', 'otros': 'fa-briefcase'
-    };
-    
-    const serviciosHTML = categoriasOrdenadas.map(([cat, count]) => `
-        <div class="popular-card">
-            <div class="popular-icon"><i class="fas ${iconosCategorias[cat] || 'fa-briefcase'}"></i></div>
-            <div class="popular-info">
-                <h4>${nombresCategorias[cat] || cat}</h4>
-                <p>Servicios disponibles</p>
-            </div>
-            <div class="popular-count">${count}</div>
-        </div>
-    `).join('');
-    
-    document.getElementById('popularServicios').innerHTML = serviciosHTML || '<p>No hay servicios registrados aún</p>';
-    
-    // Profesionales más solicitados (con más visualizaciones - simulamos con los más recientes por ahora)
-    const profesionalesDestacados = todosLosServicios.filter(s => s.estado === 'aprobado').slice(0, 6);
-    const profesionalesHTML = profesionalesDestacados.map(s => `
-        <div class="popular-card" onclick="verPerfil('${s.id}')" style="cursor:pointer;">
-            <div class="popular-icon">
-                ${s.foto ? `<img src="${s.foto}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">` : `<i class="fas fa-user-circle"></i>`}
-            </div>
-            <div class="popular-info">
-                <h4>${escapeHtml(s.nombre)}</h4>
-                <p>${escapeHtml(s.especialidad || s.categoria)} • ${escapeHtml(s.zona)}</p>
-            </div>
-            <div class="popular-count"><i class="fas fa-star"></i> Destacado</div>
-        </div>
-    `).join('');
-    
-    document.getElementById('popularProfesionales').innerHTML = profesionalesHTML || '<p>No hay profesionales destacados aún</p>';
 }
 
-// ==================== CARGAR PROFESIONALES ====================
+async function enviarCalificacion() {
+    if (!servicioActualCalificar) return;
+    if (puntuacionSeleccionada === 0) {
+        mostrarToast('Selecciona una puntuación de 1 a 5 estrellas', 'error');
+        return;
+    }
+    const comentario = document.getElementById('calificarComentario').value.trim();
+    try {
+        const { error } = await supabase.from('calificaciones').insert([{
+            servicio_id: servicioActualCalificar,
+            usuario_id: currentUser.id,
+            puntuacion: puntuacionSeleccionada,
+            comentario: comentario || null
+        }]);
+        if (error) throw error;
+        mostrarToast('⭐ Calificación enviada. ¡Gracias por tu opinión!', 'success');
+        document.getElementById('modalCalificar').style.display = 'none';
+        await cargarProfesionales();
+    } catch (err) {
+        mostrarToast('Error: ' + err.message, 'error');
+    }
+}
+
+// CARGAR PROFESIONALES
 async function cargarProfesionales() {
     try {
         const { data, error } = await supabase.from('oferentes').select('*').order('created_at', { ascending: false });
         if (error) throw error;
-        
         todosLosServicios = data || [];
         const aprobados = todosLosServicios.filter(s => s.estado === 'aprobado').length;
         const pendientes = todosLosServicios.filter(s => s.estado === 'pendiente').length;
-        
         document.getElementById('totalProfesionales').textContent = aprobados;
         document.getElementById('totalPendientes').textContent = pendientes;
         
-        // Cargar populares
-        cargarPopulares();
+        // Populares
+        const categoriasCount = {};
+        todosLosServicios.forEach(s => { if (s.estado === 'aprobado') categoriasCount[s.categoria] = (categoriasCount[s.categoria] || 0) + 1; });
+        const categoriasOrdenadas = Object.entries(categoriasCount).sort((a,b) => b[1] - a[1]).slice(0, 6);
+        const nombresCategorias = { 'carpinteria':'Carpintería','construccion':'Construcción','electricidad':'Electricidad','soldadura':'Soldadura','reparaciones':'Reparaciones','transporte':'Transporte','otros':'Otros' };
+        const iconosCategorias = { 'carpinteria':'fa-hammer','construccion':'fa-hard-hat','electricidad':'fa-bolt','soldadura':'fa-wrench','reparaciones':'fa-tools','transporte':'fa-truck','otros':'fa-briefcase' };
+        document.getElementById('popularServicios').innerHTML = categoriasOrdenadas.map(([cat, count]) => `
+            <div class="popular-card"><div class="popular-icon"><i class="fas ${iconosCategorias[cat] || 'fa-briefcase'}"></i></div>
+            <div class="popular-info"><h4>${nombresCategorias[cat] || cat}</h4><p>Servicios disponibles</p></div>
+            <div class="popular-count">${count}</div></div>
+        `).join('') || '<p>No hay servicios registrados aún</p>';
+        
+        const profesionalesDestacados = todosLosServicios.filter(s => s.estado === 'aprobado').slice(0, 6);
+        document.getElementById('popularProfesionales').innerHTML = profesionalesDestacados.map(s => `
+            <div class="popular-card" onclick="verPerfil('${s.id}')"><div class="popular-icon">${s.foto ? `<img src="${s.foto}">` : `<i class="fas fa-user-circle"></i>`}</div>
+            <div class="popular-info"><h4>${escapeHtml(s.nombre)}</h4><p>${escapeHtml(s.especialidad || s.categoria)} • ${escapeHtml(s.zona)}</p></div>
+            <div class="popular-count"><i class="fas fa-star"></i> Destacado</div></div>
+        `).join('') || '<p>No hay profesionales destacados</p>';
         
         let serviciosMostrar = adminAuthenticated ? todosLosServicios : todosLosServicios.filter(s => s.estado === 'aprobado');
-        
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         const categoria = document.getElementById('categoriaFilter').value;
-        
-        if (searchTerm) {
-            serviciosMostrar = serviciosMostrar.filter(s => 
-                (s.nombre || '').toLowerCase().includes(searchTerm) ||
-                (s.especialidad || '').toLowerCase().includes(searchTerm) ||
-                (s.zona || '').toLowerCase().includes(searchTerm)
-            );
-        }
-        if (categoria) {
-            serviciosMostrar = serviciosMostrar.filter(s => s.categoria === categoria);
-        }
+        if (searchTerm) serviciosMostrar = serviciosMostrar.filter(s => (s.nombre || '').toLowerCase().includes(searchTerm) || (s.especialidad || '').toLowerCase().includes(searchTerm) || (s.zona || '').toLowerCase().includes(searchTerm));
+        if (categoria) serviciosMostrar = serviciosMostrar.filter(s => s.categoria === categoria);
         
         const container = document.getElementById('listaProfesionales');
-        
-        if (serviciosMostrar.length === 0) {
-            container.innerHTML = '<div style="text-align:center;padding:60px;"><i class="fas fa-store-slash" style="font-size:48px;color:#5a6e7a;"></i><h3>No hay profesionales</h3></div>';
-            actualizarMapa();
-            return;
-        }
+        if (serviciosMostrar.length === 0) { container.innerHTML = '<div style="text-align:center;padding:60px;"><i class="fas fa-store-slash"></i><h3>No hay profesionales</h3></div>'; actualizarMapa(); return; }
         
         container.innerHTML = serviciosMostrar.map(s => `
             <div class="professional-card">
                 <div class="card-header">
-                    <div class="card-avatar">
-                        ${s.foto ? `<img src="${s.foto}" alt="foto">` : `<i class="fas fa-user-circle"></i>`}
-                    </div>
+                    <div class="card-avatar">${s.foto ? `<img src="${s.foto}">` : `<i class="fas fa-user-circle"></i>`}</div>
                     <h3>${escapeHtml(s.nombre)}</h3>
                     <span class="card-badge">${escapeHtml(s.especialidad || s.categoria)}</span>
                 </div>
                 <div class="card-body">
+                    ${renderStars(s.promedio_puntuacion, s.total_calificaciones)}
                     <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(s.zona)}</p>
                     <p><i class="fab fa-whatsapp"></i> ${escapeHtml(s.telefono)}</p>
                     ${s.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(s.descripcion.substring(0, 80))}${s.descripcion.length > 80 ? '...' : ''}</p>` : ''}
@@ -1217,18 +1336,15 @@ async function cargarProfesionales() {
                 <div class="card-footer">
                     <button class="btn btn-outline" onclick="verPerfil('${s.id}')"><i class="fas fa-user"></i> Ver Perfil</button>
                     <button class="btn btn-primary" style="background:#25D366;" onclick="window.open('https://wa.me/${s.telefono.replace(/[^0-9]/g, '')}')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    ${currentUser ? `<button class="btn btn-outline" onclick="mostrarModalCalificar('${s.id}', '${escapeHtml(s.nombre)}')"><i class="fas fa-star"></i> Calificar</button>` : ''}
                 </div>
             </div>
         `).join('');
-        
         actualizarMapa();
-    } catch (err) {
-        console.error(err);
-        mostrarToast('Error al cargar profesionales', 'error');
-    }
+    } catch (err) { mostrarToast('Error al cargar profesionales', 'error'); }
 }
 
-// ==================== PUBLICAR SERVICIO ====================
+// PUBLICAR
 async function publicarServicio() {
     const nombre = document.getElementById('pubNombre').value.trim();
     const categoria = document.getElementById('pubCategoria').value;
@@ -1236,31 +1352,13 @@ async function publicarServicio() {
     const telefono = document.getElementById('pubTelefono').value.trim();
     const descripcion = document.getElementById('pubDescripcion').value.trim();
     const fotoFile = document.getElementById('fotoPerfil').files[0];
-    
-    if (!nombre || !zona || !telefono) {
-        mostrarToast('Completa nombre, zona y teléfono', 'error');
-        return;
-    }
-    
+    if (!nombre || !zona || !telefono) { mostrarToast('Completa nombre, zona y teléfono', 'error'); return; }
     const categoriaTexto = document.getElementById('pubCategoria').options[document.getElementById('pubCategoria').selectedIndex]?.text || categoria;
-    
     try {
         let fotoUrl = null;
-        if (fotoFile) {
-            mostrarToast('Subiendo imagen...', 'info');
-            fotoUrl = await subirImagen(fotoFile, currentUser.id);
-        }
-        
-        const { error } = await supabase.from('oferentes').insert([{
-            nombre, categoria, zona, telefono, descripcion, foto: fotoUrl,
-            especialidad: categoriaTexto,
-            estado: 'pendiente',
-            user_id: currentUser?.id,
-            created_at: new Date().toISOString()
-        }]);
-        
+        if (fotoFile) { mostrarToast('Subiendo imagen...', 'info'); fotoUrl = await subirImagen(fotoFile, currentUser.id); }
+        const { error } = await supabase.from('oferentes').insert([{ nombre, categoria, zona, telefono, descripcion, foto: fotoUrl, especialidad: categoriaTexto, estado: 'pendiente', user_id: currentUser?.id, created_at: new Date().toISOString() }]);
         if (error) throw error;
-        
         mostrarToast('✅ Servicio publicado. Espera aprobación.', 'success');
         document.getElementById('modalPublicar').style.display = 'none';
         document.getElementById('pubNombre').value = '';
@@ -1269,44 +1367,23 @@ async function publicarServicio() {
         document.getElementById('pubDescripcion').value = '';
         document.getElementById('previewFoto').innerHTML = '';
         await cargarProfesionales();
-        
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
+    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 }
 
-// Preview de foto
 document.getElementById('fotoPerfil')?.addEventListener('change', (e) => {
     const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            document.getElementById('previewFoto').innerHTML = `<img src="${ev.target.result}" alt="preview">`;
-        };
-        reader.readAsDataURL(file);
-    }
+    if (file) { const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('previewFoto').innerHTML = `<img src="${ev.target.result}" alt="preview">`; }; reader.readAsDataURL(file); }
 });
 
-// ==================== COMPARTIR QR ====================
-function generarQR() {
-    const url = window.location.href;
-    document.getElementById('shareUrl').value = url;
-    const qrContainer = document.getElementById('qrContainer');
-    qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}" style="margin:0 auto;border-radius:16px;background:white;padding:10px;">`;
-}
+// QR
+function generarQR() { const url = window.location.href; document.getElementById('shareUrl').value = url; document.getElementById('qrContainer').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}" style="margin:0 auto;border-radius:16px;background:white;padding:10px;">`; }
 
-// ==================== AUTENTICACIÓN ====================
+// AUTENTICACIÓN
 let loginMode = 'login';
-
 async function manejarAuth() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    
-    if (!email || !password) {
-        mostrarToast('Completa email y contraseña', 'error');
-        return;
-    }
-    
+    if (!email || !password) { mostrarToast('Completa email y contraseña', 'error'); return; }
     try {
         if (loginMode === 'login') {
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -1327,181 +1404,56 @@ async function manejarAuth() {
             document.getElementById('loginEmail').value = '';
             document.getElementById('loginPassword').value = '';
         }
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
+    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 }
-
-async function logout() {
-    await supabase.auth.signOut();
-    currentUser = null;
-    adminAuthenticated = false;
-    sessionStorage.removeItem('adminAutenticado');
-    actualizarUI();
-    await cargarProfesionales();
-    mostrarToast('Sesión cerrada', 'info');
-}
-
+async function logout() { await supabase.auth.signOut(); currentUser = null; adminAuthenticated = false; sessionStorage.removeItem('adminAutenticado'); actualizarUI(); await cargarProfesionales(); mostrarToast('Sesión cerrada', 'info'); }
 function actualizarUI() {
-    const userInfo = document.getElementById('userInfo');
-    const userName = document.getElementById('userName');
-    const btnLogin = document.getElementById('btnLogin');
-    const btnPublicar = document.getElementById('btnPublicar');
-    const btnCompartir = document.getElementById('btnCompartir');
-    const btnAdmin = document.getElementById('btnAdmin');
-    const btnLogout = document.getElementById('btnLogout');
-    
+    const userInfo = document.getElementById('userInfo'); const userName = document.getElementById('userName');
+    const btnLogin = document.getElementById('btnLogin'); const btnPublicar = document.getElementById('btnPublicar');
+    const btnCompartir = document.getElementById('btnCompartir'); const btnAdmin = document.getElementById('btnAdmin'); const btnLogout = document.getElementById('btnLogout');
     if (currentUser) {
-        userInfo.style.display = 'flex';
-        userName.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email.split('@')[0]}`;
-        btnLogin.style.display = 'none';
-        btnPublicar.style.display = 'inline-block';
-        btnCompartir.style.display = 'inline-block';
-        btnLogout.style.display = 'inline-block';
-        // SOLO mostrar botón Admin si está autenticado como admin
+        userInfo.style.display = 'flex'; userName.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email.split('@')[0]}`;
+        btnLogin.style.display = 'none'; btnPublicar.style.display = 'inline-block'; btnCompartir.style.display = 'inline-block'; btnLogout.style.display = 'inline-block';
         btnAdmin.style.display = adminAuthenticated ? 'inline-block' : 'none';
     } else {
-        userInfo.style.display = 'none';
-        btnLogin.style.display = 'inline-block';
-        btnPublicar.style.display = 'none';
-        btnCompartir.style.display = 'none';
-        btnAdmin.style.display = 'none';
-        btnLogout.style.display = 'none';
+        userInfo.style.display = 'none'; btnLogin.style.display = 'inline-block'; btnPublicar.style.display = 'none'; btnCompartir.style.display = 'none'; btnAdmin.style.display = 'none'; btnLogout.style.display = 'none';
     }
 }
 
-// ==================== ADMIN ====================
+// ADMIN
 function verificarAdminPassword() {
     const password = document.getElementById('adminPasswordInput').value;
     if (password === ADMIN_PASSWORD) {
-        adminAuthenticated = true;
-        sessionStorage.setItem('adminAutenticado', 'true');
-        mostrarToast('✅ Acceso de administrador concedido', 'success');
-        document.getElementById('passwordSection').style.display = 'none';
-        document.getElementById('adminPanelSection').style.display = 'block';
-        actualizarStatsAdmin();
-        cargarAdminPendientes();
-        actualizarUI(); // Para mostrar el botón Admin en el header
-    } else {
-        mostrarToast('❌ Contraseña incorrecta', 'error');
-    }
+        adminAuthenticated = true; sessionStorage.setItem('adminAutenticado', 'true'); mostrarToast('✅ Acceso de administrador concedido', 'success');
+        document.getElementById('passwordSection').style.display = 'none'; document.getElementById('adminPanelSection').style.display = 'block';
+        actualizarStatsAdmin(); cargarAdminPendientes(); actualizarUI();
+    } else { mostrarToast('❌ Contraseña incorrecta', 'error'); }
 }
-
 function checkAdminSession() {
     if (sessionStorage.getItem('adminAutenticado') === 'true') {
-        adminAuthenticated = true;
-        document.getElementById('passwordSection').style.display = 'none';
-        document.getElementById('adminPanelSection').style.display = 'block';
-        actualizarStatsAdmin();
-        cargarAdminPendientes();
-        actualizarUI();
+        adminAuthenticated = true; document.getElementById('passwordSection').style.display = 'none'; document.getElementById('adminPanelSection').style.display = 'block';
+        actualizarStatsAdmin(); cargarAdminPendientes(); actualizarUI();
     }
 }
-
-// Funciones admin
-window.aprobarServicio = async function(id) {
-    if (!confirm('¿Aprobar este servicio?')) return;
-    await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id);
-    mostrarToast('✅ Servicio aprobado', 'success');
-    cargarAdminPendientes();
-    cargarProfesionales();
-    actualizarStatsAdmin();
-};
-
-window.rechazarServicio = async function(id) {
-    if (!confirm('¿Rechazar este servicio?')) return;
-    await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id);
-    mostrarToast('❌ Servicio rechazado', 'info');
-    cargarAdminPendientes();
-    cargarProfesionales();
-    actualizarStatsAdmin();
-};
-
-window.eliminarServicio = async function(id) {
-    if (!confirm('⚠️ ¿Eliminar permanentemente?')) return;
-    await supabase.from('oferentes').delete().eq('id', id);
-    mostrarToast('🗑️ Eliminado', 'success');
-    cargarAdminActual();
-    cargarProfesionales();
-    actualizarStatsAdmin();
-};
-
-window.verPerfilAdmin = async function(id) {
-    const servicio = todosLosServicios.find(s => s.id === id);
-    if (servicio) {
-        alert(`Perfil de: ${servicio.nombre}\nTeléfono: ${servicio.telefono}\nZona: ${servicio.zona}\nDescripción: ${servicio.descripcion || 'Sin descripción'}\nID Usuario: ${servicio.user_id}`);
-    }
-};
-
+window.aprobarServicio = async function(id) { if (!confirm('¿Aprobar?')) return; await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id); mostrarToast('✅ Aprobado', 'success'); cargarAdminPendientes(); cargarProfesionales(); actualizarStatsAdmin(); };
+window.rechazarServicio = async function(id) { if (!confirm('¿Rechazar?')) return; await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id); mostrarToast('❌ Rechazado', 'info'); cargarAdminPendientes(); cargarProfesionales(); actualizarStatsAdmin(); };
+window.eliminarServicio = async function(id) { if (!confirm('¿Eliminar?')) return; await supabase.from('oferentes').delete().eq('id', id); mostrarToast('🗑️ Eliminado', 'success'); cargarAdminActual(); cargarProfesionales(); actualizarStatsAdmin(); };
+window.verPerfilAdmin = async function(id) { const s = todosLosServicios.find(s => s.id === id); if(s) alert(`Perfil: ${s.nombre}\nTeléfono: ${s.telefono}\nZona: ${s.zona}\nDescripción: ${s.descripcion || 'Sin descripción'}`); };
 let adminTabActual = 'pendientes';
-async function cargarAdminActual() {
-    if (adminTabActual === 'pendientes') await cargarAdminPendientes();
-    else if (adminTabActual === 'aprobados') await cargarAdminAprobados();
-    else await cargarAdminTodos();
-}
-
+async function cargarAdminActual() { if (adminTabActual === 'pendientes') await cargarAdminPendientes(); else if (adminTabActual === 'aprobados') await cargarAdminAprobados(); else await cargarAdminTodos(); }
 async function cargarAdminPendientes() {
-    adminTabActual = 'pendientes';
-    const content = document.getElementById('adminContent');
-    const { data } = await supabase.from('oferentes').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
-    if (!data || data.length === 0) {
-        content.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios pendientes</div>';
-        return;
-    }
-    content.innerHTML = data.map(s => `
-        <div class="service-item service-pendiente">
-            <div class="service-header">
-                <div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div>
-                <div class="service-actions">
-                    <button class="btn btn-primary btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button>
-                    <button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button>
-                    <button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button>
-                    <button class="btn btn-outline btn-sm" onclick="verPerfilAdmin('${s.id}')">👤 Ver Perfil</button>
-                </div>
-            </div>
-            <div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div>
-        </div>
-    `).join('');
+    adminTabActual = 'pendientes'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
+    if (!data || data.length === 0) { content.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios pendientes</div>'; return; }
+    content.innerHTML = data.map(s => `<div class="service-item service-pendiente"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-primary btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button><button class="btn btn-outline btn-sm" onclick="verPerfilAdmin('${s.id}')">👤 Ver Perfil</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('');
 }
-
 async function cargarAdminAprobados() {
-    adminTabActual = 'aprobados';
-    const content = document.getElementById('adminContent');
-    const { data } = await supabase.from('oferentes').select('*').eq('estado', 'aprobado');
-    content.innerHTML = data?.map(s => `
-        <div class="service-item service-aprobado">
-            <div class="service-header">
-                <div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div>
-                <div class="service-actions">
-                    <button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button>
-                    <button class="btn btn-outline btn-sm" onclick="verPerfilAdmin('${s.id}')">👤 Ver Perfil</button>
-                </div>
-            </div>
-            <div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div>
-        </div>
-    `).join('') || '<p>No hay servicios aprobados</p>';
+    adminTabActual = 'aprobados'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*').eq('estado', 'aprobado');
+    content.innerHTML = data?.map(s => `<div class="service-item service-aprobado"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button><button class="btn btn-outline btn-sm" onclick="verPerfilAdmin('${s.id}')">👤 Ver Perfil</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('') || '<p>No hay servicios aprobados</p>';
 }
-
 async function cargarAdminTodos() {
-    adminTabActual = 'todos';
-    const content = document.getElementById('adminContent');
-    const { data } = await supabase.from('oferentes').select('*');
-    content.innerHTML = data?.map(s => `
-        <div class="service-item ${s.estado === 'aprobado' ? 'service-aprobado' : s.estado === 'pendiente' ? 'service-pendiente' : 'service-rechazado'}">
-            <div class="service-header">
-                <div><strong>${escapeHtml(s.nombre)}</strong><br><small>${s.estado} - ${escapeHtml(s.especialidad || s.categoria)}</small></div>
-                <div class="service-actions">
-                    ${s.estado === 'pendiente' ? `<button class="btn btn-primary btn-sm" onclick="aprobarServicio('${s.id}')">Aprobar</button>` : ''}
-                    ${s.estado === 'pendiente' ? `<button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">Rechazar</button>` : ''}
-                    <button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button>
-                    <button class="btn btn-outline btn-sm" onclick="verPerfilAdmin('${s.id}')">👤 Ver Perfil</button>
-                </div>
-            </div>
-            <div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div>
-        </div>
-    `).join('') || '<p>No hay servicios</p>';
+    adminTabActual = 'todos'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*');
+    content.innerHTML = data?.map(s => `<div class="service-item ${s.estado === 'aprobado' ? 'service-aprobado' : s.estado === 'pendiente' ? 'service-pendiente' : 'service-rechazado'}"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${s.estado} - ${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions">${s.estado === 'pendiente' ? `<button class="btn btn-primary btn-sm" onclick="aprobarServicio('${s.id}')">Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">Rechazar</button>` : ''}<button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button><button class="btn btn-outline btn-sm" onclick="verPerfilAdmin('${s.id}')">👤 Ver Perfil</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('') || '<p>No hay servicios</p>';
 }
-
 async function actualizarStatsAdmin() {
     const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
     const pendientes = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
@@ -1511,85 +1463,37 @@ async function actualizarStatsAdmin() {
     document.getElementById('adminAprobados').textContent = aprobados.count || 0;
 }
 
-// ==================== EVENTOS ====================
+// EVENTOS
 document.getElementById('btnLogin').onclick = () => document.getElementById('modalLogin').style.display = 'flex';
 document.getElementById('btnLogout').onclick = logout;
 document.getElementById('btnCompartir').onclick = () => { generarQR(); document.getElementById('modalCompartir').style.display = 'flex'; };
-document.getElementById('btnPublicar').onclick = () => {
-    if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); document.getElementById('modalLogin').style.display = 'flex'; return; }
-    document.getElementById('modalPublicar').style.display = 'flex';
-};
+document.getElementById('btnPublicar').onclick = () => { if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); document.getElementById('modalLogin').style.display = 'flex'; return; } document.getElementById('modalPublicar').style.display = 'flex'; };
 document.getElementById('btnGuardarServicio').onclick = publicarServicio;
 document.getElementById('btnClosePublicar').onclick = () => document.getElementById('modalPublicar').style.display = 'none';
 document.getElementById('btnCloseLogin').onclick = () => document.getElementById('modalLogin').style.display = 'none';
 document.getElementById('btnCloseCompartir').onclick = () => document.getElementById('modalCompartir').style.display = 'none';
 document.getElementById('btnClosePerfil').onclick = () => document.getElementById('modalPerfil').style.display = 'none';
+document.getElementById('btnCloseCalificar').onclick = () => document.getElementById('modalCalificar').style.display = 'none';
+document.getElementById('btnEnviarCalificacion').onclick = enviarCalificacion;
 document.getElementById('btnLoginSubmit').onclick = manejarAuth;
 document.getElementById('btnBuscar').onclick = cargarProfesionales;
 document.getElementById('searchInput').onkeyup = (e) => { if(e.key === 'Enter') cargarProfesionales(); };
 document.getElementById('categoriaFilter').onchange = cargarProfesionales;
 document.getElementById('verifyAdminBtn').onclick = verificarAdminPassword;
-
-// Tabs populares
-document.querySelectorAll('.popular-tab').forEach(tab => {
-    tab.onclick = () => {
-        document.querySelectorAll('.popular-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const tabName = tab.dataset.tab;
-        document.getElementById('popularServicios').style.display = tabName === 'servicios' ? 'grid' : 'none';
-        document.getElementById('popularProfesionales').style.display = tabName === 'profesionales' ? 'grid' : 'none';
-    };
-});
-
-// Compartir
+document.querySelectorAll('.popular-tab').forEach(tab => { tab.onclick = () => { document.querySelectorAll('.popular-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const tabName = tab.dataset.tab; document.getElementById('popularServicios').style.display = tabName === 'servicios' ? 'grid' : 'none'; document.getElementById('popularProfesionales').style.display = tabName === 'profesionales' ? 'grid' : 'none'; }; });
 document.getElementById('shareWhatsApp').onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent('¡Conoce Factor Cuba! ' + window.location.href)}`, '_blank');
 document.getElementById('shareTelegram').onclick = () => window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent('¡Conoce Factor Cuba!')}`, '_blank');
 document.getElementById('copyLinkBtn').onclick = () => { navigator.clipboard.writeText(window.location.href); mostrarToast('✅ Enlace copiado', 'success'); };
-
-// Admin
-document.getElementById('btnAdmin').onclick = () => {
-    if (!adminAuthenticated) {
-        document.getElementById('passwordSection').style.display = 'block';
-        document.getElementById('adminPanelSection').style.display = 'none';
-        document.getElementById('adminPasswordInput').value = '';
-    } else {
-        document.getElementById('passwordSection').style.display = 'none';
-        document.getElementById('adminPanelSection').style.display = 'block';
-        actualizarStatsAdmin();
-        cargarAdminPendientes();
-    }
-    document.getElementById('modalAdmin').style.display = 'flex';
-};
+document.getElementById('btnAdmin').onclick = () => { if (!adminAuthenticated) { document.getElementById('passwordSection').style.display = 'block'; document.getElementById('adminPanelSection').style.display = 'none'; document.getElementById('adminPasswordInput').value = ''; } else { document.getElementById('passwordSection').style.display = 'none'; document.getElementById('adminPanelSection').style.display = 'block'; actualizarStatsAdmin(); cargarAdminPendientes(); } document.getElementById('modalAdmin').style.display = 'flex'; };
 document.getElementById('btnCloseAdmin').onclick = () => document.getElementById('modalAdmin').style.display = 'none';
 document.getElementById('adminTabPendientes').onclick = cargarAdminPendientes;
 document.getElementById('adminTabAprobados').onclick = cargarAdminAprobados;
 document.getElementById('adminTabTodos').onclick = cargarAdminTodos;
-
-document.getElementById('switchAuthMode').onclick = (e) => {
-    e.preventDefault();
-    if (loginMode === 'login') {
-        loginMode = 'register';
-        document.getElementById('modalLoginTitle').innerHTML = '<i class="fas fa-user-plus"></i> Crear Cuenta';
-        document.getElementById('btnLoginSubmit').innerHTML = '<i class="fas fa-user-plus"></i> Registrarse';
-        document.getElementById('switchAuthMode').innerHTML = '¿Ya tienes cuenta? Inicia sesión';
-    } else {
-        loginMode = 'login';
-        document.getElementById('modalLoginTitle').innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
-        document.getElementById('btnLoginSubmit').innerHTML = '<i class="fas fa-arrow-right"></i> Ingresar';
-        document.getElementById('switchAuthMode').innerHTML = '¿No tienes cuenta? Regístrate';
-    }
-};
-
+document.getElementById('switchAuthMode').onclick = (e) => { e.preventDefault(); if (loginMode === 'login') { loginMode = 'register'; document.getElementById('modalLoginTitle').innerHTML = '<i class="fas fa-user-plus"></i> Crear Cuenta'; document.getElementById('btnLoginSubmit').innerHTML = '<i class="fas fa-user-plus"></i> Registrarse'; document.getElementById('switchAuthMode').innerHTML = '¿Ya tienes cuenta? Inicia sesión'; } else { loginMode = 'login'; document.getElementById('modalLoginTitle').innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión'; document.getElementById('btnLoginSubmit').innerHTML = '<i class="fas fa-arrow-right"></i> Ingresar'; document.getElementById('switchAuthMode').innerHTML = '¿No tienes cuenta? Regístrate'; } };
 window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 
-// ==================== INICIAR ====================
-async function init() {
-    const { data: { session } } = await supabase.auth.getSession();
-    currentUser = session?.user || null;
-    actualizarUI();
-    await cargarProfesionales();
-    checkAdminSession();
-}
+// INICIAR
+async function init() { const { data: { session } } = await supabase.auth.getSession(); currentUser = session?.user || null; actualizarUI(); await cargarProfesionales(); checkAdminSession(); initRatingStars(); }
 init();
 </script>
 </body>
