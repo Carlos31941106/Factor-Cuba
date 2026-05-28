@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="description" content="Factor Cuba - La plataforma para conectar profesionales y clientes en Cuba">
     <title>Factor Cuba | Conectando profesionales en Cuba</title>
     
     <!-- Leaflet para el mapa -->
@@ -15,9 +14,6 @@
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- QR Library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
     
@@ -36,20 +32,8 @@
         }
         
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .container {
@@ -86,7 +70,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            cursor: pointer;
         }
         
         .logo-icon {
@@ -156,34 +139,14 @@
             font-size: 12px;
         }
         
-        .btn-warning {
-            background: linear-gradient(135deg, #e8c96a, #c9a53b);
-            color: #1a1a1a;
-        }
-        
-        .btn-large {
-            padding: 15px 40px;
-            font-size: 18px;
-        }
-        
-        .landing {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        .hero {
             text-align: center;
-            padding: 80px 20px;
+            padding: 60px 0 40px;
             animation: fadeInUp 0.8s ease;
         }
         
-        .hero-landing {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .hero-landing h1 {
-            font-size: 64px;
+        .hero h1 {
+            font-size: 48px;
             font-weight: 800;
             margin-bottom: 20px;
             background: linear-gradient(135deg, #ffffff, #2ec76b);
@@ -191,93 +154,11 @@
             -webkit-text-fill-color: transparent;
         }
         
-        .hero-landing p {
-            font-size: 20px;
-            color: #a0b0a8;
-            margin-bottom: 40px;
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin: 60px 0;
-        }
-        
-        .feature-card {
-            background: rgba(13, 31, 22, 0.8);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            border: 1px solid rgba(46, 199, 107, 0.2);
-            transition: all 0.3s ease;
-            animation: float 3s ease-in-out infinite;
-        }
-        
-        .feature-card:nth-child(2) { animation-delay: 0.5s; }
-        .feature-card:nth-child(3) { animation-delay: 1s; }
-        .feature-card:nth-child(4) { animation-delay: 1.5s; }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-            border-color: #2ec76b;
-        }
-        
-        .feature-icon {
-            font-size: 48px;
-            color: #2ec76b;
-            margin-bottom: 20px;
-        }
-        
-        .feature-card h3 {
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-        
-        .feature-card p {
-            color: #b0c4b0;
-            line-height: 1.5;
-        }
-        
-        .mission-section {
-            background: rgba(46, 199, 107, 0.1);
-            border-radius: 30px;
-            padding: 50px;
-            margin: 50px 0;
-            border: 1px solid rgba(46, 199, 107, 0.3);
-        }
-        
-        .mission-section h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
-            color: #2ec76b;
-        }
-        
-        .mission-section p {
+        .hero p {
             font-size: 18px;
-            line-height: 1.6;
-            color: #b0c4b0;
-            max-width: 800px;
+            color: #a0b0a8;
+            max-width: 600px;
             margin: 0 auto;
-        }
-        
-        .frase-motivadora {
-            font-size: 24px;
-            font-style: italic;
-            margin: 40px 0;
-            padding: 30px;
-            background: linear-gradient(135deg, rgba(46, 199, 107, 0.2), rgba(26, 122, 65, 0.1));
-            border-radius: 30px;
-            border-left: 5px solid #2ec76b;
-        }
-        
-        .main-app {
-            display: none;
-        }
-        
-        .main-app.active {
-            display: block;
         }
         
         .stats-grid {
@@ -363,7 +244,7 @@
         
         .professionals-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 25px;
             margin: 40px 0;
         }
@@ -433,28 +314,6 @@
         .card-body i {
             width: 20px;
             color: #2ec76b;
-        }
-        
-        .image-gallery {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-            flex-wrap: wrap;
-        }
-        
-        .gallery-img {
-            width: 80px;
-            height: 80px;
-            border-radius: 10px;
-            object-fit: cover;
-            cursor: pointer;
-            transition: transform 0.3s;
-            border: 2px solid rgba(46, 199, 107, 0.3);
-        }
-        
-        .gallery-img:hover {
-            transform: scale(1.05);
-            border-color: #2ec76b;
         }
         
         .card-footer {
@@ -546,23 +405,9 @@
             border-color: #2ec76b;
         }
         
-        .image-preview {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-        
-        .image-preview img {
-            width: 80px;
-            height: 80px;
-            border-radius: 10px;
-            object-fit: cover;
-        }
-        
         .admin-stats {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin-bottom: 25px;
         }
@@ -618,23 +463,6 @@
             color: #a0b0a8;
         }
         
-        .imagen-pendiente-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-        }
-        
-        .imagen-pendiente-item img {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-        
         .toast {
             position: fixed;
             bottom: 30px;
@@ -679,70 +507,33 @@
             border: 1px solid rgba(46, 199, 107, 0.3);
         }
         
-        .back-to-landing {
-            background: transparent;
-            border: none;
-            color: #2ec76b;
-            cursor: pointer;
-            font-size: 14px;
-            margin-left: 20px;
-        }
-        
-        .back-to-landing:hover {
-            text-decoration: underline;
-        }
-        
-        .pendiente-badge {
-            background: #e8c96a33;
-            color: #e8c96a;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 11px;
-            margin-left: 8px;
-        }
-        
         @media (max-width: 768px) {
             .container {
                 padding: 0 15px;
             }
-            
-            .hero-landing h1 {
+            .hero h1 {
                 font-size: 32px;
             }
-            
             .professionals-grid {
                 grid-template-columns: 1fr;
             }
-            
             .filters {
                 flex-direction: column;
             }
-            
             .admin-stats {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr;
             }
-            
             #mapa {
                 height: 300px;
-            }
-            
-            .mission-section {
-                padding: 30px 20px;
-            }
-            
-            .frase-motivadora {
-                font-size: 18px;
             }
         }
         
         ::-webkit-scrollbar {
             width: 8px;
         }
-        
         ::-webkit-scrollbar-track {
             background: #0a150f;
         }
-        
         ::-webkit-scrollbar-thumb {
             background: #2ec76b;
             border-radius: 4px;
@@ -753,13 +544,13 @@
 
 <header class="header">
     <div class="container header-content">
-        <div class="logo" id="logoHome">
+        <div class="logo">
             <div class="logo-icon">
                 <i class="fas fa-handshake"></i>
             </div>
             <span>Factor <span style="color:#2ec76b;">Cuba</span></span>
         </div>
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
             <div id="userInfo" style="display: none; align-items: center; gap: 15px;">
                 <span id="userName" style="color: #2ec76b;"></span>
             </div>
@@ -768,108 +559,66 @@
             <button class="btn btn-outline" id="btnCompartir" style="display: none;"><i class="fas fa-qrcode"></i> Compartir</button>
             <button class="btn btn-admin" id="btnAdmin" style="display: none;"><i class="fas fa-crown"></i> <span id="adminBadge">Admin</span></button>
             <button class="btn btn-danger" id="btnLogout" style="display: none;"><i class="fas fa-sign-out-alt"></i> Salir</button>
-            <button class="back-to-landing" id="btnBackToLanding" style="display: none;"><i class="fas fa-home"></i> Inicio</button>
         </div>
     </div>
 </header>
 
-<!-- LANDING PAGE -->
-<div id="landingPage" class="landing">
+<section class="hero">
     <div class="container">
-        <div class="hero-landing">
-            <h1><i class="fas fa-star" style="color: #e8c96a;"></i> Conectamos Talento Cubano <i class="fas fa-star" style="color: #e8c96a;"></i></h1>
-            <p>La plataforma que une a los mejores profesionales con quienes más los necesitan</p>
-            <button class="btn btn-primary btn-large" id="btnExplorar"><i class="fas fa-search"></i> Explorar Profesionales</button>
+        <h1><i class="fas fa-star" style="color: #e8c96a;"></i> Conectamos Talento Cubano <i class="fas fa-star" style="color: #e8c96a;"></i></h1>
+        <p>Encuentra los mejores profesionales de confianza o publica tu servicio y haz crecer tu negocio</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="totalProfesionales">0</div>
+            <div class="stat-label">Profesionales Activos</div>
         </div>
-        
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-hard-hat"></i></div>
-                <h3>Construcción</h3>
-                <p>Albañiles, constructores y maestros de obra con experiencia y calidad garantizada</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
-                <h3>Electricidad</h3>
-                <p>Instalaciones, reparaciones y mantenimiento eléctrico por profesionales certificados</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-wrench"></i></div>
-                <h3>Reparaciones</h3>
-                <p>Todo tipo de reparaciones del hogar: electrodomésticos, fontanería y más</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-truck"></i></div>
-                <h3>Transporte</h3>
-                <p>Servicios de mudanzas, fletes y transporte de carga confiables</p>
-            </div>
+        <div class="stat-card">
+            <div class="stat-number" id="totalPendientes">0</div>
+            <div class="stat-label">Pendientes de Aprobación</div>
         </div>
-        
-        <div class="mission-section">
-            <h2><i class="fas fa-heart" style="color: #2ec76b;"></i> Nuestra Misión</h2>
-            <p>En Factor Cuba nos dedicamos a conectar a los mejores profesionales del país con los clientes que buscan calidad, confianza y resultados. Nuestro objetivo es que cada persona que confíe en nosotros se sienta satisfecha, cómoda y segura con el trabajo recibido. Porque tu tranquilidad es nuestra mayor motivación.</p>
+        <div class="stat-card">
+            <div class="stat-number">7</div>
+            <div class="stat-label">Categorías</div>
         </div>
-        
-        <div class="frase-motivadora">
-            <i class="fas fa-quote-left" style="color: #2ec76b; margin-right: 15px;"></i>
-            El trabajo bien hecho no es un gasto, es una inversión en tu tranquilidad. En Factor Cuba, conectamos talento con excelencia.
-            <i class="fas fa-quote-right" style="color: #2ec76b; margin-left: 15px;"></i>
+        <div class="stat-card">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Posibilidades</div>
+        </div>
+    </div>
+    
+    <div class="map-container">
+        <div id="mapa"></div>
+    </div>
+    
+    <div class="filters">
+        <i class="fas fa-search" style="align-self: center; color: #2ec76b;"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, oficio o zona...">
+        <select id="categoriaFilter">
+            <option value="">Todas las categorías</option>
+            <option value="carpinteria">🪵 Carpintería</option>
+            <option value="construccion">🏗️ Construcción</option>
+            <option value="electricidad">⚡ Electricidad</option>
+            <option value="soldadura">⚙️ Soldadura</option>
+            <option value="reparaciones">🔧 Reparaciones</option>
+            <option value="transporte">🚚 Transporte</option>
+            <option value="otros">📦 Otros Servicios</option>
+        </select>
+        <button class="btn btn-primary" id="btnBuscar"><i class="fas fa-search"></i> Buscar</button>
+    </div>
+    
+    <div class="professionals-grid" id="listaProfesionales">
+        <div style="text-align: center; padding: 60px;">
+            <i class="fas fa-spinner fa-pulse" style="font-size: 48px; color: #2ec76b;"></i>
+            <p>Cargando profesionales...</p>
         </div>
     </div>
 </div>
 
-<!-- MAIN APP -->
-<div id="mainApp" class="main-app">
-    <div class="container">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number" id="totalProfesionales">0</div>
-                <div class="stat-label">Profesionales Activos</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalPendientes">0</div>
-                <div class="stat-label">Pendientes de Aprobación</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">7</div>
-                <div class="stat-label">Categorías</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">∞</div>
-                <div class="stat-label">Posibilidades</div>
-            </div>
-        </div>
-        
-        <div class="map-container">
-            <div id="mapa"></div>
-        </div>
-        
-        <div class="filters">
-            <i class="fas fa-search" style="align-self: center; color: #2ec76b;"></i>
-            <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, oficio o zona...">
-            <select id="categoriaFilter">
-                <option value="">Todas las categorías</option>
-                <option value="carpinteria">🪵 Carpintería</option>
-                <option value="construccion">🏗️ Construcción</option>
-                <option value="electricidad">⚡ Electricidad</option>
-                <option value="soldadura">⚙️ Soldadura</option>
-                <option value="reparaciones">🔧 Reparaciones</option>
-                <option value="transporte">🚚 Transporte</option>
-                <option value="otros">📦 Otros Servicios</option>
-            </select>
-            <button class="btn btn-primary" id="btnBuscar"><i class="fas fa-search"></i> Buscar</button>
-        </div>
-        
-        <div class="professionals-grid" id="listaProfesionales">
-            <div style="text-align: center; padding: 60px;">
-                <i class="fas fa-spinner fa-pulse" style="font-size: 48px; color: #2ec76b;"></i>
-                <p>Cargando profesionales...</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODALES -->
+<!-- MODAL LOGIN -->
 <div id="modalLogin" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -888,9 +637,13 @@
         <p style="margin-top: 20px; text-align: center;">
             <a href="#" id="switchAuthMode" style="color: #2ec76b;">¿No tienes cuenta? Regístrate</a>
         </p>
+        <p style="margin-top: 10px; text-align: center; font-size: 12px; color: #a0b0a8;">
+            <i class="fas fa-info-circle"></i> Revisa tu correo (y spam) para confirmar tu cuenta
+        </p>
     </div>
 </div>
 
+<!-- MODAL PUBLICAR SERVICIO -->
 <div id="modalPublicar" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -923,13 +676,7 @@
         </div>
         <div class="form-group">
             <label><i class="fas fa-info-circle"></i> Descripción del Servicio</label>
-            <textarea id="pubDescripcion" rows="3" placeholder="Describe tu experiencia, servicios que ofreces, etc."></textarea>
-        </div>
-        <div class="form-group">
-            <label><i class="fas fa-images"></i> Imágenes de tus trabajos (hasta 3)</label>
-            <input type="file" id="pubImagenes" accept="image/*" multiple>
-            <div class="image-preview" id="imagePreview"></div>
-            <small style="color: #a0b0a8;">Las imágenes serán revisadas por el administrador antes de mostrarse</small>
+            <textarea id="pubDescripcion" rows="4" placeholder="Describe tu experiencia, servicios que ofreces, etc."></textarea>
         </div>
         <button class="btn btn-primary" id="btnGuardarServicio" style="width: 100%;"><i class="fas fa-cloud-upload-alt"></i> Publicar Servicio</button>
         <p style="font-size: 12px; color: #a0b0a8; margin-top: 15px; text-align: center;">
@@ -938,6 +685,7 @@
     </div>
 </div>
 
+<!-- MODAL COMPARTIR -->
 <div id="modalCompartir" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -963,8 +711,9 @@
     </div>
 </div>
 
+<!-- MODAL ADMIN -->
 <div id="modalAdmin" class="modal">
-    <div class="modal-content" style="max-width: 900px;">
+    <div class="modal-content" style="max-width: 800px;">
         <div class="modal-header">
             <h2><i class="fas fa-crown"></i> Panel de Control - Administrador</h2>
             <button class="close-modal" id="btnCloseAdmin">&times;</button>
@@ -977,6 +726,9 @@
                 <input type="password" id="adminPasswordInput" placeholder="Ingresa la contraseña de administrador">
             </div>
             <button class="btn btn-primary" id="verifyAdminBtn" style="width: 100%;"><i class="fas fa-check-circle"></i> Verificar Acceso</button>
+            <p style="font-size: 12px; color: #a0b0a8; margin-top: 10px; text-align: center;">
+                Solo el administrador tiene acceso a esta sección
+            </p>
         </div>
         
         <div id="adminPanelSection" style="display: none;">
@@ -987,23 +739,18 @@
                 </div>
                 <div class="admin-stat">
                     <div class="stat-number" id="adminPendientes">0</div>
-                    <div>Servicios Pendientes</div>
+                    <div>Pendientes</div>
                 </div>
                 <div class="admin-stat">
                     <div class="stat-number" id="adminAprobados">0</div>
                     <div>Aprobados</div>
                 </div>
-                <div class="admin-stat">
-                    <div class="stat-number" id="adminImagenesPendientes">0</div>
-                    <div>Imágenes Pendientes</div>
-                </div>
             </div>
             
             <div style="display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap;">
-                <button class="btn btn-outline" id="adminTabPendientes"><i class="fas fa-clock"></i> Servicios Pendientes</button>
+                <button class="btn btn-outline" id="adminTabPendientes"><i class="fas fa-clock"></i> Pendientes</button>
                 <button class="btn btn-outline" id="adminTabAprobados"><i class="fas fa-check-circle"></i> Aprobados</button>
                 <button class="btn btn-outline" id="adminTabRechazados"><i class="fas fa-times-circle"></i> Rechazados</button>
-                <button class="btn btn-outline" id="adminTabImagenes"><i class="fas fa-images"></i> Imágenes Pendientes</button>
                 <button class="btn btn-outline" id="adminTabTodos"><i class="fas fa-list"></i> Todos</button>
             </div>
             
@@ -1022,32 +769,29 @@ const SUPABASE_URL = 'https://fuppvnrayedcevafzwjg.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_FkeG4_g-P6g3Nqi1YYgFBQ_7nrnIW-P';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ==================== CONTRASEÑA ADMIN ====================
 const ADMIN_PASSWORD = "FactorCuba2025";
-
 let adminAuthenticated = false;
+
+// ==================== VARIABLES ====================
 let currentUser = null;
 let todosLosServicios = [];
 let mapaInstance = null;
-let imagenesSeleccionadas = [];
 
 const ZONAS_COORDS = {
-    'Centro Habana': [23.1365, -82.3810],
-    'Playa': [23.0949, -82.4485],
-    '10 de Octubre': [23.0833, -82.3500],
-    'Habana Vieja': [23.1389, -82.3572],
-    'Vedado': [23.1415, -82.3850],
-    'Marianao': [23.0833, -82.4167],
-    'Santiago de Cuba': [20.0247, -75.8218],
-    'Camagüey': [21.3844, -77.9075],
-    'Holguín': [20.8882, -76.2631],
-    'Santa Clara': [22.4067, -79.9648]
+    'Centro Habana': [23.1365, -82.3810], 'Playa': [23.0949, -82.4485],
+    '10 de Octubre': [23.0833, -82.3500], 'Habana Vieja': [23.1389, -82.3572],
+    'Vedado': [23.1415, -82.3850], 'Marianao': [23.0833, -82.4167],
+    'Santiago de Cuba': [20.0247, -75.8218], 'Camagüey': [21.3844, -77.9075],
+    'Holguín': [20.8882, -76.2631], 'Santa Clara': [22.4067, -79.9648]
 };
 
+// ==================== FUNCIONES ====================
 function mostrarToast(mensaje, tipo = 'success') {
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.style.borderLeftColor = tipo === 'success' ? '#2ec76b' : tipo === 'error' ? '#e05858' : '#e8c96a';
-    toast.innerHTML = `<i class="fas ${tipo === 'success' ? 'fa-check-circle' : tipo === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}" style="font-size: 20px;"></i><span>${mensaje}</span>`;
+    toast.innerHTML = `<i class="fas ${tipo === 'success' ? 'fa-check-circle' : tipo === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i><span>${mensaje}</span>`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 4000);
 }
@@ -1060,68 +804,6 @@ function escapeHtml(text) {
         if (m === '>') return '&gt;';
         return m;
     });
-}
-
-function mostrarLanding() {
-    document.getElementById('landingPage').style.display = 'flex';
-    document.getElementById('mainApp').classList.remove('active');
-    document.getElementById('btnBackToLanding').style.display = 'none';
-}
-
-function mostrarApp() {
-    document.getElementById('landingPage').style.display = 'none';
-    document.getElementById('mainApp').classList.add('active');
-    document.getElementById('btnBackToLanding').style.display = currentUser ? 'inline-block' : 'none';
-    cargarProfesionales();
-}
-
-// ==================== IMÁGENES ====================
-document.getElementById('pubImagenes')?.addEventListener('change', function(e) {
-    const preview = document.getElementById('imagePreview');
-    preview.innerHTML = '';
-    imagenesSeleccionadas = [];
-    
-    const files = Array.from(e.target.files);
-    if (files.length > 3) {
-        mostrarToast('Solo puedes seleccionar hasta 3 imágenes', 'error');
-        this.value = '';
-        return;
-    }
-    
-    files.forEach(file => {
-        if (file.type.startsWith('image/')) {
-            imagenesSeleccionadas.push(file);
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = document.createElement('img');
-                img.src = event.target.result;
-                preview.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-});
-
-async function subirImagenes(servicioId, files) {
-    const urls = [];
-    const estados = {};
-    
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const fileName = `${servicioId}/${Date.now()}_${i}.jpg`;
-        const { data, error } = await supabase.storage
-            .from('imagenes-servicios')
-            .upload(fileName, file);
-        
-        if (!error && data) {
-            const { data: { publicUrl } } = supabase.storage
-                .from('imagenes-servicios')
-                .getPublicUrl(fileName);
-            urls.push(publicUrl);
-            estados[publicUrl] = 'pendiente';
-        }
-    }
-    return { urls, estados };
 }
 
 // ==================== MAPA ====================
@@ -1150,14 +832,11 @@ function actualizarMapa() {
         if (coords) {
             const marker = L.marker(coords).addTo(mapaInstance);
             marker.bindPopup(`
-                <div style="font-family: 'Inter', sans-serif; text-align: center; min-width: 150px;">
-                    <b style="font-size: 14px;">${escapeHtml(servicio.nombre)}</b><br>
+                <div style="font-family:'Inter',sans-serif;text-align:center;min-width:150px;">
+                    <b>${escapeHtml(servicio.nombre)}</b><br>
                     📍 ${escapeHtml(servicio.zona)}<br>
                     🔧 ${escapeHtml(servicio.especialidad || servicio.categoria)}<br>
-                    ${servicio.estado !== 'aprobado' ? `<span style="color:#e8c96a;">⏳ ${servicio.estado}</span><br>` : ''}
-                    <button onclick="window.open('https://wa.me/${servicio.telefono.replace(/[^0-9]/g, '')}')" style="margin-top: 8px; padding: 5px 12px; background: #25D366; color: white; border: none; border-radius: 20px; cursor: pointer;">
-                        💬 Contactar
-                    </button>
+                    <button onclick="window.open('https://wa.me/${servicio.telefono.replace(/[^0-9]/g, '')}')" style="margin-top:8px;padding:5px 12px;background:#25D366;color:white;border:none;border-radius:20px;cursor:pointer;">💬 Contactar</button>
                 </div>
             `);
         }
@@ -1167,25 +846,17 @@ function actualizarMapa() {
 // ==================== CARGAR PROFESIONALES ====================
 async function cargarProfesionales() {
     try {
-        const { data, error } = await supabase
-            .from('oferentes')
-            .select('*')
-            .order('created_at', { ascending: false });
-        
+        const { data, error } = await supabase.from('oferentes').select('*').order('created_at', { ascending: false });
         if (error) throw error;
         
         todosLosServicios = data || [];
-        
         const aprobados = todosLosServicios.filter(s => s.estado === 'aprobado').length;
         const pendientes = todosLosServicios.filter(s => s.estado === 'pendiente').length;
         
         document.getElementById('totalProfesionales').textContent = aprobados;
         document.getElementById('totalPendientes').textContent = pendientes;
         
-        let serviciosMostrar = todosLosServicios;
-        if (!adminAuthenticated) {
-            serviciosMostrar = todosLosServicios.filter(s => s.estado === 'aprobado');
-        }
+        let serviciosMostrar = adminAuthenticated ? todosLosServicios : todosLosServicios.filter(s => s.estado === 'aprobado');
         
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         const categoria = document.getElementById('categoriaFilter').value;
@@ -1197,7 +868,6 @@ async function cargarProfesionales() {
                 (s.zona || '').toLowerCase().includes(searchTerm)
             );
         }
-        
         if (categoria) {
             serviciosMostrar = serviciosMostrar.filter(s => s.categoria === categoria);
         }
@@ -1205,68 +875,127 @@ async function cargarProfesionales() {
         const container = document.getElementById('listaProfesionales');
         
         if (serviciosMostrar.length === 0) {
-            container.innerHTML = `<div style="text-align: center; padding: 60px; grid-column: 1/-1;"><i class="fas fa-store-slash" style="font-size: 64px; color: #a0b0a8; margin-bottom: 20px;"></i><h3>No hay profesionales disponibles</h3><p>¡Sé el primero en publicar tu servicio!</p></div>`;
+            container.innerHTML = `<div style="text-align:center;padding:60px;grid-column:1/-1;"><i class="fas fa-store-slash" style="font-size:64px;color:#a0b0a8;"></i><h3>No hay profesionales disponibles</h3><p>¡Sé el primero en publicar tu servicio!</p></div>`;
             actualizarMapa();
             return;
         }
         
-        container.innerHTML = serviciosMostrar.map(s => {
-            let imagenesHtml = '';
-            if (s.imagenes && s.imagenes.length > 0) {
-                let urls = typeof s.imagenes === 'string' ? JSON.parse(s.imagenes) : s.imagenes;
-                let estados = {};
-                if (s.imagenes_estado) {
-                    estados = typeof s.imagenes_estado === 'string' ? JSON.parse(s.imagenes_estado) : s.imagenes_estado;
-                }
-                
-                const urlsAprobadas = urls.filter(url => estados[url] === 'aprobado');
-                
-                if (urlsAprobadas.length > 0) {
-                    imagenesHtml = `<div class="image-gallery">${urlsAprobadas.map(url => `<img src="${url}" class="gallery-img" onclick="window.open('${url}')" alt="Trabajo realizado">`).join('')}</div>`;
-                } else if (urls.length > 0 && s.estado === 'aprobado') {
-                    imagenesHtml = `<div class="image-gallery"><span class="pendiente-badge"><i class="fas fa-clock"></i> Imágenes pendientes de aprobación</span></div>`;
-                }
-            }
-            
-            return `
-                <div class="professional-card">
-                    <div class="card-header">
-                        <div class="card-icon"><i class="fas ${getCategoriaIcon(s.categoria)}"></i></div>
-                        <h3>${escapeHtml(s.nombre)}</h3>
-                        <span class="card-badge">${escapeHtml(s.especialidad || s.categoria)}</span>
-                    </div>
-                    <div class="card-body">
-                        <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(s.zona)}</p>
-                        <p><i class="fab fa-whatsapp"></i> ${escapeHtml(s.telefono)}</p>
-                        ${s.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(s.descripcion.substring(0, 100))}${s.descripcion.length > 100 ? '...' : ''}</p>` : ''}
-                        ${imagenesHtml}
-                    </div>
-                    <div class="card-footer">
-                        <button class="btn btn-primary" style="width: 100%; background: #25D366;" onclick="window.open('https://wa.me/${s.telefono.replace(/[^0-9]/g, '')}')"><i class="fab fa-whatsapp"></i> Contactar por WhatsApp</button>
-                    </div>
+        container.innerHTML = serviciosMostrar.map(s => `
+            <div class="professional-card">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fas ${getCategoriaIcon(s.categoria)}"></i></div>
+                    <h3>${escapeHtml(s.nombre)}</h3>
+                    <span class="card-badge">${escapeHtml(s.especialidad || s.categoria)}</span>
                 </div>
-            `;
-        }).join('');
+                <div class="card-body">
+                    <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(s.zona)}</p>
+                    <p><i class="fab fa-whatsapp"></i> ${escapeHtml(s.telefono)}</p>
+                    ${s.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(s.descripcion.substring(0, 100))}${s.descripcion.length > 100 ? '...' : ''}</p>` : ''}
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary" style="width:100%;background:#25D366;" onclick="window.open('https://wa.me/${s.telefono.replace(/[^0-9]/g, '')}')"><i class="fab fa-whatsapp"></i> Contactar por WhatsApp</button>
+                </div>
+            </div>
+        `).join('');
         
         actualizarMapa();
-        
     } catch (err) {
-        console.error(err);
         mostrarToast('Error al cargar profesionales: ' + err.message, 'error');
     }
 }
 
 function getCategoriaIcon(categoria) {
-    const icons = {
-        'carpinteria': 'fa-hammer',
-        'construccion': 'fa-hard-hat',
-        'electricidad': 'fa-bolt',
-        'soldadura': 'fa-wrench',
-        'reparaciones': 'fa-tools',
-        'transporte': 'fa-truck',
-        'otros': 'fa-briefcase'
-    };
+    const icons = { 'carpinteria': 'fa-hammer', 'construccion': 'fa-hard-hat', 'electricidad': 'fa-bolt', 'soldadura': 'fa-wrench', 'reparaciones': 'fa-tools', 'transporte': 'fa-truck', 'otros': 'fa-briefcase' };
     return icons[categoria] || 'fa-user';
+}
+
+// ==================== AUTENTICACIÓN MEJORADA ====================
+let loginMode = 'login';
+
+function mostrarLogin() {
+    document.getElementById('modalLogin').style.display = 'flex';
+}
+
+async function manejarAuth() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+        mostrarToast('Completa email y contraseña', 'error');
+        return;
+    }
+    
+    try {
+        if (loginMode === 'login') {
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            
+            if (error) {
+                if (error.message.includes('Email not confirmed')) {
+                    mostrarToast('📧 Revisa tu correo (y spam) y haz clic en el enlace de confirmación', 'info');
+                    return;
+                }
+                throw error;
+            }
+            
+            currentUser = data.user;
+            mostrarToast('✅ Sesión iniciada', 'success');
+            document.getElementById('modalLogin').style.display = 'none';
+            actualizarUI();
+            await cargarProfesionales();
+            
+        } else {
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            
+            if (error) throw error;
+            
+            mostrarToast('✅ Registro exitoso. Revisa tu correo para confirmar tu cuenta.', 'success');
+            loginMode = 'login';
+            document.getElementById('modalLoginTitle').innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+            document.getElementById('btnLoginSubmit').innerHTML = '<i class="fas fa-arrow-right"></i> Ingresar';
+            document.getElementById('switchAuthMode').innerHTML = '¿No tienes cuenta? Regístrate';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+    } catch (err) {
+        mostrarToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function logout() {
+    await supabase.auth.signOut();
+    currentUser = null;
+    adminAuthenticated = false;
+    sessionStorage.removeItem('adminAutenticado');
+    actualizarUI();
+    await cargarProfesionales();
+    mostrarToast('Sesión cerrada', 'info');
+}
+
+function actualizarUI() {
+    const userInfo = document.getElementById('userInfo');
+    const userName = document.getElementById('userName');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnPublicar = document.getElementById('btnPublicar');
+    const btnCompartir = document.getElementById('btnCompartir');
+    const btnAdmin = document.getElementById('btnAdmin');
+    const btnLogout = document.getElementById('btnLogout');
+    
+    if (currentUser) {
+        userInfo.style.display = 'flex';
+        userName.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email.split('@')[0]}`;
+        btnLogin.style.display = 'none';
+        btnPublicar.style.display = 'inline-block';
+        btnCompartir.style.display = 'inline-block';
+        btnLogout.style.display = 'inline-block';
+        btnAdmin.style.display = 'inline-block';
+    } else {
+        userInfo.style.display = 'none';
+        btnLogin.style.display = 'inline-block';
+        btnPublicar.style.display = 'none';
+        btnCompartir.style.display = 'none';
+        btnAdmin.style.display = 'none';
+        btnLogout.style.display = 'none';
+    }
 }
 
 // ==================== PUBLICAR SERVICIO ====================
@@ -1285,411 +1014,51 @@ async function publicarServicio() {
     const categoriaTexto = document.getElementById('pubCategoria').options[document.getElementById('pubCategoria').selectedIndex]?.text || categoria;
     
     try {
-        const { data: servicioData, error: insertError } = await supabase.from('oferentes').insert([{
+        const { error } = await supabase.from('oferentes').insert([{
             nombre, categoria, zona, telefono, descripcion,
             especialidad: categoriaTexto,
             estado: 'pendiente',
             user_id: currentUser?.id,
             created_at: new Date().toISOString()
-        }]).select();
+        }]);
         
-        if (insertError) throw insertError;
-        
-        const servicioId = servicioData[0].id;
-        
-        if (imagenesSeleccionadas.length > 0) {
-            const { urls, estados } = await subirImagenes(servicioId, imagenesSeleccionadas);
-            if (urls.length > 0) {
-                await supabase.from('oferentes').update({ 
-                    imagenes: JSON.stringify(urls),
-                    imagenes_estado: JSON.stringify(estados)
-                }).eq('id', servicioId);
-            }
-        }
+        if (error) throw error;
         
         mostrarToast('✅ Servicio publicado. Espera aprobación del administrador.', 'success');
-        
         document.getElementById('modalPublicar').style.display = 'none';
         document.getElementById('pubNombre').value = '';
         document.getElementById('pubZona').value = '';
         document.getElementById('pubTelefono').value = '';
         document.getElementById('pubDescripcion').value = '';
-        document.getElementById('pubImagenes').value = '';
-        document.getElementById('imagePreview').innerHTML = '';
-        imagenesSeleccionadas = [];
-        
         await cargarProfesionales();
-        if (adminAuthenticated) actualizarStatsAdmin();
         
     } catch (err) {
         mostrarToast('Error: ' + err.message, 'error');
     }
 }
 
-// ==================== APROBACIÓN DE IMÁGENES ====================
-window.aprobarImagen = async function(servicioId, imagenUrl) {
-    try {
-        const { data: servicio } = await supabase.from('oferentes').select('imagenes_estado').eq('id', servicioId).single();
-        let estados = {};
-        if (servicio?.imagenes_estado) {
-            estados = typeof servicio.imagenes_estado === 'string' ? JSON.parse(servicio.imagenes_estado) : servicio.imagenes_estado;
-        }
-        estados[imagenUrl] = 'aprobado';
-        
-        await supabase.from('oferentes').update({ imagenes_estado: JSON.stringify(estados) }).eq('id', servicioId);
-        mostrarToast('✅ Imagen aprobada', 'success');
-        await cargarAdminImagenesPendientes();
-        await cargarProfesionales();
-        await actualizarStatsAdmin();
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
-};
-
-window.rechazarImagen = async function(servicioId, imagenUrl) {
-    if (!confirm('¿Eliminar esta imagen permanentemente?')) return;
-    try {
-        const { data: servicio } = await supabase.from('oferentes').select('imagenes, imagenes_estado').eq('id', servicioId).single();
-        let urls = [];
-        let estados = {};
-        if (servicio?.imagenes) {
-            urls = typeof servicio.imagenes === 'string' ? JSON.parse(servicio.imagenes) : servicio.imagenes;
-        }
-        if (servicio?.imagenes_estado) {
-            estados = typeof servicio.imagenes_estado === 'string' ? JSON.parse(servicio.imagenes_estado) : servicio.imagenes_estado;
-        }
-        
-        const nuevasUrls = urls.filter(url => url !== imagenUrl);
-        delete estados[imagenUrl];
-        
-        await supabase.from('oferentes').update({ 
-            imagenes: JSON.stringify(nuevasUrls),
-            imagenes_estado: JSON.stringify(estados)
-        }).eq('id', servicioId);
-        
-        mostrarToast('❌ Imagen eliminada', 'info');
-        await cargarAdminImagenesPendientes();
-        await cargarProfesionales();
-        await actualizarStatsAdmin();
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
-};
-
-// ==================== ADMIN - SERVICIOS ====================
-window.aprobarServicio = async function(id) {
-    if (!confirm('¿Aprobar este servicio? Se mostrará al público.')) return;
-    try {
-        await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id);
-        mostrarToast('✅ Servicio aprobado', 'success');
-        await cargarAdminPendientes();
-        await cargarProfesionales();
-        await actualizarStatsAdmin();
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
-};
-
-window.rechazarServicio = async function(id) {
-    if (!confirm('¿Rechazar este servicio?')) return;
-    try {
-        await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id);
-        mostrarToast('❌ Servicio rechazado', 'info');
-        await cargarAdminPendientes();
-        await cargarProfesionales();
-        await actualizarStatsAdmin();
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
-};
-
-window.eliminarServicio = async function(id) {
-    if (!confirm('⚠️ ¿ELIMINAR este servicio permanentemente? Esta acción NO se puede deshacer.')) return;
-    try {
-        await supabase.from('oferentes').delete().eq('id', id);
-        mostrarToast('🗑️ Servicio eliminado permanentemente', 'success');
-        await cargarAdminActual();
-        await cargarProfesionales();
-        await actualizarStatsAdmin();
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
-};
-
-let adminTabActual = 'pendientes';
-
-async function cargarAdminActual() {
-    if (adminTabActual === 'pendientes') await cargarAdminPendientes();
-    else if (adminTabActual === 'aprobados') await cargarAdminAprobados();
-    else if (adminTabActual === 'rechazados') await cargarAdminRechazados();
-    else if (adminTabActual === 'imagenes') await cargarAdminImagenesPendientes();
-    else await cargarAdminTodos();
-}
-
-async function cargarAdminPendientes() {
-    adminTabActual = 'pendientes';
-    const content = document.getElementById('adminContent');
-    content.innerHTML = '<div style="text-align:center; padding:40px;"><i class="fas fa-spinner fa-pulse"></i></div>';
-    
-    const { data } = await supabase.from('oferentes').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
-    
-    if (!data || data.length === 0) {
-        content.innerHTML = '<div style="text-align:center; padding:40px;"><i class="fas fa-check-circle" style="font-size:48px; color:#2ec76b;"></i><p>No hay servicios pendientes</p></div>';
-        return;
-    }
-    
-    content.innerHTML = data.map(s => `
-        <div class="service-item service-pendiente">
-            <div class="service-header">
-                <div><div class="service-title">📦 ${escapeHtml(s.nombre)}</div><div style="font-size:13px;">${escapeHtml(s.especialidad || s.categoria)}</div></div>
-                <div class="service-actions">
-                    <button class="btn btn-primary btn-sm" onclick="aprobarServicio('${s.id}')"><i class="fas fa-check"></i> Aprobar</button>
-                    <button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')"><i class="fas fa-times"></i> Rechazar</button>
-                    <button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')"><i class="fas fa-trash"></i> Eliminar</button>
-                </div>
-            </div>
-            <div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div>
-        </div>
-    `).join('');
-}
-
-async function cargarAdminAprobados() {
-    adminTabActual = 'aprobados';
-    const content = document.getElementById('adminContent');
-    const { data } = await supabase.from('oferentes').select('*').eq('estado', 'aprobado').order('created_at', { ascending: false });
-    
-    if (!data || data.length === 0) {
-        content.innerHTML = '<div style="text-align:center; padding:40px;">No hay servicios aprobados</div>';
-        return;
-    }
-    
-    content.innerHTML = data.map(s => `
-        <div class="service-item service-aprobado">
-            <div class="service-header">
-                <div><div class="service-title">✅ ${escapeHtml(s.nombre)}</div><div style="font-size:13px;">${escapeHtml(s.especialidad || s.categoria)}</div></div>
-                <div class="service-actions"><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')"><i class="fas fa-trash"></i> Eliminar</button></div>
-            </div>
-            <div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div>
-        </div>
-    `).join('');
-}
-
-async function cargarAdminRechazados() {
-    adminTabActual = 'rechazados';
-    const content = document.getElementById('adminContent');
-    const { data } = await supabase.from('oferentes').select('*').eq('estado', 'rechazado').order('created_at', { ascending: false });
-    
-    if (!data || data.length === 0) {
-        content.innerHTML = '<div style="text-align:center; padding:40px;">No hay servicios rechazados</div>';
-        return;
-    }
-    
-    content.innerHTML = data.map(s => `
-        <div class="service-item service-rechazado">
-            <div class="service-header">
-                <div><div class="service-title">❌ ${escapeHtml(s.nombre)}</div><div style="font-size:13px;">${escapeHtml(s.especialidad || s.categoria)}</div></div>
-                <div class="service-actions"><button class="btn btn-primary btn-sm" onclick="aprobarServicio('${s.id}')">Reaprobar</button><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">Eliminar</button></div>
-            </div>
-            <div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div>
-        </div>
-    `).join('');
-}
-
-async function cargarAdminImagenesPendientes() {
-    adminTabActual = 'imagenes';
-    const content = document.getElementById('adminContent');
-    content.innerHTML = '<div style="text-align:center; padding:40px;"><i class="fas fa-spinner fa-pulse"></i></div>';
-    
-    const { data } = await supabase.from('oferentes').select('id, nombre, imagenes, imagenes_estado, estado').not('imagenes', 'is', null);
-    
-    const imagenesPendientes = [];
-    
-    for (const servicio of data) {
-        let urls = [];
-        let estados = {};
-        if (servicio.imagenes) urls = typeof servicio.imagenes === 'string' ? JSON.parse(servicio.imagenes) : servicio.imagenes;
-        if (servicio.imagenes_estado) estados = typeof servicio.imagenes_estado === 'string' ? JSON.parse(servicio.imagenes_estado) : servicio.imagenes_estado;
-        
-        for (const url of urls) {
-            if (estados[url] === 'pendiente') {
-                imagenesPendientes.push({ servicioId: servicio.id, servicioNombre: servicio.nombre, url, servicioEstado: servicio.estado });
-            }
-        }
-    }
-    
-    if (imagenesPendientes.length === 0) {
-        content.innerHTML = '<div style="text-align:center; padding:40px;"><i class="fas fa-check-circle" style="font-size:48px; color:#2ec76b;"></i><p>No hay imágenes pendientes de aprobación</p></div>';
-        return;
-    }
-    
-    content.innerHTML = `<h3 style="margin-bottom:15px;"><i class="fas fa-images"></i> Imágenes pendientes (${imagenesPendientes.length})</h3>` + imagenesPendientes.map(img => `
-        <div class="imagen-pendiente-item">
-            <img src="${img.url}" onerror="this.src='https://placehold.co/60x60/0d1f16/2ec76b?text=Error'">
-            <div style="flex:1">
-                <div><strong>${escapeHtml(img.servicioNombre)}</strong> ${img.servicioEstado === 'aprobado' ? '<span class="pendiente-badge">Servicio ya aprobado</span>' : '<span class="pendiente-badge">Servicio pendiente</span>'}</div>
-                <div style="font-size:12px; color:#a0b0a8; word-break:break-all;">${img.url.substring(0, 60)}...</div>
-            </div>
-            <div class="service-actions">
-                <button class="btn btn-primary btn-sm" onclick="aprobarImagen('${img.servicioId}', '${img.url}')"><i class="fas fa-check"></i> Aprobar</button>
-                <button class="btn btn-danger btn-sm" onclick="rechazarImagen('${img.servicioId}', '${img.url}')"><i class="fas fa-times"></i> Rechazar</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-async function cargarAdminTodos() {
-    adminTabActual = 'todos';
-    const content = document.getElementById('adminContent');
-    const { data } = await supabase.from('oferentes').select('*').order('created_at', { ascending: false });
-    
-    if (!data || data.length === 0) {
-        content.innerHTML = '<div style="text-align:center; padding:40px;">No hay servicios registrados</div>';
-        return;
-    }
-    
-    content.innerHTML = data.map(s => `
-        <div class="service-item ${s.estado === 'aprobado' ? 'service-aprobado' : s.estado === 'pendiente' ? 'service-pendiente' : 'service-rechazado'}">
-            <div class="service-header">
-                <div><div class="service-title">${escapeHtml(s.nombre)}</div><div><span class="card-badge">${escapeHtml(s.especialidad || s.categoria)}</span> <span class="card-badge">${s.estado}</span></div></div>
-                <div class="service-actions">
-                    ${s.estado === 'pendiente' ? `<button class="btn btn-primary btn-sm" onclick="aprobarServicio('${s.id}')">Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">Rechazar</button>` : ''}
-                    <button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')"><i class="fas fa-trash"></i> Eliminar</button>
-                </div>
-            </div>
-            <div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)} | 🆔 ${s.user_id?.substring(0, 8)}...</div>
-        </div>
-    `).join('');
-}
-
-async function actualizarStatsAdmin() {
-    const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
-    const pendientes = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
-    const aprobados = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
-    
-    const { data: serviciosConImagenes } = await supabase.from('oferentes').select('imagenes, imagenes_estado').not('imagenes', 'is', null);
-    let imagenesPendientesCount = 0;
-    for (const s of serviciosConImagenes || []) {
-        if (s.imagenes) {
-            let urls = typeof s.imagenes === 'string' ? JSON.parse(s.imagenes) : s.imagenes;
-            let estados = {};
-            if (s.imagenes_estado) estados = typeof s.imagenes_estado === 'string' ? JSON.parse(s.imagenes_estado) : s.imagenes_estado;
-            imagenesPendientesCount += urls.filter(url => estados[url] === 'pendiente').length;
-        }
-    }
-    
-    document.getElementById('adminTotal').textContent = total.count || 0;
-    document.getElementById('adminPendientes').textContent = pendientes.count || 0;
-    document.getElementById('adminAprobados').textContent = aprobados.count || 0;
-    document.getElementById('adminImagenesPendientes').textContent = imagenesPendientesCount;
-    
-    const adminBtn = document.getElementById('btnAdmin');
-    if (adminBtn && (pendientes.count > 0 || imagenesPendientesCount > 0) && !adminAuthenticated) {
-        document.getElementById('adminBadge').innerHTML = `Admin (${pendientes.count + imagenesPendientesCount})`;
-    } else if (adminBtn) {
-        document.getElementById('adminBadge').innerHTML = 'Admin';
-    }
-}
-
-// ==================== QR ====================
+// ==================== COMPARTIR QR ====================
 function generarQR() {
     const url = window.location.href;
-    document.getElementById('shareUrl').value = url;
     const qrContainer = document.getElementById('qrContainer');
+    const shareUrlInput = document.getElementById('shareUrl');
+    shareUrlInput.value = url;
     qrContainer.innerHTML = '';
-    
-    if (window.location.protocol === 'file:') {
-        qrContainer.innerHTML = `<div style="text-align:center; padding:20px; background:#ffcc0033; border-radius:16px;"><i class="fas fa-exclamation-triangle" style="font-size:48px; color:#ffcc00;"></i><p style="margin-top:15px;">Usa la URL de GitHub Pages: https://carlos31941106.github.io/Factor-Cuba/</p><button class="btn btn-primary" id="copyLocalLinkBtn">Copiar enlace</button></div>`;
-        document.getElementById('copyLocalLinkBtn')?.addEventListener('click', () => {
-            navigator.clipboard.writeText('https://carlos31941106.github.io/Factor-Cuba/');
-            mostrarToast('✅ Enlace copiado', 'success');
-        });
-        return;
-    }
-    
-    const qrDiv = document.createElement('div');
-    qrDiv.id = 'qrcode';
-    qrDiv.style.display = 'flex';
-    qrDiv.style.justifyContent = 'center';
-    qrContainer.appendChild(qrDiv);
-    new QRCode(qrDiv, { text: url, width: 200, height: 200, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+    const qrImg = document.createElement('img');
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+    qrImg.style.margin = '0 auto';
+    qrImg.style.borderRadius = '16px';
+    qrImg.style.background = 'white';
+    qrImg.style.padding = '10px';
+    qrContainer.appendChild(qrImg);
 }
 
-function abrirCompartir() { generarQR(); document.getElementById('modalCompartir').style.display = 'flex'; }
-
-// ==================== AUTENTICACIÓN ====================
-let loginMode = 'login';
-
-async function manejarAuth() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    if (!email || !password) { mostrarToast('Completa email y contraseña', 'error'); return; }
-    try {
-        if (loginMode === 'login') {
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) throw error;
-            mostrarToast('✅ Sesión iniciada', 'success');
-        } else {
-            const { error } = await supabase.auth.signUp({ email, password });
-            if (error) throw error;
-            mostrarToast('✅ Registro exitoso. Inicia sesión.', 'success');
-            loginMode = 'login';
-            document.getElementById('modalLoginTitle').innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
-            document.getElementById('btnLoginSubmit').innerHTML = '<i class="fas fa-arrow-right"></i> Ingresar';
-            document.getElementById('switchAuthMode').innerHTML = '¿No tienes cuenta? Regístrate';
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-            return;
-        }
-        document.getElementById('modalLogin').style.display = 'none';
-        document.getElementById('loginEmail').value = '';
-        document.getElementById('loginPassword').value = '';
-        const { data: { session } } = await supabase.auth.getSession();
-        currentUser = session?.user || null;
-        actualizarUI();
-        if (document.getElementById('mainApp').classList.contains('active')) await cargarProfesionales();
-    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
+function abrirCompartir() {
+    generarQR();
+    document.getElementById('modalCompartir').style.display = 'flex';
 }
 
-async function logout() {
-    await supabase.auth.signOut();
-    currentUser = null;
-    adminAuthenticated = false;
-    sessionStorage.removeItem('adminAutenticado');
-    actualizarUI();
-    mostrarLanding();
-    mostrarToast('Sesión cerrada', 'info');
-}
-
-function actualizarUI() {
-    const userInfo = document.getElementById('userInfo');
-    const userName = document.getElementById('userName');
-    const btnLogin = document.getElementById('btnLogin');
-    const btnPublicar = document.getElementById('btnPublicar');
-    const btnCompartir = document.getElementById('btnCompartir');
-    const btnAdmin = document.getElementById('btnAdmin');
-    const btnLogout = document.getElementById('btnLogout');
-    const btnBackToLanding = document.getElementById('btnBackToLanding');
-    
-    if (currentUser) {
-        userInfo.style.display = 'flex';
-        userName.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email.split('@')[0]}`;
-        btnLogin.style.display = 'none';
-        btnPublicar.style.display = 'inline-block';
-        btnCompartir.style.display = 'inline-block';
-        btnLogout.style.display = 'inline-block';
-        btnAdmin.style.display = 'inline-block';
-        if (document.getElementById('mainApp').classList.contains('active')) btnBackToLanding.style.display = 'inline-block';
-    } else {
-        userInfo.style.display = 'none';
-        btnLogin.style.display = 'inline-block';
-        btnPublicar.style.display = 'none';
-        btnCompartir.style.display = 'none';
-        btnAdmin.style.display = 'none';
-        btnLogout.style.display = 'none';
-        btnBackToLanding.style.display = 'none';
-    }
-}
-
+// ==================== ADMIN ====================
 function verificarAdminPassword() {
     const password = document.getElementById('adminPasswordInput').value;
     if (password === ADMIN_PASSWORD) {
@@ -1700,7 +1069,9 @@ function verificarAdminPassword() {
         document.getElementById('adminPanelSection').style.display = 'block';
         actualizarStatsAdmin();
         cargarAdminPendientes();
-    } else { mostrarToast('❌ Contraseña incorrecta', 'error'); }
+    } else {
+        mostrarToast('❌ Contraseña incorrecta', 'error');
+    }
 }
 
 function checkAdminSession() {
@@ -1713,11 +1084,109 @@ function checkAdminSession() {
     }
 }
 
+window.aprobarServicio = async function(id) {
+    if (!confirm('¿Aprobar este servicio?')) return;
+    await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id);
+    mostrarToast('✅ Servicio aprobado', 'success');
+    cargarAdminPendientes();
+    cargarProfesionales();
+    actualizarStatsAdmin();
+};
+
+window.rechazarServicio = async function(id) {
+    if (!confirm('¿Rechazar este servicio?')) return;
+    await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id);
+    mostrarToast('❌ Servicio rechazado', 'info');
+    cargarAdminPendientes();
+    cargarProfesionales();
+    actualizarStatsAdmin();
+};
+
+window.eliminarServicio = async function(id) {
+    if (!confirm('⚠️ ¿ELIMINAR permanentemente?')) return;
+    await supabase.from('oferentes').delete().eq('id', id);
+    mostrarToast('🗑️ Servicio eliminado', 'success');
+    cargarAdminActual();
+    cargarProfesionales();
+    actualizarStatsAdmin();
+};
+
+window.editarServicio = async function(id, campo, valor) {
+    const nuevoValor = prompt(`Editar ${campo}:`, valor);
+    if (nuevoValor && nuevoValor !== valor) {
+        await supabase.from('oferentes').update({ [campo]: nuevoValor }).eq('id', id);
+        mostrarToast(`✅ ${campo} actualizado`, 'success');
+        cargarAdminActual();
+        cargarProfesionales();
+    }
+};
+
+let adminTabActual = 'pendientes';
+async function cargarAdminActual() {
+    if (adminTabActual === 'pendientes') await cargarAdminPendientes();
+    else if (adminTabActual === 'aprobados') await cargarAdminAprobados();
+    else if (adminTabActual === 'rechazados') await cargarAdminRechazados();
+    else await cargarAdminTodos();
+}
+
+async function cargarAdminPendientes() {
+    adminTabActual = 'pendientes';
+    const content = document.getElementById('adminContent');
+    const { data } = await supabase.from('oferentes').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
+    if (!data || data.length === 0) {
+        content.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios pendientes</div>';
+        return;
+    }
+    content.innerHTML = data.map(s => `
+        <div class="service-item service-pendiente">
+            <div class="service-header">
+                <div><div class="service-title">${escapeHtml(s.nombre)}</div><div>${escapeHtml(s.especialidad || s.categoria)}</div></div>
+                <div class="service-actions">
+                    <button class="btn btn-primary btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button>
+                    <button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button>
+                    <button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button>
+                </div>
+            </div>
+            <div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}<br>${s.descripcion || ''}</div>
+        </div>
+    `).join('');
+}
+
+async function cargarAdminAprobados() {
+    adminTabActual = 'aprobados';
+    const content = document.getElementById('adminContent');
+    const { data } = await supabase.from('oferentes').select('*').eq('estado', 'aprobado');
+    content.innerHTML = data?.map(s => `<div class="service-item service-aprobado">✅ ${escapeHtml(s.nombre)} - ${escapeHtml(s.especialidad)} - ${escapeHtml(s.zona)}<button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div>`).join('') || '<p>No hay servicios aprobados</p>';
+}
+
+async function cargarAdminRechazados() {
+    adminTabActual = 'rechazados';
+    const content = document.getElementById('adminContent');
+    const { data } = await supabase.from('oferentes').select('*').eq('estado', 'rechazado');
+    content.innerHTML = data?.map(s => `<div class="service-item service-rechazado">❌ ${escapeHtml(s.nombre)} - ${escapeHtml(s.especialidad)}<button class="btn btn-primary btn-sm" onclick="aprobarServicio('${s.id}')">Aprobar</button></div>`).join('') || '<p>No hay servicios rechazados</p>';
+}
+
+async function cargarAdminTodos() {
+    adminTabActual = 'todos';
+    const content = document.getElementById('adminContent');
+    const { data } = await supabase.from('oferentes').select('*');
+    content.innerHTML = data?.map(s => `<div class="service-item ${s.estado === 'aprobado' ? 'service-aprobado' : s.estado === 'pendiente' ? 'service-pendiente' : 'service-rechazado'}">${escapeHtml(s.nombre)} - ${s.estado}<button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div>`).join('') || '<p>No hay servicios</p>';
+}
+
+async function actualizarStatsAdmin() {
+    const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
+    const pendientes = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+    const aprobados = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
+    document.getElementById('adminTotal').textContent = total.count || 0;
+    document.getElementById('adminPendientes').textContent = pendientes.count || 0;
+    document.getElementById('adminAprobados').textContent = aprobados.count || 0;
+}
+
 // ==================== EVENTOS ====================
-document.getElementById('btnLogin').onclick = () => document.getElementById('modalLogin').style.display = 'flex';
+document.getElementById('btnLogin').onclick = mostrarLogin;
 document.getElementById('btnLogout').onclick = logout;
 document.getElementById('btnCompartir').onclick = abrirCompartir;
-document.getElementById('btnPublicar').onclick = () => { if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); document.getElementById('modalLogin').style.display = 'flex'; return; } document.getElementById('modalPublicar').style.display = 'flex'; };
+document.getElementById('btnPublicar').onclick = () => { if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); mostrarLogin(); return; } document.getElementById('modalPublicar').style.display = 'flex'; };
 document.getElementById('btnGuardarServicio').onclick = publicarServicio;
 document.getElementById('btnClosePublicar').onclick = () => document.getElementById('modalPublicar').style.display = 'none';
 document.getElementById('btnCloseLogin').onclick = () => document.getElementById('modalLogin').style.display = 'none';
@@ -1727,11 +1196,8 @@ document.getElementById('btnBuscar').onclick = cargarProfesionales;
 document.getElementById('searchInput').onkeyup = (e) => { if(e.key === 'Enter') cargarProfesionales(); };
 document.getElementById('categoriaFilter').onchange = cargarProfesionales;
 document.getElementById('verifyAdminBtn').onclick = verificarAdminPassword;
-document.getElementById('btnExplorar').onclick = mostrarApp;
-document.getElementById('logoHome').onclick = mostrarLanding;
-document.getElementById('btnBackToLanding').onclick = mostrarLanding;
 
-document.getElementById('shareWhatsApp').onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent('¡Conoce Factor Cuba! Encuentra profesionales de confianza: ' + window.location.href)}`, '_blank');
+document.getElementById('shareWhatsApp').onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent('¡Conoce Factor Cuba! ' + window.location.href)}`, '_blank');
 document.getElementById('shareTelegram').onclick = () => window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent('¡Conoce Factor Cuba!')}`, '_blank');
 document.getElementById('shareFacebook').onclick = () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
 document.getElementById('copyLinkBtn').onclick = () => { navigator.clipboard.writeText(window.location.href); mostrarToast('✅ Enlace copiado', 'success'); };
@@ -1740,14 +1206,18 @@ document.getElementById('btnAdmin').onclick = () => {
     document.getElementById('passwordSection').style.display = 'block';
     document.getElementById('adminPanelSection').style.display = 'none';
     document.getElementById('adminPasswordInput').value = '';
-    if (adminAuthenticated) { document.getElementById('passwordSection').style.display = 'none'; document.getElementById('adminPanelSection').style.display = 'block'; actualizarStatsAdmin(); cargarAdminPendientes(); }
+    if (adminAuthenticated) {
+        document.getElementById('passwordSection').style.display = 'none';
+        document.getElementById('adminPanelSection').style.display = 'block';
+        actualizarStatsAdmin();
+        cargarAdminPendientes();
+    }
     document.getElementById('modalAdmin').style.display = 'flex';
 };
 document.getElementById('btnCloseAdmin').onclick = () => document.getElementById('modalAdmin').style.display = 'none';
 document.getElementById('adminTabPendientes').onclick = cargarAdminPendientes;
 document.getElementById('adminTabAprobados').onclick = cargarAdminAprobados;
 document.getElementById('adminTabRechazados').onclick = cargarAdminRechazados;
-document.getElementById('adminTabImagenes').onclick = cargarAdminImagenesPendientes;
 document.getElementById('adminTabTodos').onclick = cargarAdminTodos;
 
 document.getElementById('switchAuthMode').onclick = (e) => {
@@ -1767,11 +1237,12 @@ document.getElementById('switchAuthMode').onclick = (e) => {
 
 window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 
+// ==================== INICIAR ====================
 async function init() {
     const { data: { session } } = await supabase.auth.getSession();
     currentUser = session?.user || null;
     actualizarUI();
-    mostrarLanding();
+    await cargarProfesionales();
     checkAdminSession();
 }
 init();
