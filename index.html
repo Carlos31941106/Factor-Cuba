@@ -816,7 +816,7 @@
             <button class="btn btn-outline" id="btnLogin"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
             <button class="btn btn-primary" id="btnPublicar" style="display: none;"><i class="fas fa-plus-circle"></i> Publicar Servicio</button>
             <button class="btn btn-outline" id="btnCompartir" style="display: none;"><i class="fas fa-qrcode"></i> Compartir</button>
-          <button class="btn btn-admin" id="btnAdmin" style="display: inline-block;"><i class="fas fa-crown"></i> <span id="adminBadge">Admin</span></button>
+            <button class="btn btn-admin" id="btnAdmin"><i class="fas fa-crown"></i> <span id="adminBadge">Admin</span></button>
             <button class="btn btn-danger" id="btnLogout" style="display: none;"><i class="fas fa-sign-out-alt"></i> Salir</button>
         </div>
     </div>
@@ -1407,16 +1407,33 @@ async function manejarAuth() {
     } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 }
 async function logout() { await supabase.auth.signOut(); currentUser = null; adminAuthenticated = false; sessionStorage.removeItem('adminAutenticado'); actualizarUI(); await cargarProfesionales(); mostrarToast('Sesión cerrada', 'info'); }
+
+// ==================== FUNCIÓN ACTUALIZAR UI CORREGIDA ====================
+// El botón Admin ahora es SIEMPRE visible
 function actualizarUI() {
-    const userInfo = document.getElementById('userInfo'); const userName = document.getElementById('userName');
-    const btnLogin = document.getElementById('btnLogin'); const btnPublicar = document.getElementById('btnPublicar');
-    const btnCompartir = document.getElementById('btnCompartir'); const btnAdmin = document.getElementById('btnAdmin'); const btnLogout = document.getElementById('btnLogout');
+    const userInfo = document.getElementById('userInfo');
+    const userName = document.getElementById('userName');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnPublicar = document.getElementById('btnPublicar');
+    const btnCompartir = document.getElementById('btnCompartir');
+    const btnAdmin = document.getElementById('btnAdmin');
+    const btnLogout = document.getElementById('btnLogout');
+    
     if (currentUser) {
-        userInfo.style.display = 'flex'; userName.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email.split('@')[0]}`;
-        btnLogin.style.display = 'none'; btnPublicar.style.display = 'inline-block'; btnCompartir.style.display = 'inline-block'; btnLogout.style.display = 'inline-block';
-        btnAdmin.style.display = adminAuthenticated ? 'inline-block' : 'none';
+        userInfo.style.display = 'flex';
+        userName.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email.split('@')[0]}`;
+        btnLogin.style.display = 'none';
+        btnPublicar.style.display = 'inline-block';
+        btnCompartir.style.display = 'inline-block';
+        btnLogout.style.display = 'inline-block';
+        btnAdmin.style.display = 'inline-block';  // SIEMPRE visible cuando hay sesión
     } else {
-        userInfo.style.display = 'none'; btnLogin.style.display = 'inline-block'; btnPublicar.style.display = 'none'; btnCompartir.style.display = 'none'; btnAdmin.style.display = 'none'; btnLogout.style.display = 'none';
+        userInfo.style.display = 'none';
+        btnLogin.style.display = 'inline-block';
+        btnPublicar.style.display = 'none';
+        btnCompartir.style.display = 'none';
+        btnAdmin.style.display = 'inline-block';  // SIEMPRE visible aunque no haya sesión
+        btnLogout.style.display = 'none';
     }
 }
 
@@ -1484,7 +1501,20 @@ document.querySelectorAll('.popular-tab').forEach(tab => { tab.onclick = () => {
 document.getElementById('shareWhatsApp').onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent('¡Conoce Factor Cuba! ' + window.location.href)}`, '_blank');
 document.getElementById('shareTelegram').onclick = () => window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent('¡Conoce Factor Cuba!')}`, '_blank');
 document.getElementById('copyLinkBtn').onclick = () => { navigator.clipboard.writeText(window.location.href); mostrarToast('✅ Enlace copiado', 'success'); };
-document.getElementById('btnAdmin').onclick = () => { if (!adminAuthenticated) { document.getElementById('passwordSection').style.display = 'block'; document.getElementById('adminPanelSection').style.display = 'none'; document.getElementById('adminPasswordInput').value = ''; } else { document.getElementById('passwordSection').style.display = 'none'; document.getElementById('adminPanelSection').style.display = 'block'; actualizarStatsAdmin(); cargarAdminPendientes(); } document.getElementById('modalAdmin').style.display = 'flex'; };
+document.getElementById('btnAdmin').onclick = () => { 
+    document.getElementById('modalAdmin').style.display = 'flex';
+    // Si ya está autenticado, mostrar panel directamente
+    if (adminAuthenticated) {
+        document.getElementById('passwordSection').style.display = 'none';
+        document.getElementById('adminPanelSection').style.display = 'block';
+        actualizarStatsAdmin();
+        cargarAdminPendientes();
+    } else {
+        document.getElementById('passwordSection').style.display = 'block';
+        document.getElementById('adminPanelSection').style.display = 'none';
+        document.getElementById('adminPasswordInput').value = '';
+    }
+};
 document.getElementById('btnCloseAdmin').onclick = () => document.getElementById('modalAdmin').style.display = 'none';
 document.getElementById('adminTabPendientes').onclick = cargarAdminPendientes;
 document.getElementById('adminTabAprobados').onclick = cargarAdminAprobados;
