@@ -1143,11 +1143,18 @@ function actualizarMapa() {
                     <br><b>${escapeHtml(servicio.nombre)}</b>
                     <br>📍 ${servicio.zona}
                     <br><button onclick="verPerfil('${servicio.id}')" style="background:#5A7D9A;border:none;padding:5px 10px;border-radius:20px;color:white;cursor:pointer;margin-top:5px;">👤 Ver Perfil</button>
-                    <br><button onclick="window.open('https://wa.me/${servicio.telefono.replace(/[^0-9]/g, '')}')" style="background:#25D366;border:none;padding:5px 10px;border-radius:20px;color:white;cursor:pointer;margin-top:5px;">💬 WhatsApp</button>
+                    <br><button onclick="abrirWhatsApp('${servicio.telefono}')" style="background:#25D366;border:none;padding:5px 10px;border-radius:20px;color:white;cursor:pointer;margin-top:5px;">💬 WhatsApp</button>
                 </div>
             `);
         }
     });
+}
+
+// FUNCIÓN WHATSAPP DIRECTA (CORREGIDA)
+function abrirWhatsApp(telefono) {
+    const numero = telefono.replace(/[^0-9]/g, '');
+    const mensaje = encodeURIComponent('Hola, vi tu perfil en Factor Cuba y me interesa tu servicio.');
+    window.open(`https://api.whatsapp.com/send?phone=${numero}&text=${mensaje}`);
 }
 
 window.verPerfil = async function(servicioId) {
@@ -1197,7 +1204,7 @@ window.verPerfil = async function(servicioId) {
             ${servicio.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(servicio.descripcion)}</p>` : ''}
             <p><i class="fas fa-calendar"></i> Miembro desde: ${new Date(servicio.created_at).toLocaleDateString()}</p>
             ${currentUser ? `<button class="btn btn-outline" onclick="mostrarModalCalificar('${servicio.id}', '${escapeHtml(servicio.nombre)}')" style="margin-top:10px;"><i class="fas fa-star"></i> Calificar este servicio</button>` : ''}
-            <button class="btn btn-primary" onclick="window.open('https://wa.me/${servicio.telefono.replace(/[^0-9]/g, '')}')" style="margin-top:10px;width:100%;">
+            <button class="btn btn-primary" onclick="abrirWhatsApp('${servicio.telefono}')" style="margin-top:10px;width:100%;">
                 <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
             </button>
             ${reseñasHtml}
@@ -1322,7 +1329,7 @@ async function cargarProfesionales() {
                 </div>
                 <div class="card-footer">
                     <button class="btn btn-outline" onclick="verPerfil('${s.id}')"><i class="fas fa-user"></i> Ver Perfil</button>
-                    <button class="btn btn-primary" style="background:#25D366;" onclick="window.open('https://wa.me/${s.telefono.replace(/[^0-9]/g, '')}')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    <button class="btn btn-primary" style="background:#25D366;" onclick="abrirWhatsApp('${s.telefono}')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
                     ${currentUser ? `<button class="btn btn-outline" onclick="mostrarModalCalificar('${s.id}', '${escapeHtml(s.nombre)}')"><i class="fas fa-star"></i> Calificar</button>` : ''}
                 </div>
             </div>
@@ -1392,7 +1399,6 @@ async function manejarAuth() {
 }
 async function logout() { await supabase.auth.signOut(); currentUser = null; adminAuthenticated = false; sessionStorage.removeItem('adminAutenticado'); actualizarUI(); await cargarProfesionales(); mostrarToast('Sesión cerrada', 'info'); }
 
-// ==================== FUNCIÓN ACTUALIZAR UI - BOTÓN ADMIN SOLO PARA TU CORREO ====================
 function actualizarUI() {
     const userInfo = document.getElementById('userInfo');
     const userName = document.getElementById('userName');
@@ -1402,7 +1408,6 @@ function actualizarUI() {
     const btnAdmin = document.getElementById('btnAdmin');
     const btnLogout = document.getElementById('btnLogout');
     
-    // SOLO este correo verá el botón de Administrador
     const ADMIN_EMAIL = 'ch361892@gmail.com';
     
     if (currentUser) {
@@ -1413,7 +1418,6 @@ function actualizarUI() {
         btnCompartir.style.display = 'inline-block';
         btnLogout.style.display = 'inline-block';
         
-        // VERIFICACIÓN: Solo mostrar botón Admin si el email es el del administrador
         if (currentUser.email === ADMIN_EMAIL) {
             btnAdmin.style.display = 'inline-block';
         } else {
