@@ -1150,25 +1150,34 @@ function actualizarMapa() {
     });
 }
 
-// ==================== FUNCIÓN WHATSAPP DEFINITIVA ====================
+// ==================== FUNCIÓN WHATSAPP CON +53 AUTOMÁTICO ====================
 function abrirWhatsApp(telefono, nombre) {
-    const numero = telefono.replace(/[^0-9]/g, '');
+    // 1. Limpiar: eliminar todo lo que no sean números
+    let numeroLimpio = telefono.replace(/[^0-9]/g, '');
+    
+    // 2. Si el número NO empieza con 53 (código de Cuba), lo agregamos automáticamente
+    if (!numeroLimpio.startsWith('53')) {
+        numeroLimpio = '53' + numeroLimpio;
+    }
+    
+    // 3. Formato final con +
+    const numeroFormateado = '+' + numeroLimpio;
+    
+    // 4. Mensaje personalizado
     const mensaje = encodeURIComponent(`Hola, vi tu perfil "${nombre}" en Factor Cuba y me interesa tu servicio.`);
     
-    // Detectar si es dispositivo móvil
+    // 5. Detectar dispositivo
     const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     if (esMovil) {
-        // En móvil: usar el esquema nativo "whatsapp://" - abre DIRECTAMENTE la app
-        window.location.href = `whatsapp://send?phone=${numero}&text=${mensaje}`;
-        
-        // Respaldo: si no funciona, mostrar el número
+        // En móvil: abrir directamente la app
+        window.location.href = `whatsapp://send?phone=${numeroFormateado}&text=${mensaje}`;
         setTimeout(() => {
-            mostrarToast(`📱 Si no se abre, contacta a: ${telefono}`, 'info');
+            mostrarToast(`📱 Contactando a: ${numeroFormateado}`, 'info');
         }, 500);
     } else {
         // En computadora: usar WhatsApp Web
-        window.open(`https://web.whatsapp.com/send?phone=${numero}&text=${mensaje}`);
+        window.open(`https://web.whatsapp.com/send?phone=${numeroFormateado}&text=${mensaje}`);
     }
 }
 
