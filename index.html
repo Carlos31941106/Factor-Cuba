@@ -349,6 +349,15 @@
         #mapa {
             height: 400px;
             width: 100%;
+            background: #e2e8f0;
+        }
+        
+        .map-controls {
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         
         .filters {
@@ -769,6 +778,18 @@
             font-size: 12px;
         }
         
+        .map-coord-info {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 0 15px;
@@ -871,8 +892,16 @@
         <div style="text-align: center; padding: 40px; width: 100%;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>
     </div>
     
+    <!-- MAPA MEJORADO -->
     <div class="map-container">
         <div id="mapa"></div>
+    </div>
+    <div class="map-controls">
+        <button class="btn btn-outline btn-sm" id="mapCentroHabana"><i class="fas fa-map-marker-alt"></i> Centro Habana</button>
+        <button class="btn btn-outline btn-sm" id="mapPlaya"><i class="fas fa-map-marker-alt"></i> Playa</button>
+        <button class="btn btn-outline btn-sm" id="MapVedado"><i class="fas fa-map-marker-alt"></i> Vedado</button>
+        <button class="btn btn-outline btn-sm" id="mapSantiago"><i class="fas fa-map-marker-alt"></i> Santiago</button>
+        <button class="btn btn-outline btn-sm" id="mapAll"><i class="fas fa-globe"></i> Ver todos</button>
     </div>
     
     <div class="filters">
@@ -1130,10 +1159,37 @@ let mapaInstance = null;
 let servicioActualCalificar = null;
 let puntuacionSeleccionada = 0;
 
+// ==================== COORDENADAS DE ZONAS DE CUBA (ACTUALIZADO) ====================
 const ZONAS_COORDS = {
-    'Centro Habana': [23.1365, -82.3810], 'Playa': [23.0949, -82.4485],
-    '10 de Octubre': [23.0833, -82.3500], 'Habana Vieja': [23.1389, -82.3572],
-    'Vedado': [23.1415, -82.3850], 'Marianao': [23.0833, -82.4167]
+    // La Habana
+    'Centro Habana': [23.1365, -82.3810],
+    'Playa': [23.0949, -82.4485],
+    '10 de Octubre': [23.0833, -82.3500],
+    'Habana Vieja': [23.1389, -82.3572],
+    'Vedado': [23.1415, -82.3850],
+    'Marianao': [23.0833, -82.4167],
+    'La Lisa': [23.0500, -82.4333],
+    'Boyeros': [23.0167, -82.4000],
+    'Arroyo Naranjo': [23.0500, -82.3000],
+    'Cerro': [23.1000, -82.3500],
+    'Guanabacoa': [23.1167, -82.3000],
+    'San Miguel del Padrón': [23.1000, -82.3167],
+    'Cotorro': [23.0333, -82.3167],
+    // Otras provincias
+    'Santiago de Cuba': [20.0247, -75.8218],
+    'Camagüey': [21.3844, -77.9075],
+    'Holguín': [20.8882, -76.2631],
+    'Santa Clara': [22.4067, -79.9648],
+    'Cienfuegos': [22.1456, -80.4364],
+    'Matanzas': [23.0411, -81.5775],
+    'Pinar del Río': [22.4175, -83.6981],
+    'Guantánamo': [20.1444, -75.2092],
+    'Las Tunas': [20.9597, -76.9511],
+    'Bayamo': [20.3794, -76.6433],
+    'Sancti Spíritus': [21.9344, -79.4425],
+    'Ciego de Ávila': [21.8481, -78.7631],
+    'Artemisa': [22.8136, -82.7611],
+    'Mayabeque': [22.9647, -82.3808]
 };
 
 function mostrarToast(mensaje, tipo = 'success') {
@@ -1198,6 +1254,85 @@ function abrirWhatsApp(telefono, nombre) {
     }
 }
 
+// ==================== MAPA MEJORADO ====================
+function centrarMapaEnZona(zona) {
+    const coords = ZONAS_COORDS[zona];
+    if (coords && mapaInstance) {
+        mapaInstance.setView(coords, 13);
+        mostrarToast(`📍 Mostrando zona: ${zona}`, 'info');
+    }
+}
+
+function centrarMapaEnProfesional(servicioId) {
+    const servicio = todosLosServicios.find(s => s.id === servicioId);
+    if (servicio && mapaInstance) {
+        let coords = null;
+        if (servicio.latitud && servicio.longitud) {
+            coords = [servicio.latitud, servicio.longitud];
+        } else if (ZONAS_COORDS[servicio.zona]) {
+            coords = ZONAS_COORDS[servicio.zona];
+        }
+        if (coords) {
+            mapaInstance.setView(coords, 14);
+            mostrarToast(`📍 Mostrando ubicación de: ${servicio.nombre}`, 'info');
+        }
+    }
+}
+
+function actualizarMapa() {
+    if (!mapaInstance) {
+        mapaInstance = L.map('mapa').setView([23.1, -82.4], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 19
+        }).addTo(mapaInstance);
+    } else {
+        mapaInstance.eachLayer(layer => {
+            if (layer instanceof L.Marker) mapaInstance.removeLayer(layer);
+        });
+    }
+    
+    const serviciosMostrar = adminAuthenticated ? todosLosServicios : todosLosServicios.filter(s => s.estado === 'aprobado');
+    let marcadores = [];
+    
+    serviciosMostrar.forEach(servicio => {
+        let coords = null;
+        if (servicio.latitud && servicio.longitud) {
+            coords = [servicio.latitud, servicio.longitud];
+        } else if (ZONAS_COORDS[servicio.zona]) {
+            coords = ZONAS_COORDS[servicio.zona];
+        }
+        
+        if (coords) {
+            const iconoColor = servicio.estado === 'aprobado' ? '#2ec76b' : '#e8c96a';
+            const marker = L.marker(coords).addTo(mapaInstance);
+            marker.bindPopup(`
+                <div style="font-family:'Inter',sans-serif;text-align:center;min-width:180px;">
+                    ${servicio.foto ? `<img src="${servicio.foto}" style="width:50px;height:50px;border-radius:50%;margin-bottom:8px;object-fit:cover;">` : `<i class="fas fa-user-circle" style="font-size:40px;color:#5A7D9A;margin-bottom:8px;"></i>`}
+                    <br><strong>${escapeHtml(servicio.nombre)}</strong>
+                    <br>📍 <strong>${escapeHtml(servicio.zona)}</strong>
+                    <br>🔧 ${escapeHtml(servicio.especialidad || servicio.categoria)}
+                    <br>⭐ ${servicio.promedio_puntuacion ? servicio.promedio_puntuacion.toFixed(1) : 'Nuevo'} (${servicio.total_calificaciones || 0})
+                    <hr style="margin:8px 0;">
+                    <div style="display:flex;gap:8px;justify-content:center;">
+                        <button onclick="verPerfil('${servicio.id}')" style="background:#5A7D9A;border:none;padding:5px 12px;border-radius:20px;color:white;cursor:pointer;font-size:12px;">👤 Ver Perfil</button>
+                        <button onclick="abrirWhatsApp('${servicio.telefono}', '${escapeHtml(servicio.nombre)}')" style="background:#25D366;border:none;padding:5px 12px;border-radius:20px;color:white;cursor:pointer;font-size:12px;">💬 WhatsApp</button>
+                        <button onclick="centrarMapaEnProfesional('${servicio.id}')" style="background:#e8c96a;border:none;padding:5px 12px;border-radius:20px;color:#333;cursor:pointer;font-size:12px;">📍 Centrar</button>
+                    </div>
+                </div>
+            `);
+            marcadores.push(marker);
+        }
+    });
+    
+    // Agrupar marcadores si hay muchos
+    if (marcadores.length > 20 && L.markerClusterGroup) {
+        // Opcional: se puede agregar cluster de marcadores si se desea
+    }
+    
+    return marcadores;
+}
+
 // ==================== EDITAR PERFIL ====================
 window.abrirEditar = function(servicioId) {
     const servicio = todosLosServicios.find(s => s.id === servicioId);
@@ -1226,7 +1361,6 @@ document.getElementById('editarForm').addEventListener('submit', async (e) => {
     const nuevoTelefono = document.getElementById('editTelefono').value.trim();
     const nuevaDescripcion = document.getElementById('editDescripcion').value.trim();
     
-    // Guardar cambios pendientes
     const cambios = [];
     if (nuevoNombre !== servicioOriginal.nombre) {
         cambios.push({ campo: 'nombre', valor_viejo: servicioOriginal.nombre, valor_nuevo: nuevoNombre });
@@ -1292,7 +1426,6 @@ async function cargarAdminCambios() {
         return;
     }
     
-    // Agrupar cambios por servicio_id
     const cambiosPorServicio = {};
     data.forEach(c => {
         if (!cambiosPorServicio[c.servicio_id]) cambiosPorServicio[c.servicio_id] = [];
@@ -1333,7 +1466,6 @@ async function cargarAdminCambios() {
 window.aprobarTodosLosCambios = async function(servicioId) {
     if (!confirm('¿Aprobar todos los cambios para este servicio?')) return;
     
-    // Obtener los cambios pendientes
     const { data: cambios } = await supabase
         .from('cambios_pendientes')
         .select('*')
@@ -1342,7 +1474,6 @@ window.aprobarTodosLosCambios = async function(servicioId) {
     
     if (!cambios || cambios.length === 0) return;
     
-    // Aplicar cambios a oferentes
     const updates = {};
     cambios.forEach(c => {
         updates[c.campo] = c.valor_nuevo;
@@ -1358,7 +1489,6 @@ window.aprobarTodosLosCambios = async function(servicioId) {
         return;
     }
     
-    // Marcar cambios como aprobados
     for (const c of cambios) {
         await supabase.from('cambios_pendientes').update({ estado: 'aprobado' }).eq('id', c.id);
     }
@@ -1387,32 +1517,6 @@ window.rechazarTodosLosCambios = async function(servicioId) {
     await cargarAdminCambios();
     await actualizarStatsAdmin();
 };
-
-// ==================== MAPA ====================
-function actualizarMapa() {
-    if (!mapaInstance) {
-        mapaInstance = L.map('mapa').setView([23.1, -82.4], 11);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaInstance);
-    } else {
-        mapaInstance.eachLayer(layer => { if (layer instanceof L.Marker) mapaInstance.removeLayer(layer); });
-    }
-    const serviciosMostrar = adminAuthenticated ? todosLosServicios : todosLosServicios.filter(s => s.estado === 'aprobado');
-    serviciosMostrar.forEach(servicio => {
-        let coords = ZONAS_COORDS[servicio.zona];
-        if (coords) {
-            const marker = L.marker(coords).addTo(mapaInstance);
-            marker.bindPopup(`
-                <div style="text-align:center;">
-                    ${servicio.foto ? `<img src="${servicio.foto}" style="width:40px;height:40px;border-radius:50%;margin-bottom:5px;">` : `<i class="fas fa-user-circle" style="font-size:32px;color:#5A7D9A;"></i>`}
-                    <br><b>${escapeHtml(servicio.nombre)}</b>
-                    <br>📍 ${servicio.zona}
-                    <br><button onclick="verPerfil('${servicio.id}')" style="background:#5A7D9A;border:none;padding:5px 10px;border-radius:20px;color:white;cursor:pointer;margin-top:5px;">👤 Ver Perfil</button>
-                    <br><button onclick="abrirWhatsApp('${servicio.telefono}', '${escapeHtml(servicio.nombre)}')" style="background:#25D366;border:none;padding:5px 10px;border-radius:20px;color:white;cursor:pointer;margin-top:5px;">💬 WhatsApp</button>
-                </div>
-            `);
-        }
-    });
-}
 
 // ==================== VER PERFIL ====================
 window.verPerfil = async function(servicioId) {
@@ -1461,11 +1565,14 @@ window.verPerfil = async function(servicioId) {
             <p><i class="fab fa-whatsapp"></i> ${escapeHtml(servicio.telefono)}</p>
             ${servicio.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(servicio.descripcion)}</p>` : ''}
             <p><i class="fas fa-calendar"></i> Miembro desde: ${new Date(servicio.created_at).toLocaleDateString()}</p>
-            ${currentUser && currentUser.id === servicio.user_id ? `<button class="btn btn-outline" onclick="abrirEditar('${servicio.id}')" style="margin-top:10px;"><i class="fas fa-edit"></i> Editar Perfil</button>` : ''}
-            ${currentUser ? `<button class="btn btn-outline" onclick="mostrarModalCalificar('${servicio.id}', '${escapeHtml(servicio.nombre)}')" style="margin-top:10px;"><i class="fas fa-star"></i> Calificar este servicio</button>` : ''}
-            <button class="btn btn-primary" onclick="abrirWhatsApp('${servicio.telefono}', '${escapeHtml(servicio.nombre)}')" style="margin-top:10px;width:100%;">
-                <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
-            </button>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:15px;">
+                <button class="btn btn-outline" onclick="centrarMapaEnProfesional('${servicio.id}')"><i class="fas fa-map-marker-alt"></i> Ver en mapa</button>
+                ${currentUser && currentUser.id === servicio.user_id ? `<button class="btn btn-outline" onclick="abrirEditar('${servicio.id}')"><i class="fas fa-edit"></i> Editar Perfil</button>` : ''}
+                ${currentUser ? `<button class="btn btn-outline" onclick="mostrarModalCalificar('${servicio.id}', '${escapeHtml(servicio.nombre)}')"><i class="fas fa-star"></i> Calificar</button>` : ''}
+                <button class="btn btn-primary" onclick="abrirWhatsApp('${servicio.telefono}', '${escapeHtml(servicio.nombre)}')" style="background:#25D366;">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+            </div>
             ${reseñasHtml}
         </div>
     `;
@@ -1590,7 +1697,10 @@ async function cargarProfesionales() {
                 </div>
                 <div class="card-footer">
                     <button class="btn btn-outline" onclick="verPerfil('${s.id}')"><i class="fas fa-user"></i> Ver Perfil</button>
+                    <button class="btn btn-outline" onclick="centrarMapaEnProfesional('${s.id}')"><i class="fas fa-map-marker-alt"></i> Ver mapa</button>
                     <button class="btn btn-primary" style="background:#25D366;" onclick="abrirWhatsApp('${s.telefono}', '${escapeHtml(s.nombre)}')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                </div>
+                <div class="card-footer" style="border-top:1px solid rgba(90,125,154,0.2); margin-top:0;">
                     ${currentUser && currentUser.id === s.user_id ? `<button class="btn btn-outline" onclick="abrirEditar('${s.id}')"><i class="fas fa-edit"></i> Editar</button>` : ''}
                     ${currentUser ? `<button class="btn btn-outline" onclick="mostrarModalCalificar('${s.id}', '${escapeHtml(s.nombre)}')"><i class="fas fa-star"></i> Calificar</button>` : ''}
                 </div>
@@ -1746,7 +1856,17 @@ async function actualizarStatsAdmin() {
     document.getElementById('adminCambiosPendientes').textContent = cambios.count || 0;
 }
 
-// EVENTOS
+// EVENTOS DEL MAPA
+document.getElementById('mapCentroHabana')?.addEventListener('click', () => centrarMapaEnZona('Centro Habana'));
+document.getElementById('mapPlaya')?.addEventListener('click', () => centrarMapaEnZona('Playa'));
+document.getElementById('MapVedado')?.addEventListener('click', () => centrarMapaEnZona('Vedado'));
+document.getElementById('mapSantiago')?.addEventListener('click', () => centrarMapaEnZona('Santiago de Cuba'));
+document.getElementById('mapAll')?.addEventListener('click', () => {
+    if (mapaInstance) mapaInstance.setView([23.1, -82.4], 11);
+    mostrarToast('📍 Mostrando todos los profesionales', 'info');
+});
+
+// EVENTOS GENERALES
 document.getElementById('btnLogin').onclick = () => document.getElementById('modalLogin').style.display = 'flex';
 document.getElementById('btnLogout').onclick = logout;
 document.getElementById('btnCompartir').onclick = () => { generarQR(); document.getElementById('modalCompartir').style.display = 'flex'; };
