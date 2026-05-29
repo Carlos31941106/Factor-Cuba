@@ -124,6 +124,11 @@
             color: white;
         }
         
+        .btn-success {
+            background: linear-gradient(135deg, #2ec76b, #1a7a41);
+            color: white;
+        }
+        
         .hero {
             text-align: center;
             padding: 80px 0 60px;
@@ -670,7 +675,7 @@
         
         .admin-stats {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             margin-bottom: 25px;
         }
@@ -776,6 +781,9 @@
             }
             .filters {
                 flex-direction: column;
+            }
+            .admin-stats {
+                grid-template-columns: repeat(2, 1fr);
             }
             #mapa {
                 height: 300px;
@@ -974,6 +982,53 @@
     </div>
 </div>
 
+<!-- MODAL EDITAR PERFIL -->
+<div id="modalEditar" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-edit"></i> Editar Perfil</h2>
+            <button class="close-modal" id="btnCloseEditar">&times;</button>
+        </div>
+        <form id="editarForm">
+            <input type="hidden" id="editId">
+            <div class="form-group">
+                <label><i class="fas fa-store"></i> Nombre del Negocio</label>
+                <input type="text" id="editNombre" class="form-control">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-tag"></i> Categoría</label>
+                <select id="editCategoria" class="form-control">
+                    <option value="carpinteria">🪵 Carpintería</option>
+                    <option value="construccion">🏗️ Construcción</option>
+                    <option value="electricidad">⚡ Electricidad</option>
+                    <option value="soldadura">⚙️ Soldadura</option>
+                    <option value="reparaciones">🔧 Reparaciones</option>
+                    <option value="transporte">🚚 Transporte</option>
+                    <option value="otros">📦 Otros Servicios</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-map-marker-alt"></i> Zona / Municipio</label>
+                <input type="text" id="editZona" class="form-control">
+            </div>
+            <div class="form-group">
+                <label><i class="fab fa-whatsapp"></i> Teléfono / WhatsApp</label>
+                <input type="tel" id="editTelefono" class="form-control">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-info-circle"></i> Descripción</label>
+                <textarea id="editDescripcion" rows="3" class="form-control"></textarea>
+            </div>
+            <div class="admin-notice">
+                <i class="fas fa-clock"></i> Los cambios serán revisados por un administrador antes de ser publicados.
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px;">
+                <i class="fas fa-paper-plane"></i> Enviar cambios para revisión
+            </button>
+        </form>
+    </div>
+</div>
+
 <div id="modalPerfil" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -1032,7 +1087,7 @@
 </div>
 
 <div id="modalAdmin" class="modal">
-    <div class="modal-content" style="max-width: 800px;">
+    <div class="modal-content" style="max-width: 900px;">
         <div class="modal-header">
             <h2><i class="fas fa-crown"></i> Panel de Administrador</h2>
             <button class="close-modal" id="btnCloseAdmin">&times;</button>
@@ -1045,13 +1100,15 @@
         <div id="adminPanelSection" style="display: none;">
             <div class="admin-stats">
                 <div class="admin-stat"><div class="stat-number" id="adminTotal">0</div><div>Total</div></div>
-                <div class="admin-stat"><div class="stat-number" id="adminPendientes">0</div><div>Pendientes</div></div>
+                <div class="admin-stat"><div class="stat-number" id="adminPendientes">0</div><div>Servicios Pendientes</div></div>
                 <div class="admin-stat"><div class="stat-number" id="adminAprobados">0</div><div>Aprobados</div></div>
+                <div class="admin-stat"><div class="stat-number" id="adminCambiosPendientes">0</div><div>Cambios Pendientes</div></div>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
-                <button class="btn btn-outline" id="adminTabPendientes">⏳ Pendientes</button>
+                <button class="btn btn-outline" id="adminTabPendientes">⏳ Servicios Pendientes</button>
                 <button class="btn btn-outline" id="adminTabAprobados">✅ Aprobados</button>
                 <button class="btn btn-outline" id="adminTabTodos">📋 Todos</button>
+                <button class="btn btn-outline" id="adminTabCambios">🔄 Cambios Pendientes</button>
             </div>
             <div id="adminContent"></div>
         </div>
@@ -1125,6 +1182,213 @@ async function subirImagen(file, userId) {
     }
 }
 
+// ==================== WHATSAPP ====================
+function abrirWhatsApp(telefono, nombre) {
+    let numeroLimpio = telefono.replace(/[^0-9]/g, '');
+    if (!numeroLimpio.startsWith('53')) {
+        numeroLimpio = '53' + numeroLimpio;
+    }
+    const numeroFormateado = '+' + numeroLimpio;
+    const mensaje = encodeURIComponent(`Hola, vi tu perfil "${nombre}" en Factor Cuba y me interesa tu servicio.`);
+    const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (esMovil) {
+        window.location.href = `whatsapp://send?phone=${numeroFormateado}&text=${mensaje}`;
+    } else {
+        window.open(`https://web.whatsapp.com/send?phone=${numeroFormateado}&text=${mensaje}`);
+    }
+}
+
+// ==================== EDITAR PERFIL ====================
+window.abrirEditar = function(servicioId) {
+    const servicio = todosLosServicios.find(s => s.id === servicioId);
+    if (!servicio) return;
+    
+    document.getElementById('editId').value = servicio.id;
+    document.getElementById('editNombre').value = servicio.nombre || '';
+    document.getElementById('editCategoria').value = servicio.categoria || '';
+    document.getElementById('editZona').value = servicio.zona || '';
+    document.getElementById('editTelefono').value = servicio.telefono || '';
+    document.getElementById('editDescripcion').value = servicio.descripcion || '';
+    
+    document.getElementById('modalEditar').style.display = 'flex';
+};
+
+document.getElementById('editarForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const id = document.getElementById('editId').value;
+    const servicioOriginal = todosLosServicios.find(s => s.id === id);
+    if (!servicioOriginal) return;
+    
+    const nuevoNombre = document.getElementById('editNombre').value.trim();
+    const nuevaCategoria = document.getElementById('editCategoria').value;
+    const nuevaZona = document.getElementById('editZona').value.trim();
+    const nuevoTelefono = document.getElementById('editTelefono').value.trim();
+    const nuevaDescripcion = document.getElementById('editDescripcion').value.trim();
+    
+    // Guardar cambios pendientes
+    const cambios = [];
+    if (nuevoNombre !== servicioOriginal.nombre) {
+        cambios.push({ campo: 'nombre', valor_viejo: servicioOriginal.nombre, valor_nuevo: nuevoNombre });
+    }
+    if (nuevaCategoria !== servicioOriginal.categoria) {
+        cambios.push({ campo: 'categoria', valor_viejo: servicioOriginal.categoria, valor_nuevo: nuevaCategoria });
+    }
+    if (nuevaZona !== servicioOriginal.zona) {
+        cambios.push({ campo: 'zona', valor_viejo: servicioOriginal.zona, valor_nuevo: nuevaZona });
+    }
+    if (nuevoTelefono !== servicioOriginal.telefono) {
+        cambios.push({ campo: 'telefono', valor_viejo: servicioOriginal.telefono, valor_nuevo: nuevoTelefono });
+    }
+    if (nuevaDescripcion !== servicioOriginal.descripcion) {
+        cambios.push({ campo: 'descripcion', valor_viejo: servicioOriginal.descripcion, valor_nuevo: nuevaDescripcion });
+    }
+    
+    if (cambios.length === 0) {
+        mostrarToast('No se detectaron cambios', 'info');
+        document.getElementById('modalEditar').style.display = 'none';
+        return;
+    }
+    
+    try {
+        for (const cambio of cambios) {
+            const { error } = await supabase.from('cambios_pendientes').insert([{
+                servicio_id: id,
+                usuario_id: currentUser.id,
+                campo: cambio.campo,
+                valor_viejo: cambio.valor_viejo,
+                valor_nuevo: cambio.valor_nuevo,
+                estado: 'pendiente'
+            }]);
+            if (error) throw error;
+        }
+        
+        mostrarToast('✅ Cambios enviados para revisión. Serán aprobados por un administrador.', 'success');
+        document.getElementById('modalEditar').style.display = 'none';
+        
+    } catch (err) {
+        mostrarToast('Error: ' + err.message, 'error');
+    }
+});
+
+// ==================== ADMIN - APROBAR CAMBIOS ====================
+async function cargarAdminCambios() {
+    const content = document.getElementById('adminContent');
+    content.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-pulse"></i></div>';
+    
+    const { data, error } = await supabase
+        .from('cambios_pendientes')
+        .select('*')
+        .eq('estado', 'pendiente')
+        .order('created_at', { ascending: false });
+    
+    if (error) {
+        content.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
+        return;
+    }
+    
+    if (!data || data.length === 0) {
+        content.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay cambios pendientes de aprobación</div>';
+        return;
+    }
+    
+    // Agrupar cambios por servicio_id
+    const cambiosPorServicio = {};
+    data.forEach(c => {
+        if (!cambiosPorServicio[c.servicio_id]) cambiosPorServicio[c.servicio_id] = [];
+        cambiosPorServicio[c.servicio_id].push(c);
+    });
+    
+    let html = '<div style="display:flex;flex-direction:column;gap:15px;">';
+    
+    for (const [servicioId, cambios] of Object.entries(cambiosPorServicio)) {
+        const servicio = todosLosServicios.find(s => s.id === servicioId);
+        if (!servicio) continue;
+        
+        html += `
+            <div class="service-item service-pendiente">
+                <div class="service-header">
+                    <div>
+                        <strong>${escapeHtml(servicio.nombre)}</strong>
+                        <div style="font-size:12px; color:#5a6e7a;">Solicitó cambios</div>
+                    </div>
+                    <div class="service-actions">
+                        <button class="btn btn-success btn-sm" onclick="aprobarTodosLosCambios('${servicioId}')">✅ Aprobar todos</button>
+                        <button class="btn btn-danger btn-sm" onclick="rechazarTodosLosCambios('${servicioId}')">❌ Rechazar todos</button>
+                    </div>
+                </div>
+                <div class="service-details">
+                    <strong>Cambios solicitados:</strong>
+                    <ul style="margin-top:5px; margin-left:20px;">
+                        ${cambios.map(c => `<li><strong>${c.campo}:</strong> "${escapeHtml(c.valor_viejo)}" → "${escapeHtml(c.valor_nuevo)}"</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+    }
+    html += '</div>';
+    content.innerHTML = html;
+}
+
+window.aprobarTodosLosCambios = async function(servicioId) {
+    if (!confirm('¿Aprobar todos los cambios para este servicio?')) return;
+    
+    // Obtener los cambios pendientes
+    const { data: cambios } = await supabase
+        .from('cambios_pendientes')
+        .select('*')
+        .eq('servicio_id', servicioId)
+        .eq('estado', 'pendiente');
+    
+    if (!cambios || cambios.length === 0) return;
+    
+    // Aplicar cambios a oferentes
+    const updates = {};
+    cambios.forEach(c => {
+        updates[c.campo] = c.valor_nuevo;
+    });
+    
+    const { error: updateError } = await supabase
+        .from('oferentes')
+        .update(updates)
+        .eq('id', servicioId);
+    
+    if (updateError) {
+        mostrarToast('Error al aplicar cambios: ' + updateError.message, 'error');
+        return;
+    }
+    
+    // Marcar cambios como aprobados
+    for (const c of cambios) {
+        await supabase.from('cambios_pendientes').update({ estado: 'aprobado' }).eq('id', c.id);
+    }
+    
+    mostrarToast('✅ Cambios aprobados y aplicados', 'success');
+    await cargarProfesionales();
+    await cargarAdminCambios();
+    await actualizarStatsAdmin();
+};
+
+window.rechazarTodosLosCambios = async function(servicioId) {
+    if (!confirm('¿Rechazar todos los cambios para este servicio?')) return;
+    
+    const { error } = await supabase
+        .from('cambios_pendientes')
+        .update({ estado: 'rechazado' })
+        .eq('servicio_id', servicioId)
+        .eq('estado', 'pendiente');
+    
+    if (error) {
+        mostrarToast('Error: ' + error.message, 'error');
+        return;
+    }
+    
+    mostrarToast('❌ Cambios rechazados', 'info');
+    await cargarAdminCambios();
+    await actualizarStatsAdmin();
+};
+
+// ==================== MAPA ====================
 function actualizarMapa() {
     if (!mapaInstance) {
         mapaInstance = L.map('mapa').setView([23.1, -82.4], 11);
@@ -1150,37 +1414,7 @@ function actualizarMapa() {
     });
 }
 
-// ==================== FUNCIÓN WHATSAPP CON +53 AUTOMÁTICO ====================
-function abrirWhatsApp(telefono, nombre) {
-    // 1. Limpiar: eliminar todo lo que no sean números
-    let numeroLimpio = telefono.replace(/[^0-9]/g, '');
-    
-    // 2. Si el número NO empieza con 53 (código de Cuba), lo agregamos automáticamente
-    if (!numeroLimpio.startsWith('53')) {
-        numeroLimpio = '53' + numeroLimpio;
-    }
-    
-    // 3. Formato final con +
-    const numeroFormateado = '+' + numeroLimpio;
-    
-    // 4. Mensaje personalizado
-    const mensaje = encodeURIComponent(`Hola, vi tu perfil "${nombre}" en Factor Cuba y me interesa tu servicio.`);
-    
-    // 5. Detectar dispositivo
-    const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (esMovil) {
-        // En móvil: abrir directamente la app
-        window.location.href = `whatsapp://send?phone=${numeroFormateado}&text=${mensaje}`;
-        setTimeout(() => {
-            mostrarToast(`📱 Contactando a: ${numeroFormateado}`, 'info');
-        }, 500);
-    } else {
-        // En computadora: usar WhatsApp Web
-        window.open(`https://web.whatsapp.com/send?phone=${numeroFormateado}&text=${mensaje}`);
-    }
-}
-
+// ==================== VER PERFIL ====================
 window.verPerfil = async function(servicioId) {
     const servicio = todosLosServicios.find(s => s.id === servicioId);
     if (!servicio) return;
@@ -1227,6 +1461,7 @@ window.verPerfil = async function(servicioId) {
             <p><i class="fab fa-whatsapp"></i> ${escapeHtml(servicio.telefono)}</p>
             ${servicio.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(servicio.descripcion)}</p>` : ''}
             <p><i class="fas fa-calendar"></i> Miembro desde: ${new Date(servicio.created_at).toLocaleDateString()}</p>
+            ${currentUser && currentUser.id === servicio.user_id ? `<button class="btn btn-outline" onclick="abrirEditar('${servicio.id}')" style="margin-top:10px;"><i class="fas fa-edit"></i> Editar Perfil</button>` : ''}
             ${currentUser ? `<button class="btn btn-outline" onclick="mostrarModalCalificar('${servicio.id}', '${escapeHtml(servicio.nombre)}')" style="margin-top:10px;"><i class="fas fa-star"></i> Calificar este servicio</button>` : ''}
             <button class="btn btn-primary" onclick="abrirWhatsApp('${servicio.telefono}', '${escapeHtml(servicio.nombre)}')" style="margin-top:10px;width:100%;">
                 <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
@@ -1237,6 +1472,7 @@ window.verPerfil = async function(servicioId) {
     modal.style.display = 'flex';
 };
 
+// ==================== CALIFICACIONES ====================
 window.mostrarModalCalificar = async function(servicioId, servicioNombre) {
     if (!currentUser) {
         mostrarToast('Debes iniciar sesión para calificar', 'error');
@@ -1301,6 +1537,7 @@ async function enviarCalificacion() {
     }
 }
 
+// ==================== CARGAR PROFESIONALES ====================
 async function cargarProfesionales() {
     try {
         const { data, error } = await supabase.from('oferentes').select('*').order('created_at', { ascending: false });
@@ -1354,6 +1591,7 @@ async function cargarProfesionales() {
                 <div class="card-footer">
                     <button class="btn btn-outline" onclick="verPerfil('${s.id}')"><i class="fas fa-user"></i> Ver Perfil</button>
                     <button class="btn btn-primary" style="background:#25D366;" onclick="abrirWhatsApp('${s.telefono}', '${escapeHtml(s.nombre)}')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    ${currentUser && currentUser.id === s.user_id ? `<button class="btn btn-outline" onclick="abrirEditar('${s.id}')"><i class="fas fa-edit"></i> Editar</button>` : ''}
                     ${currentUser ? `<button class="btn btn-outline" onclick="mostrarModalCalificar('${s.id}', '${escapeHtml(s.nombre)}')"><i class="fas fa-star"></i> Calificar</button>` : ''}
                 </div>
             </div>
@@ -1362,6 +1600,7 @@ async function cargarProfesionales() {
     } catch (err) { mostrarToast('Error al cargar profesionales', 'error'); }
 }
 
+// ==================== PUBLICAR SERVICIO ====================
 async function publicarServicio() {
     const nombre = document.getElementById('pubNombre').value.trim();
     const categoria = document.getElementById('pubCategoria').value;
@@ -1394,6 +1633,7 @@ document.getElementById('fotoPerfil')?.addEventListener('change', (e) => {
 
 function generarQR() { const url = window.location.href; document.getElementById('shareUrl').value = url; document.getElementById('qrContainer').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}" style="margin:0 auto;border-radius:16px;background:white;padding:10px;">`; }
 
+// ==================== AUTENTICACIÓN ====================
 let loginMode = 'login';
 async function manejarAuth() {
     const email = document.getElementById('loginEmail').value.trim();
@@ -1457,6 +1697,7 @@ function actualizarUI() {
     }
 }
 
+// ==================== ADMIN ====================
 function verificarAdminPassword() {
     const password = document.getElementById('adminPasswordInput').value;
     if (password === ADMIN_PASSWORD) {
@@ -1476,29 +1717,33 @@ function checkAdminSession() {
 window.aprobarServicio = async function(id) { if (!confirm('¿Aprobar?')) return; await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id); mostrarToast('✅ Aprobado', 'success'); cargarAdminPendientes(); cargarProfesionales(); actualizarStatsAdmin(); };
 window.rechazarServicio = async function(id) { if (!confirm('¿Rechazar?')) return; await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id); mostrarToast('❌ Rechazado', 'info'); cargarAdminPendientes(); cargarProfesionales(); actualizarStatsAdmin(); };
 window.eliminarServicio = async function(id) { if (!confirm('¿Eliminar?')) return; await supabase.from('oferentes').delete().eq('id', id); mostrarToast('🗑️ Eliminado', 'success'); cargarAdminActual(); cargarProfesionales(); actualizarStatsAdmin(); };
-window.verPerfilAdmin = async function(id) { const s = todosLosServicios.find(s => s.id === id); if(s) alert(`Perfil: ${s.nombre}\nTeléfono: ${s.telefono}\nZona: ${s.zona}\nDescripción: ${s.descripcion || 'Sin descripción'}`); };
+
 let adminTabActual = 'pendientes';
-async function cargarAdminActual() { if (adminTabActual === 'pendientes') await cargarAdminPendientes(); else if (adminTabActual === 'aprobados') await cargarAdminAprobados(); else await cargarAdminTodos(); }
+async function cargarAdminActual() { if (adminTabActual === 'pendientes') await cargarAdminPendientes(); else if (adminTabActual === 'aprobados') await cargarAdminAprobados(); else if (adminTabActual === 'cambios') await cargarAdminCambios(); else await cargarAdminTodos(); }
+
 async function cargarAdminPendientes() {
     adminTabActual = 'pendientes'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
     if (!data || data.length === 0) { content.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios pendientes</div>'; return; }
-    content.innerHTML = data.map(s => `<div class="service-item service-pendiente"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-primary btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button><button class="btn btn-outline btn-sm" onclick="verPerfilAdmin('${s.id}')">👤 Ver Perfil</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('');
+    content.innerHTML = data.map(s => `<div class="service-item service-pendiente"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('');
 }
 async function cargarAdminAprobados() {
     adminTabActual = 'aprobados'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*').eq('estado', 'aprobado');
-    content.innerHTML = data?.map(s => `<div class="service-item service-aprobado"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button><button class="btn btn-outline btn-sm" onclick="verPerfilAdmin('${s.id}')">👤 Ver Perfil</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('') || '<p>No hay servicios aprobados</p>';
+    content.innerHTML = data?.map(s => `<div class="service-item service-aprobado"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('') || '<p>No hay servicios aprobados</p>';
 }
 async function cargarAdminTodos() {
     adminTabActual = 'todos'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*');
-    content.innerHTML = data?.map(s => `<div class="service-item ${s.estado === 'aprobado' ? 'service-aprobado' : s.estado === 'pendiente' ? 'service-pendiente' : 'service-rechazado'}"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${s.estado} - ${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions">${s.estado === 'pendiente' ? `<button class="btn btn-primary btn-sm" onclick="aprobarServicio('${s.id}')">Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">Rechazar</button>` : ''}<button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button><button class="btn btn-outline btn-sm" onclick="verPerfilAdmin('${s.id}')">👤 Ver Perfil</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('') || '<p>No hay servicios</p>';
+    content.innerHTML = data?.map(s => `<div class="service-item ${s.estado === 'aprobado' ? 'service-aprobado' : s.estado === 'pendiente' ? 'service-pendiente' : 'service-rechazado'}"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${s.estado} - ${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions">${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">Rechazar</button>` : ''}<button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('') || '<p>No hay servicios</p>';
 }
+
 async function actualizarStatsAdmin() {
     const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
     const pendientes = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
     const aprobados = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
+    const cambios = await supabase.from('cambios_pendientes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
     document.getElementById('adminTotal').textContent = total.count || 0;
     document.getElementById('adminPendientes').textContent = pendientes.count || 0;
     document.getElementById('adminAprobados').textContent = aprobados.count || 0;
+    document.getElementById('adminCambiosPendientes').textContent = cambios.count || 0;
 }
 
 // EVENTOS
@@ -1512,6 +1757,7 @@ document.getElementById('btnCloseLogin').onclick = () => document.getElementById
 document.getElementById('btnCloseCompartir').onclick = () => document.getElementById('modalCompartir').style.display = 'none';
 document.getElementById('btnClosePerfil').onclick = () => document.getElementById('modalPerfil').style.display = 'none';
 document.getElementById('btnCloseCalificar').onclick = () => document.getElementById('modalCalificar').style.display = 'none';
+document.getElementById('btnCloseEditar').onclick = () => document.getElementById('modalEditar').style.display = 'none';
 document.getElementById('btnEnviarCalificacion').onclick = enviarCalificacion;
 document.getElementById('btnLoginSubmit').onclick = manejarAuth;
 document.getElementById('btnBuscar').onclick = cargarProfesionales;
@@ -1539,6 +1785,7 @@ document.getElementById('btnCloseAdmin').onclick = () => document.getElementById
 document.getElementById('adminTabPendientes').onclick = cargarAdminPendientes;
 document.getElementById('adminTabAprobados').onclick = cargarAdminAprobados;
 document.getElementById('adminTabTodos').onclick = cargarAdminTodos;
+document.getElementById('adminTabCambios').onclick = cargarAdminCambios;
 document.getElementById('switchAuthMode').onclick = (e) => { e.preventDefault(); if (loginMode === 'login') { loginMode = 'register'; document.getElementById('modalLoginTitle').innerHTML = '<i class="fas fa-user-plus"></i> Crear Cuenta'; document.getElementById('btnLoginSubmit').innerHTML = '<i class="fas fa-user-plus"></i> Registrarse'; document.getElementById('switchAuthMode').innerHTML = '¿Ya tienes cuenta? Inicia sesión'; } else { loginMode = 'login'; document.getElementById('modalLoginTitle').innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión'; document.getElementById('btnLoginSubmit').innerHTML = '<i class="fas fa-arrow-right"></i> Ingresar'; document.getElementById('switchAuthMode').innerHTML = '¿No tienes cuenta? Regístrate'; } };
 window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 
