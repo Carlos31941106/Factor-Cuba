@@ -352,12 +352,30 @@
             background: #e2e8f0;
         }
         
+        /* Mapa pequeño dentro del formulario */
+        .map-small {
+            height: 250px;
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 10px;
+            border: 1px solid rgba(90, 125, 154, 0.3);
+        }
+        
         .map-controls {
             margin: 10px 0;
             display: flex;
             justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
+        }
+        
+        .location-info {
+            background: rgba(90, 125, 154, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 8px;
         }
         
         .filters {
@@ -517,7 +535,7 @@
             background: white;
             border-radius: 24px;
             padding: 35px;
-            max-width: 550px;
+            max-width: 600px;
             width: 90%;
             max-height: 85vh;
             overflow-y: auto;
@@ -778,18 +796,6 @@
             font-size: 12px;
         }
         
-        .map-coord-info {
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
-        
         @media (max-width: 768px) {
             .container {
                 padding: 0 15px;
@@ -808,6 +814,9 @@
             }
             #mapa {
                 height: 300px;
+            }
+            .map-small {
+                height: 200px;
             }
         }
         
@@ -892,7 +901,7 @@
         <div style="text-align: center; padding: 40px; width: 100%;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>
     </div>
     
-    <!-- MAPA MEJORADO -->
+    <!-- MAPA PRINCIPAL -->
     <div class="map-container">
         <div id="mapa"></div>
     </div>
@@ -961,6 +970,7 @@
     </div>
 </div>
 
+<!-- MODAL PUBLICAR CON MAPA DE UBICACIÓN -->
 <div id="modalPublicar" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -988,6 +998,15 @@
             <input type="text" id="pubZona" placeholder="Ej: Centro Habana, Playa, Vedado">
         </div>
         <div class="form-group">
+            <label><i class="fas fa-map-pin"></i> Ubicación exacta en el mapa *</label>
+            <div id="ubicacionMapa" class="map-small"></div>
+            <div class="location-info" id="ubicacionInfo">
+                <i class="fas fa-info-circle"></i> Haz clic en el mapa para marcar la ubicación de tu negocio
+            </div>
+            <input type="hidden" id="pubLatitud" value="">
+            <input type="hidden" id="pubLongitud" value="">
+        </div>
+        <div class="form-group">
             <label><i class="fab fa-whatsapp"></i> Teléfono / WhatsApp *</label>
             <input type="tel" id="pubTelefono" placeholder="+53 5XXXXXXXX">
         </div>
@@ -1001,7 +1020,7 @@
         </div>
         <div class="form-group">
             <label><i class="fas fa-info-circle"></i> Descripción</label>
-            <textarea id="pubDescripcion" rows="4" placeholder="Describe tu experiencia..."></textarea>
+            <textarea id="pubDescripcion" rows="3" placeholder="Describe tu experiencia..."></textarea>
         </div>
         <div class="admin-notice">
             <i class="fas fa-shield-alt"></i> Los administradores pueden verificar tu perfil para garantizar la calidad del servicio.
@@ -1156,12 +1175,13 @@ let adminAuthenticated = false;
 let currentUser = null;
 let todosLosServicios = [];
 let mapaInstance = null;
+let mapaUbicacionInstance = null;
+let marcadorUbicacion = null;
 let servicioActualCalificar = null;
 let puntuacionSeleccionada = 0;
 
-// ==================== COORDENADAS DE ZONAS DE CUBA (ACTUALIZADO) ====================
+// ==================== COORDENADAS DE ZONAS DE CUBA ====================
 const ZONAS_COORDS = {
-    // La Habana
     'Centro Habana': [23.1365, -82.3810],
     'Playa': [23.0949, -82.4485],
     '10 de Octubre': [23.0833, -82.3500],
@@ -1175,7 +1195,6 @@ const ZONAS_COORDS = {
     'Guanabacoa': [23.1167, -82.3000],
     'San Miguel del Padrón': [23.1000, -82.3167],
     'Cotorro': [23.0333, -82.3167],
-    // Otras provincias
     'Santiago de Cuba': [20.0247, -75.8218],
     'Camagüey': [21.3844, -77.9075],
     'Holguín': [20.8882, -76.2631],
@@ -1254,7 +1273,36 @@ function abrirWhatsApp(telefono, nombre) {
     }
 }
 
-// ==================== MAPA MEJORADO ====================
+// ==================== MAPA DE UBICACIÓN (para seleccionar) ====================
+function iniciarMapaUbicacion() {
+    if (mapaUbicacionInstance) {
+        mapaUbicacionInstance.remove();
+    }
+    
+    mapaUbicacionInstance = L.map('ubicacionMapa').setView([23.1, -82.4], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(mapaUbicacionInstance);
+    
+    mapaUbicacionInstance.on('click', function(e) {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+        
+        if (marcadorUbicacion) {
+            mapaUbicacionInstance.removeLayer(marcadorUbicacion);
+        }
+        
+        marcadorUbicacion = L.marker([lat, lng]).addTo(mapaUbicacionInstance);
+        
+        document.getElementById('pubLatitud').value = lat;
+        document.getElementById('pubLongitud').value = lng;
+        
+        document.getElementById('ubicacionInfo').innerHTML = `<i class="fas fa-check-circle" style="color:#2ec76b;"></i> Ubicación marcada: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        document.getElementById('ubicacionInfo').style.background = 'rgba(46,199,107,0.1)';
+    });
+}
+
+// ==================== MAPA PRINCIPAL ====================
 function centrarMapaEnZona(zona) {
     const coords = ZONAS_COORDS[zona];
     if (coords && mapaInstance) {
@@ -1283,8 +1331,7 @@ function actualizarMapa() {
     if (!mapaInstance) {
         mapaInstance = L.map('mapa').setView([23.1, -82.4], 11);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 19
+            attribution: '© OpenStreetMap'
         }).addTo(mapaInstance);
     } else {
         mapaInstance.eachLayer(layer => {
@@ -1293,7 +1340,6 @@ function actualizarMapa() {
     }
     
     const serviciosMostrar = adminAuthenticated ? todosLosServicios : todosLosServicios.filter(s => s.estado === 'aprobado');
-    let marcadores = [];
     
     serviciosMostrar.forEach(servicio => {
         let coords = null;
@@ -1304,7 +1350,6 @@ function actualizarMapa() {
         }
         
         if (coords) {
-            const iconoColor = servicio.estado === 'aprobado' ? '#2ec76b' : '#e8c96a';
             const marker = L.marker(coords).addTo(mapaInstance);
             marker.bindPopup(`
                 <div style="font-family:'Inter',sans-serif;text-align:center;min-width:180px;">
@@ -1321,16 +1366,8 @@ function actualizarMapa() {
                     </div>
                 </div>
             `);
-            marcadores.push(marker);
         }
     });
-    
-    // Agrupar marcadores si hay muchos
-    if (marcadores.length > 20 && L.markerClusterGroup) {
-        // Opcional: se puede agregar cluster de marcadores si se desea
-    }
-    
-    return marcadores;
 }
 
 // ==================== EDITAR PERFIL ====================
@@ -1718,12 +1755,22 @@ async function publicarServicio() {
     const telefono = document.getElementById('pubTelefono').value.trim();
     const descripcion = document.getElementById('pubDescripcion').value.trim();
     const fotoFile = document.getElementById('fotoPerfil').files[0];
+    const latitud = document.getElementById('pubLatitud').value;
+    const longitud = document.getElementById('pubLongitud').value;
+    
     if (!nombre || !zona || !telefono) { mostrarToast('Completa nombre, zona y teléfono', 'error'); return; }
+    if (!latitud || !longitud) { mostrarToast('Haz clic en el mapa para marcar la ubicación de tu negocio', 'error'); return; }
+    
     const categoriaTexto = document.getElementById('pubCategoria').options[document.getElementById('pubCategoria').selectedIndex]?.text || categoria;
     try {
         let fotoUrl = null;
         if (fotoFile) { mostrarToast('Subiendo imagen...', 'info'); fotoUrl = await subirImagen(fotoFile, currentUser.id); }
-        const { error } = await supabase.from('oferentes').insert([{ nombre, categoria, zona, telefono, descripcion, foto: fotoUrl, especialidad: categoriaTexto, estado: 'pendiente', user_id: currentUser?.id, created_at: new Date().toISOString() }]);
+        const { error } = await supabase.from('oferentes').insert([{ 
+            nombre, categoria, zona, telefono, descripcion, foto: fotoUrl, 
+            especialidad: categoriaTexto, estado: 'pendiente', 
+            latitud: parseFloat(latitud), longitud: parseFloat(longitud),
+            user_id: currentUser?.id, created_at: new Date().toISOString() 
+        }]);
         if (error) throw error;
         mostrarToast('✅ Servicio publicado. Espera aprobación.', 'success');
         document.getElementById('modalPublicar').style.display = 'none';
@@ -1732,6 +1779,14 @@ async function publicarServicio() {
         document.getElementById('pubTelefono').value = '';
         document.getElementById('pubDescripcion').value = '';
         document.getElementById('previewFoto').innerHTML = '';
+        document.getElementById('pubLatitud').value = '';
+        document.getElementById('pubLongitud').value = '';
+        if (marcadorUbicacion) {
+            mapaUbicacionInstance.removeLayer(marcadorUbicacion);
+            marcadorUbicacion = null;
+        }
+        document.getElementById('ubicacionInfo').innerHTML = '<i class="fas fa-info-circle"></i> Haz clic en el mapa para marcar la ubicación de tu negocio';
+        document.getElementById('ubicacionInfo').style.background = '';
         await cargarProfesionales();
     } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 }
@@ -1870,7 +1925,11 @@ document.getElementById('mapAll')?.addEventListener('click', () => {
 document.getElementById('btnLogin').onclick = () => document.getElementById('modalLogin').style.display = 'flex';
 document.getElementById('btnLogout').onclick = logout;
 document.getElementById('btnCompartir').onclick = () => { generarQR(); document.getElementById('modalCompartir').style.display = 'flex'; };
-document.getElementById('btnPublicar').onclick = () => { if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); document.getElementById('modalLogin').style.display = 'flex'; return; } document.getElementById('modalPublicar').style.display = 'flex'; };
+document.getElementById('btnPublicar').onclick = () => { 
+    if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); document.getElementById('modalLogin').style.display = 'flex'; return; } 
+    document.getElementById('modalPublicar').style.display = 'flex';
+    setTimeout(() => iniciarMapaUbicacion(), 300);
+};
 document.getElementById('btnGuardarServicio').onclick = publicarServicio;
 document.getElementById('btnClosePublicar').onclick = () => document.getElementById('modalPublicar').style.display = 'none';
 document.getElementById('btnCloseLogin').onclick = () => document.getElementById('modalLogin').style.display = 'none';
