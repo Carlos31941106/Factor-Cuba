@@ -253,6 +253,28 @@
         .foto-preview { margin-top: 12px; }
         .foto-preview img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); }
         
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .admin-stat {
+            background: var(--primary-light);
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+        .service-item {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid;
+        }
+        .service-pendiente { border-left-color: var(--warning); }
+        .service-aprobado { border-left-color: var(--success); }
+        
         .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg-primary); border-left: 4px solid; padding: 14px 20px; border-radius: var(--radius-md); z-index: 3000; animation: slideIn 0.3s ease; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-xl); max-width: 350px; }
         .toast-success { border-left-color: var(--success); }
         .toast-error { border-left-color: var(--error); }
@@ -273,6 +295,7 @@
             .row-2cols { grid-template-columns: 1fr; }
             .stats-grid { gap: 16px; }
             .stat-number { font-size: 32px; }
+            .admin-stats { grid-template-columns: 1fr; }
         }
         
         ::-webkit-scrollbar { width: 8px; }
@@ -580,7 +603,36 @@ async function cargarProfesionales() {
 window.verPerfil = async function(servicioId) {
     const servicio = todosLosServicios.find(s => s.id === servicioId);
     if (!servicio) return;
-    mostrarToast(`Perfil de ${servicio.nombre} - Función en desarrollo`, 'info');
+    
+    let calificaciones = '';
+    const { data: reseñas } = await supabase.from('calificaciones').select('*').eq('servicio_id', servicioId);
+    if (reseñas && reseñas.length > 0) {
+        calificaciones = '<div style="margin-top:15px;"><h4>Reseñas:</h4>' + reseñas.map(r => `<div style="background:#f8fafc;padding:10px;margin-bottom:8px;border-radius:8px;">⭐ ${r.puntuacion} estrellas<br>${r.comentario ? `"${escapeHtml(r.comentario)}"` : ''}<br><small>${new Date(r.created_at).toLocaleDateString()}</small></div>`).join('') + '</div>';
+    } else {
+        calificaciones = '<p style="margin-top:15px;">📝 Aún no hay reseñas</p>';
+    }
+    
+    const contenido = `
+        <div style="text-align:center;">
+            <div style="width:100px;height:100px;background:linear-gradient(135deg,#2c5f8a,#5A7D9A);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:48px;color:white;overflow:hidden;">
+                ${servicio.foto ? `<img src="${servicio.foto}" style="width:100%;height:100%;object-fit:cover;">` : `<i class="fas fa-user-circle"></i>`}
+            </div>
+            <h3>${escapeHtml(servicio.nombre)}</h3>
+            <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(servicio.zona)}</p>
+            <p><i class="fab fa-whatsapp"></i> ${escapeHtml(servicio.telefono)}</p>
+            ${servicio.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(servicio.descripcion)}</p>` : ''}
+            <div style="margin-top:15px;">
+                <button class="btn btn-primary" onclick="window.open('https://wa.me/${servicio.telefono.replace(/[^0-9]/g, '')}')" style="background:#25D366;">💬 Contactar por WhatsApp</button>
+            </div>
+            ${calificaciones}
+        </div>
+    `;
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'flex';
+    modal.innerHTML = `<div class="modal-content" style="max-width:500px;"><div class="modal-header"><h2>Perfil Profesional</h2><button class="close-modal" onclick="this.closest('.modal').remove()">&times;</button></div>${contenido}</div>`;
+    document.body.appendChild(modal);
 };
 
 // ==================== PUBLICAR SERVICIO ====================
@@ -700,44 +752,90 @@ function actualizarUI() {
 
 // ==================== ADMIN ====================
 document.getElementById('btnAdmin').onclick = () => {
+    if (!currentUser) {
+        mostrarToast('Debes iniciar sesión primero', 'error');
+        return;
+    }
+    if (currentUser.email !== 'ch361892@gmail.com') {
+        mostrarToast('No tienes permisos de administrador', 'error');
+        return;
+    }
     const password = prompt('🔒 Ingresa la contraseña de administrador:');
     if (password === ADMIN_PASSWORD) {
         adminAuthenticated = true;
         sessionStorage.setItem('adminAutenticado', 'true');
         mostrarToast('✅ Acceso de administrador concedido', 'success');
-        document.getElementById('modalAdmin').style.display = 'flex';
-        actualizarStatsAdmin();
-        cargarAdminPendientes();
-        actualizarUI();
+        cargarAdminPanel();
     } else if (password !== null) {
         mostrarToast('❌ Contraseña incorrecta', 'error');
     }
 };
 
-async function actualizarStatsAdmin() {
+async function cargarAdminPanel() {
+    const modal = document.getElementById('modalAdmin');
+    const content = document.getElementById('adminContent');
+    
+    modal.style.display = 'flex';
+    content.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>';
+    
+    // Cargar estadísticas
     const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
-    const pendientes = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
-    const aprobados = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
-    document.getElementById('adminTotal') ? document.getElementById('adminTotal').textContent = total.count || 0 : null;
-    document.getElementById('adminPendientes') ? document.getElementById('adminPendientes').textContent = pendientes.count || 0 : null;
-    document.getElementById('adminAprobados') ? document.getElementById('adminAprobados').textContent = aprobados.count || 0 : null;
+    const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+    const aprobadosCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
+    
+    // Cargar servicios pendientes
+    const { data: serviciosPendientes } = await supabase.from('oferentes').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
+    
+    let html = `
+        <div class="admin-stats">
+            <div class="admin-stat"><div class="stat-number">${total.count || 0}</div><div>Total</div></div>
+            <div class="admin-stat"><div class="stat-number" style="color:#f59e0b;">${pendientesCount.count || 0}</div><div>Pendientes</div></div>
+            <div class="admin-stat"><div class="stat-number" style="color:#10b981;">${aprobadosCount.count || 0}</div><div>Aprobados</div></div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+            <button class="btn btn-outline" id="adminTabPendientes" style="background:#f59e0b; color:white;">⏳ Pendientes</button>
+            <button class="btn btn-outline" id="adminTabAprobados">✅ Aprobados</button>
+            <button class="btn btn-outline" id="adminTabTodos">📋 Todos</button>
+        </div>
+        <div id="adminLista"></div>
+    `;
+    content.innerHTML = html;
+    
+    // Cargar pendientes por defecto
+    cargarAdminLista('pendiente');
+    
+    document.getElementById('adminTabPendientes').onclick = () => cargarAdminLista('pendiente');
+    document.getElementById('adminTabAprobados').onclick = () => cargarAdminLista('aprobado');
+    document.getElementById('adminTabTodos').onclick = () => cargarAdminLista('todos');
 }
 
-async function cargarAdminPendientes() {
-    const content = document.getElementById('adminContent');
-    if (!content) return;
-    const { data } = await supabase.from('oferentes').select('*').eq('estado', 'pendiente');
-    if (!data || data.length === 0) { content.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios pendientes</div>'; return; }
-    content.innerHTML = data.map(s => `
-        <div style="background:#f5f7fa; border-radius:16px; padding:20px; margin-bottom:15px; border-left:4px solid #f59e0b;">
-            <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
+async function cargarAdminLista(tipo) {
+    const listaDiv = document.getElementById('adminLista');
+    if (!listaDiv) return;
+    
+    let query = supabase.from('oferentes').select('*');
+    if (tipo === 'pendiente') query = query.eq('estado', 'pendiente');
+    else if (tipo === 'aprobado') query = query.eq('estado', 'aprobado');
+    
+    const { data } = await query.order('created_at', { ascending: false });
+    
+    if (!data || data.length === 0) {
+        listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios</div>';
+        return;
+    }
+    
+    listaDiv.innerHTML = data.map(s => `
+        <div class="service-item ${s.estado === 'pendiente' ? 'service-pendiente' : 'service-aprobado'}">
+            <div class="service-header" style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;">
                 <div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button>
-                    <button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    ${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button>` : ''}
+                    ${s.estado === 'pendiente' ? `<button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button>` : ''}
+                    <button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button>
                 </div>
             </div>
-            <div style="margin-top:10px;">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div>
+            <div>📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div>
+            ${s.descripcion ? `<div style="margin-top:8px;">📝 ${escapeHtml(s.descripcion)}</div>` : ''}
         </div>
     `).join('');
 }
@@ -746,18 +844,31 @@ window.aprobarServicio = async function(id) {
     if (!confirm('¿Aprobar este servicio?')) return; 
     await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id); 
     mostrarToast('✅ Servicio aprobado', 'success'); 
-    cargarAdminPendientes(); 
-    cargarProfesionales(); 
-    actualizarStatsAdmin(); 
+    cargarAdminLista('pendiente');
+    await cargarProfesionales();
+    const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+    document.getElementById('totalPendientes').textContent = pendientesCount.count || 0;
+    document.getElementById('adminPendientes') ? document.getElementById('adminPendientes').textContent = pendientesCount.count || 0 : null;
 };
 
 window.rechazarServicio = async function(id) { 
     if (!confirm('¿Rechazar este servicio?')) return; 
     await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id); 
     mostrarToast('❌ Servicio rechazado', 'warning'); 
-    cargarAdminPendientes(); 
-    cargarProfesionales(); 
-    actualizarStatsAdmin(); 
+    cargarAdminLista('pendiente');
+    await cargarProfesionales();
+    const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+    document.getElementById('totalPendientes').textContent = pendientesCount.count || 0;
+};
+
+window.eliminarServicio = async function(id) { 
+    if (!confirm('⚠️ ¿Eliminar permanentemente este servicio?')) return; 
+    await supabase.from('oferentes').delete().eq('id', id); 
+    mostrarToast('🗑️ Servicio eliminado', 'success'); 
+    cargarAdminLista('pendiente');
+    await cargarProfesionales();
+    const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+    document.getElementById('totalPendientes').textContent = pendientesCount.count || 0;
 };
 
 // ==================== REGISTRO ====================
