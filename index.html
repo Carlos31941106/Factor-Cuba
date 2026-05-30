@@ -337,7 +337,7 @@
     <div class="stats-grid">
         <div class="stat-card"><div class="stat-number" id="totalProfesionales">0</div><div class="stat-label">Profesionales Activos</div></div>
         <div class="stat-card"><div class="stat-number" id="totalPendientes">0</div><div class="stat-label">Pendientes de Aprobación</div></div>
-        <div class="stat-card"><div class="stat-number">7</div><div class="stat-label">Categorías</div></div>
+        <div class="stat-card"><div class="stat-number">16</div><div class="stat-label">Provincias</div></div>
         <div class="stat-card"><div class="stat-number">∞</div><div class="stat-label">Posibilidades</div></div>
     </div>
     
@@ -354,6 +354,12 @@
     <div class="filters">
         <i class="fas fa-search" style="align-self: center; color: var(--primary);"></i>
         <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, oficio o zona...">
+        <select id="provinciaFilter">
+            <option value="">Todas las provincias</option>
+        </select>
+        <select id="municipioFilter">
+            <option value="">Todos los municipios</option>
+        </select>
         <select id="categoriaFilter">
             <option value="">Todas las categorías</option>
             <option value="carpinteria">Carpintería</option>
@@ -402,7 +408,10 @@
         <div class="modal-header"><h2>Publicar Servicio</h2><button class="close-modal" id="btnClosePublicar">&times;</button></div>
         <div class="form-group"><label>Nombre del Negocio *</label><input type="text" id="pubNombre" placeholder="Ej: Carpintería La Habana"></div>
         <div class="form-group"><label>Categoría *</label><select id="pubCategoria"><option value="carpinteria">Carpintería</option><option value="construccion">Construcción</option><option value="electricidad">Electricidad</option><option value="soldadura">Soldadura</option><option value="reparaciones">Reparaciones</option><option value="transporte">Transporte</option><option value="otros">Otros Servicios</option></select></div>
-        <div class="form-group"><label>Zona / Municipio *</label><input type="text" id="pubZona" placeholder="Ej: Centro Habana, Playa, Vedado"></div>
+        <div class="row-2cols">
+            <div class="form-group"><label>Provincia *</label><select id="pubProvincia" required><option value="">Selecciona provincia</option></select></div>
+            <div class="form-group"><label>Municipio *</label><select id="pubMunicipio" required disabled><option value="">Primero selecciona provincia</option></select></div>
+        </div>
         <div class="form-group"><label>Ubicación exacta en el mapa</label><div id="ubicacionMapa" class="map-small"></div><div class="location-info" id="ubicacionInfo">Haz clic en el mapa para marcar tu ubicación</div><input type="hidden" id="pubLatitud" value=""><input type="hidden" id="pubLongitud" value=""></div>
         <div class="form-group"><label>Teléfono / WhatsApp *</label><input type="tel" id="pubTelefono" placeholder="+53 5XXXXXXXX"></div>
         <div class="form-group"><label>Foto de Perfil</label><label for="fotoPerfil" class="file-input-label"><i class="fas fa-cloud-upload-alt"></i> Seleccionar imagen</label><input type="file" id="fotoPerfil" accept="image/*" style="display: none;"><div class="foto-preview" id="previewFoto"></div></div>
@@ -432,6 +441,26 @@ let todosLosServicios = [];
 let mapaInstance = null;
 let mapaUbicacionInstance = null;
 let marcadorUbicacion = null;
+
+// ==================== PROVINCIAS Y MUNICIPIOS DE CUBA ====================
+const provinciasYMunicipios = {
+    'Pinar del Río': ['Pinar del Río', 'Sandino', 'San Juan y Martínez', 'Viñales', 'Consolación del Sur', 'Mantua', 'Minas de Matahambre', 'Los Palacios', 'Guane', 'La Palma', 'Bahía Honda', 'Candelaria', 'San Cristóbal'],
+    'Artemisa': ['Artemisa', 'Guanajay', 'Güira de Melena', 'Alquízar', 'Bahía Honda', 'Bauta', 'Caimito', 'Mariel', 'San Antonio de los Baños', 'San Cristóbal'],
+    'La Habana': ['Centro Habana', 'Plaza de la Revolución', 'Playa', 'Vedado', 'Habana Vieja', '10 de Octubre', 'Marianao', 'La Lisa', 'Boyeros', 'Arroyo Naranjo', 'Cerro', 'Guanabacoa', 'San Miguel del Padrón', 'Cotorro', 'Regla', 'La Habana del Este'],
+    'Mayabeque': ['San José de las Lajas', 'Jaruco', 'Santa Cruz del Norte', 'Madruga', 'Nueva Paz', 'Bejucal', 'San Nicolás', 'Güines', 'Melena del Sur', 'Batabanó', 'Quivicán'],
+    'Matanzas': ['Matanzas', 'Cárdenas', 'Colón', 'Jovellanos', 'Limonar', 'Pedro Betancourt', 'Perico', 'Unión de Reyes', 'Calimete', 'Jagüey Grande', 'Los Arabos', 'Martí', 'Varadero'],
+    'Cienfuegos': ['Cienfuegos', 'Aguada de Pasajeros', 'Rodas', 'Palmira', 'Lajas', 'Cruces', 'Cumanayagua', 'Abreus'],
+    'Villa Clara': ['Santa Clara', 'Placetas', 'Sagua la Grande', 'Encrucijada', 'Camajuaní', 'Caibarién', 'Remedios', 'Manicaragua', 'Cifuentes', 'Santo Domingo', 'Ranchuelo', 'Quemado de Güines'],
+    'Sancti Spíritus': ['Sancti Spíritus', 'Cabaiguán', 'Fomento', 'Jatibonico', 'La Sierpe', 'Taguasco', 'Trinidad', 'Yaguajay'],
+    'Ciego de Ávila': ['Ciego de Ávila', 'Morón', 'Chambas', 'Florencia', 'Majagua', 'Primero de Enero', 'Venezuela', 'Baraguá', 'Ciro Redondo'],
+    'Camagüey': ['Camagüey', 'Florida', 'Nuevitas', 'Vertientes', 'Jimaguayú', 'Esmeralda', 'Minas', 'Sibanicú', 'Guáimaro', 'Santa Cruz del Sur', 'Najasa'],
+    'Las Tunas': ['Las Tunas', 'Puerto Padre', 'Amancio', 'Jobabo', 'Colombia', 'Manatí', 'Majibacoa', 'Jesús Menéndez'],
+    'Holguín': ['Holguín', 'Banes', 'Antilla', 'Mayarí', 'Moa', 'Sagua de Tánamo', 'Gibara', 'Cacocum', 'Cueto', 'Frank País', 'Urbano Noris', 'Baguanos'],
+    'Granma': ['Bayamo', 'Manzanillo', 'Jiguaní', 'Yara', 'Campechuela', 'Cauto Cristo', 'Guisa', 'Media Luna', 'Niquero', 'Río Cauto', 'Buey Arriba', 'Bartolomé Masó'],
+    'Santiago de Cuba': ['Santiago de Cuba', 'Contramaestre', 'San Luis', 'Palma Soriano', 'Songo-La Maya', 'Tercer Frente', 'Guamá', 'Mella'],
+    'Guantánamo': ['Guantánamo', 'Baracoa', 'Maisí', 'San Antonio del Sur', 'Imías', 'Caimanera', 'El Salvador', 'Yateras', 'Niceto Pérez'],
+    'Isla de la Juventud': ['Nueva Gerona', 'Santa Fe', 'La Fe', 'Columbia']
+};
 
 const ZONAS_COORDS = {
     'Centro Habana': [23.1365, -82.3810], 'Playa': [23.0949, -82.4485],
@@ -488,6 +517,44 @@ async function subirImagen(file, userId) {
     }
 }
 
+// ==================== CARGAR PROVINCIAS Y MUNICIPIOS ====================
+function cargarProvincias() {
+    const selects = ['pubProvincia', 'provinciaFilter'];
+    selects.forEach(id => {
+        const select = document.getElementById(id);
+        if (select) {
+            select.innerHTML = '<option value="">Selecciona provincia</option>';
+            for (const provincia of Object.keys(provinciasYMunicipios)) {
+                const option = document.createElement('option');
+                option.value = provincia;
+                option.textContent = provincia;
+                select.appendChild(option);
+            }
+        }
+    });
+}
+
+function actualizarMunicipios(provinciaSelectId, municipioSelectId) {
+    const provinciaSelect = document.getElementById(provinciaSelectId);
+    const municipioSelect = document.getElementById(municipioSelectId);
+    if (!provinciaSelect || !municipioSelect) return;
+    
+    const provincia = provinciaSelect.value;
+    municipioSelect.innerHTML = '<option value="">Primero selecciona provincia</option>';
+    municipioSelect.disabled = true;
+    
+    if (provincia && provinciasYMunicipios[provincia]) {
+        municipioSelect.disabled = false;
+        municipioSelect.innerHTML = '<option value="">Selecciona municipio</option>';
+        provinciasYMunicipios[provincia].forEach(municipio => {
+            const option = document.createElement('option');
+            option.value = municipio;
+            option.textContent = municipio;
+            municipioSelect.appendChild(option);
+        });
+    }
+}
+
 // ==================== MAPA DE UBICACIÓN ====================
 function iniciarMapaUbicacion() {
     if (mapaUbicacionInstance) mapaUbicacionInstance.remove();
@@ -519,6 +586,8 @@ function actualizarMapa() {
         let coords = null;
         if (servicio.latitud && servicio.longitud) {
             coords = [servicio.latitud, servicio.longitud];
+        } else if (ZONAS_COORDS[servicio.municipio]) {
+            coords = ZONAS_COORDS[servicio.municipio];
         } else if (ZONAS_COORDS[servicio.zona]) {
             coords = ZONAS_COORDS[servicio.zona];
         }
@@ -529,7 +598,7 @@ function actualizarMapa() {
                 <div style="text-align:center;min-width:160px;">
                     ${servicio.foto ? `<img src="${servicio.foto}" style="width:45px;height:45px;border-radius:50%;margin-bottom:8px;">` : `<i class="fas fa-user-circle" style="font-size:36px;color:#2c5f8a;"></i>`}
                     <br><strong>${escapeHtml(servicio.nombre)}</strong>
-                    <br>📍 ${escapeHtml(servicio.zona)}
+                    <br>📍 ${escapeHtml(servicio.municipio || servicio.zona)}, ${escapeHtml(servicio.provincia || '')}
                     <br>🔧 ${escapeHtml(servicio.especialidad || servicio.categoria)}
                     <br>⭐ ${servicio.promedio_puntuacion ? servicio.promedio_puntuacion.toFixed(1) : 'Nuevo'} (${servicio.total_calificaciones || 0})
                     <hr>
@@ -565,12 +634,17 @@ async function cargarProfesionales() {
         document.getElementById('popularServicios').innerHTML = categoriasOrdenadas.map(([cat, count]) => `<div class="popular-card"><div class="popular-icon"><i class="fas ${iconosCategorias[cat]}"></i></div><div class="popular-info"><h4>${nombresCategorias[cat]}</h4><p>Servicios disponibles</p></div><div class="popular-count">${count}</div></div>`).join('') || '<p>No hay servicios registrados aún</p>';
         
         const profesionalesDestacados = todosLosServicios.filter(s => s.estado === 'aprobado').slice(0, 6);
-        document.getElementById('popularProfesionales').innerHTML = profesionalesDestacados.map(s => `<div class="popular-card" onclick="verPerfil('${s.id}')"><div class="popular-icon">${s.foto ? `<img src="${s.foto}">` : `<i class="fas fa-user-circle"></i>`}</div><div class="popular-info"><h4>${escapeHtml(s.nombre)}</h4><p>${escapeHtml(s.especialidad || s.categoria)} • ${escapeHtml(s.zona)}</p></div><div class="popular-count"><i class="fas fa-star"></i> Destacado</div></div>`).join('') || '<p>No hay profesionales destacados</p>';
+        document.getElementById('popularProfesionales').innerHTML = profesionalesDestacados.map(s => `<div class="popular-card" onclick="verPerfil('${s.id}')"><div class="popular-icon">${s.foto ? `<img src="${s.foto}">` : `<i class="fas fa-user-circle"></i>`}</div><div class="popular-info"><h4>${escapeHtml(s.nombre)}</h4><p>${escapeHtml(s.especialidad || s.categoria)} • ${escapeHtml(s.municipio || s.zona)}</p></div><div class="popular-count"><i class="fas fa-star"></i> Destacado</div></div>`).join('') || '<p>No hay profesionales destacados</p>';
         
         let serviciosMostrar = adminAuthenticated ? todosLosServicios : todosLosServicios.filter(s => s.estado === 'aprobado');
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const provincia = document.getElementById('provinciaFilter').value;
+        const municipio = document.getElementById('municipioFilter').value;
         const categoria = document.getElementById('categoriaFilter').value;
-        if (searchTerm) serviciosMostrar = serviciosMostrar.filter(s => (s.nombre || '').toLowerCase().includes(searchTerm) || (s.especialidad || '').toLowerCase().includes(searchTerm) || (s.zona || '').toLowerCase().includes(searchTerm));
+        
+        if (searchTerm) serviciosMostrar = serviciosMostrar.filter(s => (s.nombre || '').toLowerCase().includes(searchTerm) || (s.especialidad || '').toLowerCase().includes(searchTerm) || (s.municipio || '').toLowerCase().includes(searchTerm) || (s.zona || '').toLowerCase().includes(searchTerm));
+        if (provincia) serviciosMostrar = serviciosMostrar.filter(s => s.provincia === provincia);
+        if (municipio) serviciosMostrar = serviciosMostrar.filter(s => s.municipio === municipio);
         if (categoria) serviciosMostrar = serviciosMostrar.filter(s => s.categoria === categoria);
         
         const container = document.getElementById('listaProfesionales');
@@ -585,7 +659,7 @@ async function cargarProfesionales() {
                 </div>
                 <div class="card-body">
                     ${renderStars(s.promedio_puntuacion, s.total_calificaciones)}
-                    <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(s.zona)}</p>
+                    <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</p>
                     <p><i class="fab fa-whatsapp"></i> ${escapeHtml(s.telefono)}</p>
                     ${s.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(s.descripcion.substring(0, 80))}${s.descripcion.length > 80 ? '...' : ''}</p>` : ''}
                 </div>
@@ -618,7 +692,7 @@ window.verPerfil = async function(servicioId) {
                 ${servicio.foto ? `<img src="${servicio.foto}" style="width:100%;height:100%;object-fit:cover;">` : `<i class="fas fa-user-circle"></i>`}
             </div>
             <h3>${escapeHtml(servicio.nombre)}</h3>
-            <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(servicio.zona)}</p>
+            <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(servicio.municipio || servicio.zona)}, ${escapeHtml(servicio.provincia || '')}</p>
             <p><i class="fab fa-whatsapp"></i> ${escapeHtml(servicio.telefono)}</p>
             ${servicio.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(servicio.descripcion)}</p>` : ''}
             <div style="margin-top:15px;">
@@ -639,21 +713,22 @@ window.verPerfil = async function(servicioId) {
 async function publicarServicio() {
     const nombre = document.getElementById('pubNombre').value.trim();
     const categoria = document.getElementById('pubCategoria').value;
-    const zona = document.getElementById('pubZona').value.trim();
+    const provincia = document.getElementById('pubProvincia').value;
+    const municipio = document.getElementById('pubMunicipio').value;
     const telefono = document.getElementById('pubTelefono').value.trim();
     const descripcion = document.getElementById('pubDescripcion').value.trim();
     const fotoFile = document.getElementById('fotoPerfil').files[0];
     const latitud = document.getElementById('pubLatitud').value;
     const longitud = document.getElementById('pubLongitud').value;
     
-    if (!nombre || !zona || !telefono) { mostrarToast('Completa nombre, zona y teléfono', 'error'); return; }
+    if (!nombre || !provincia || !municipio || !telefono) { mostrarToast('Completa todos los campos', 'error'); return; }
     
     const categoriaTexto = document.getElementById('pubCategoria').options[document.getElementById('pubCategoria').selectedIndex]?.text || categoria;
     try {
         let fotoUrl = null;
         if (fotoFile) { mostrarToast('Subiendo imagen...', 'info'); fotoUrl = await subirImagen(fotoFile, currentUser.id); }
         const { error } = await supabase.from('oferentes').insert([{ 
-            nombre, categoria, zona, telefono, descripcion, foto: fotoUrl, 
+            nombre, categoria, provincia, municipio, telefono, descripcion, foto: fotoUrl, 
             especialidad: categoriaTexto, estado: 'pendiente', 
             latitud: latitud ? parseFloat(latitud) : null, 
             longitud: longitud ? parseFloat(longitud) : null,
@@ -664,7 +739,8 @@ async function publicarServicio() {
         mostrarToast('✅ Servicio publicado. Espera aprobación.', 'success');
         document.getElementById('modalPublicar').style.display = 'none';
         document.getElementById('pubNombre').value = '';
-        document.getElementById('pubZona').value = '';
+        document.getElementById('pubProvincia').value = '';
+        document.getElementById('pubMunicipio').value = '';
         document.getElementById('pubTelefono').value = '';
         document.getElementById('pubDescripcion').value = '';
         document.getElementById('previewFoto').innerHTML = '';
@@ -778,12 +854,10 @@ async function cargarAdminPanel() {
     modal.style.display = 'flex';
     content.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>';
     
-    // Cargar estadísticas
     const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
     const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
     const aprobadosCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
     
-    // Cargar servicios pendientes
     const { data: serviciosPendientes } = await supabase.from('oferentes').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
     
     let html = `
@@ -801,7 +875,6 @@ async function cargarAdminPanel() {
     `;
     content.innerHTML = html;
     
-    // Cargar pendientes por defecto
     cargarAdminLista('pendiente');
     
     document.getElementById('adminTabPendientes').onclick = () => cargarAdminLista('pendiente');
@@ -826,15 +899,15 @@ async function cargarAdminLista(tipo) {
     
     listaDiv.innerHTML = data.map(s => `
         <div class="service-item ${s.estado === 'pendiente' ? 'service-pendiente' : 'service-aprobado'}">
-            <div class="service-header" style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;">
-                <div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div>
+            <div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;">
+                <div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small><br><small>📍 ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</small></div>
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     ${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button>` : ''}
                     ${s.estado === 'pendiente' ? `<button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button>` : ''}
                     <button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button>
                 </div>
             </div>
-            <div>📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div>
+            <div>📞 ${escapeHtml(s.telefono)}</div>
             ${s.descripcion ? `<div style="margin-top:8px;">📝 ${escapeHtml(s.descripcion)}</div>` : ''}
         </div>
     `).join('');
@@ -848,7 +921,6 @@ window.aprobarServicio = async function(id) {
     await cargarProfesionales();
     const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
     document.getElementById('totalPendientes').textContent = pendientesCount.count || 0;
-    document.getElementById('adminPendientes') ? document.getElementById('adminPendientes').textContent = pendientesCount.count || 0 : null;
 };
 
 window.rechazarServicio = async function(id) { 
@@ -896,7 +968,14 @@ document.getElementById('btnPublicar').onclick = () => {
     if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); document.getElementById('modalLogin').style.display = 'flex'; return; }
     document.getElementById('modalPublicar').style.display = 'flex';
     setTimeout(() => iniciarMapaUbicacion(), 300);
+    cargarProvincias();
+    document.getElementById('pubProvincia').value = '';
+    document.getElementById('pubMunicipio').innerHTML = '<option value="">Primero selecciona provincia</option>';
+    document.getElementById('pubMunicipio').disabled = true;
 };
+document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
+document.getElementById('provinciaFilter').onchange = function() { actualizarMunicipios('provinciaFilter', 'municipioFilter'); cargarProfesionales(); };
+document.getElementById('municipioFilter').onchange = cargarProfesionales;
 document.getElementById('btnGuardarServicio').onclick = publicarServicio;
 document.getElementById('btnClosePublicar').onclick = () => document.getElementById('modalPublicar').style.display = 'none';
 document.getElementById('btnCloseLogin').onclick = () => document.getElementById('modalLogin').style.display = 'none';
@@ -914,6 +993,9 @@ document.getElementById('switchAuthMode').onclick = (e) => { e.preventDefault();
 window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 
 async function init() { 
+    cargarProvincias();
+    document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
+    document.getElementById('provinciaFilter').onchange = function() { actualizarMunicipios('provinciaFilter', 'municipioFilter'); cargarProfesionales(); };
     const { data: { session } } = await supabase.auth.getSession(); 
     currentUser = session?.user || null; 
     actualizarUI(); 
