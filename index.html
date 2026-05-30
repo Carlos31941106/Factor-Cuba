@@ -392,20 +392,7 @@
 <div id="modalAdmin" class="modal">
     <div class="modal-content" style="max-width: 800px;">
         <div class="modal-header"><h2>Panel de Administrador</h2><button class="close-modal" id="btnCloseAdmin">&times;</button></div>
-        <div class="password-container" id="passwordSection"><h3>Verificación</h3><input type="password" id="adminPasswordInput" placeholder="Contraseña de administrador"><button class="btn btn-primary" id="verifyAdminBtn" style="width: 100%; margin-top: 10px;">Verificar</button></div>
-        <div id="adminPanelSection" style="display: none;">
-            <div class="admin-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
-                <div class="admin-stat"><div class="stat-number" id="adminTotal">0</div><div>Total</div></div>
-                <div class="admin-stat"><div class="stat-number" id="adminPendientes">0</div><div>Pendientes</div></div>
-                <div class="admin-stat"><div class="stat-number" id="adminAprobados">0</div><div>Aprobados</div></div>
-            </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
-                <button class="btn btn-outline" id="adminTabPendientes">⏳ Pendientes</button>
-                <button class="btn btn-outline" id="adminTabAprobados">✅ Aprobados</button>
-                <button class="btn btn-outline" id="adminTabTodos">📋 Todos</button>
-            </div>
-            <div id="adminContent"></div>
-        </div>
+        <div id="adminContent"></div>
     </div>
 </div>
 
@@ -593,13 +580,7 @@ async function cargarProfesionales() {
 window.verPerfil = async function(servicioId) {
     const servicio = todosLosServicios.find(s => s.id === servicioId);
     if (!servicio) return;
-    
-    const modal = document.getElementById('modalVerPerfil');
-    if (!modal) {
-        mostrarToast('Función en desarrollo', 'info');
-        return;
-    }
-    modal.style.display = 'flex';
+    mostrarToast(`Perfil de ${servicio.nombre} - Función en desarrollo`, 'info');
 };
 
 // ==================== PUBLICAR SERVICIO ====================
@@ -717,6 +698,68 @@ function actualizarUI() {
     }
 }
 
+// ==================== ADMIN ====================
+document.getElementById('btnAdmin').onclick = () => {
+    const password = prompt('🔒 Ingresa la contraseña de administrador:');
+    if (password === ADMIN_PASSWORD) {
+        adminAuthenticated = true;
+        sessionStorage.setItem('adminAutenticado', 'true');
+        mostrarToast('✅ Acceso de administrador concedido', 'success');
+        document.getElementById('modalAdmin').style.display = 'flex';
+        actualizarStatsAdmin();
+        cargarAdminPendientes();
+        actualizarUI();
+    } else if (password !== null) {
+        mostrarToast('❌ Contraseña incorrecta', 'error');
+    }
+};
+
+async function actualizarStatsAdmin() {
+    const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
+    const pendientes = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+    const aprobados = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
+    document.getElementById('adminTotal') ? document.getElementById('adminTotal').textContent = total.count || 0 : null;
+    document.getElementById('adminPendientes') ? document.getElementById('adminPendientes').textContent = pendientes.count || 0 : null;
+    document.getElementById('adminAprobados') ? document.getElementById('adminAprobados').textContent = aprobados.count || 0 : null;
+}
+
+async function cargarAdminPendientes() {
+    const content = document.getElementById('adminContent');
+    if (!content) return;
+    const { data } = await supabase.from('oferentes').select('*').eq('estado', 'pendiente');
+    if (!data || data.length === 0) { content.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios pendientes</div>'; return; }
+    content.innerHTML = data.map(s => `
+        <div style="background:#f5f7fa; border-radius:16px; padding:20px; margin-bottom:15px; border-left:4px solid #f59e0b;">
+            <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
+                <div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button>
+                    <button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button>
+                </div>
+            </div>
+            <div style="margin-top:10px;">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div>
+        </div>
+    `).join('');
+}
+
+window.aprobarServicio = async function(id) { 
+    if (!confirm('¿Aprobar este servicio?')) return; 
+    await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id); 
+    mostrarToast('✅ Servicio aprobado', 'success'); 
+    cargarAdminPendientes(); 
+    cargarProfesionales(); 
+    actualizarStatsAdmin(); 
+};
+
+window.rechazarServicio = async function(id) { 
+    if (!confirm('¿Rechazar este servicio?')) return; 
+    await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id); 
+    mostrarToast('❌ Servicio rechazado', 'warning'); 
+    cargarAdminPendientes(); 
+    cargarProfesionales(); 
+    actualizarStatsAdmin(); 
+};
+
 // ==================== REGISTRO ====================
 document.getElementById('registroForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -733,52 +776,6 @@ document.getElementById('registroForm').addEventListener('submit', async (e) => 
         document.getElementById('modalRegistro').style.display = 'none';
     } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 });
-
-// ==================== ADMIN ====================
-function verificarAdminPassword() {
-    const password = document.getElementById('adminPasswordInput').value;
-    if (password === ADMIN_PASSWORD) {
-        adminAuthenticated = true; sessionStorage.setItem('adminAutenticado', 'true'); mostrarToast('✅ Acceso concedido', 'success');
-        document.getElementById('passwordSection').style.display = 'none'; document.getElementById('adminPanelSection').style.display = 'block';
-        actualizarStatsAdmin(); cargarAdminPendientes(); actualizarUI();
-    } else { mostrarToast('❌ Contraseña incorrecta', 'error'); }
-}
-
-function checkAdminSession() {
-    if (sessionStorage.getItem('adminAutenticado') === 'true') {
-        adminAuthenticated = true; document.getElementById('passwordSection').style.display = 'none'; document.getElementById('adminPanelSection').style.display = 'block';
-        actualizarStatsAdmin(); cargarAdminPendientes(); actualizarUI();
-    }
-}
-
-window.aprobarServicio = async function(id) { if (!confirm('¿Aprobar?')) return; await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id); mostrarToast('✅ Aprobado', 'success'); cargarAdminPendientes(); cargarProfesionales(); actualizarStatsAdmin(); };
-window.rechazarServicio = async function(id) { if (!confirm('¿Rechazar?')) return; await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id); mostrarToast('❌ Rechazado', 'warning'); cargarAdminPendientes(); cargarProfesionales(); actualizarStatsAdmin(); };
-window.eliminarServicio = async function(id) { if (!confirm('¿Eliminar?')) return; await supabase.from('oferentes').delete().eq('id', id); mostrarToast('🗑️ Eliminado', 'success'); cargarAdminActual(); cargarProfesionales(); actualizarStatsAdmin(); };
-
-let adminTabActual = 'pendientes';
-async function cargarAdminActual() { if (adminTabActual === 'pendientes') await cargarAdminPendientes(); else if (adminTabActual === 'aprobados') await cargarAdminAprobados(); else await cargarAdminTodos(); }
-
-async function cargarAdminPendientes() {
-    adminTabActual = 'pendientes'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*').eq('estado', 'pendiente');
-    if (!data || data.length === 0) { content.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios pendientes</div>'; return; }
-    content.innerHTML = data.map(s => `<div class="service-item service-pendiente"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('');
-}
-async function cargarAdminAprobados() {
-    adminTabActual = 'aprobados'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*').eq('estado', 'aprobado');
-    content.innerHTML = data?.map(s => `<div class="service-item service-aprobado"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('') || '<p>No hay servicios aprobados</p>';
-}
-async function cargarAdminTodos() {
-    adminTabActual = 'todos'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*');
-    content.innerHTML = data?.map(s => `<div class="service-item ${s.estado === 'aprobado' ? 'service-aprobado' : 'service-pendiente'}"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${s.estado} - ${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions">${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">Rechazar</button>` : ''}<button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('') || '<p>No hay servicios</p>';
-}
-async function actualizarStatsAdmin() {
-    const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
-    const pendientes = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
-    const aprobados = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
-    document.getElementById('adminTotal').textContent = total.count || 0;
-    document.getElementById('adminPendientes').textContent = pendientes.count || 0;
-    document.getElementById('adminAprobados').textContent = aprobados.count || 0;
-}
 
 // ==================== EVENTOS ====================
 document.getElementById('btnLogin').onclick = () => document.getElementById('modalLogin').style.display = 'flex';
@@ -798,7 +795,6 @@ document.getElementById('btnLoginSubmit').onclick = manejarAuth;
 document.getElementById('btnBuscar').onclick = cargarProfesionales;
 document.getElementById('searchInput').onkeyup = (e) => { if(e.key === 'Enter') cargarProfesionales(); };
 document.getElementById('categoriaFilter').onchange = cargarProfesionales;
-document.getElementById('verifyAdminBtn').onclick = verificarAdminPassword;
 
 document.querySelectorAll('.popular-tab').forEach(tab => { tab.onclick = () => { document.querySelectorAll('.popular-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const tabName = tab.dataset.tab; document.getElementById('popularServicios').style.display = tabName === 'servicios' ? 'grid' : 'none'; document.getElementById('popularProfesionales').style.display = tabName === 'profesionales' ? 'grid' : 'none'; }; });
 
@@ -811,7 +807,6 @@ async function init() {
     currentUser = session?.user || null; 
     actualizarUI(); 
     await cargarProfesionales(); 
-    checkAdminSession(); 
 }
 init();
 </script>
