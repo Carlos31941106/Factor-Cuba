@@ -289,7 +289,7 @@
         .popular-count { margin-left: auto; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
         
         .map-container { margin: 32px 0; border-radius: var(--radius-xl); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow-md); }
-        #mapa { height: 400px; width: 100%; }
+        #mapa { height: 400px; width: 100%; background: #e2e8f0; }
         .map-controls { margin: 12px 0; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
         
         .filters { display: flex; gap: 16px; flex-wrap: wrap; margin: 32px 0; background: var(--bg-primary); padding: 20px 24px; border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
@@ -731,42 +731,11 @@ const provinciasYMunicipios = {
     'Isla de la Juventud': ['Nueva Gerona', 'Santa Fe', 'La Fe', 'Columbia']
 };
 
-function cargarProvincias() {
-    const selects = ['profProvincia', 'pubProvincia', 'provinciaFilter'];
-    selects.forEach(id => {
-        const select = document.getElementById(id);
-        if (select) {
-            select.innerHTML = '<option value="">Selecciona provincia</option>';
-            for (const provincia of Object.keys(provinciasYMunicipios)) {
-                const option = document.createElement('option');
-                option.value = provincia;
-                option.textContent = provincia;
-                select.appendChild(option);
-            }
-        }
-    });
-}
-
-function actualizarMunicipios(provinciaSelectId, municipioSelectId) {
-    const provinciaSelect = document.getElementById(provinciaSelectId);
-    const municipioSelect = document.getElementById(municipioSelectId);
-    if (!provinciaSelect || !municipioSelect) return;
-    
-    const provincia = provinciaSelect.value;
-    municipioSelect.innerHTML = '<option value="">Primero selecciona provincia</option>';
-    municipioSelect.disabled = true;
-    
-    if (provincia && provinciasYMunicipios[provincia]) {
-        municipioSelect.disabled = false;
-        municipioSelect.innerHTML = '<option value="">Selecciona municipio</option>';
-        provinciasYMunicipios[provincia].forEach(municipio => {
-            const option = document.createElement('option');
-            option.value = municipio;
-            option.textContent = municipio;
-            municipioSelect.appendChild(option);
-        });
-    }
-}
+const ZONAS_COORDS = {
+    'Centro Habana': [23.1365, -82.3810], 'Playa': [23.0949, -82.4485], 'Vedado': [23.1415, -82.3850],
+    'Habana Vieja': [23.1389, -82.3572], 'Guanabacoa': [23.1167, -82.3000], 'Santiago de Cuba': [20.0247, -75.8218],
+    'Camagüey': [21.3844, -77.9075], 'Holguín': [20.8882, -76.2631], 'Santa Clara': [22.4067, -79.9648]
+};
 
 // ==================== UTILIDADES ====================
 function mostrarToast(mensaje, tipo = 'success') {
@@ -814,39 +783,211 @@ function iniciarMapaUbicacion() {
     });
 }
 
-// ==================== MAPA PRINCIPAL ====================
-function centrarMapaEnZona(zona) {
-    const coords = ZONAS_COORDS[zona];
-    if (coords && mapaInstance) { mapaInstance.setView(coords, 13); mostrarToast(`📍 Mostrando zona: ${zona}`, 'info'); }
+// ==================== CARGAR PROVINCIAS ====================
+function cargarProvincias() {
+    const selects = ['profProvincia', 'pubProvincia', 'provinciaFilter'];
+    selects.forEach(id => {
+        const select = document.getElementById(id);
+        if (select) {
+            select.innerHTML = '<option value="">Selecciona provincia</option>';
+            for (const provincia of Object.keys(provinciasYMunicipios)) {
+                const option = document.createElement('option');
+                option.value = provincia;
+                option.textContent = provincia;
+                select.appendChild(option);
+            }
+        }
+    });
 }
 
-function actualizarMapa() {
+function actualizarMunicipios(provinciaSelectId, municipioSelectId) {
+    const provinciaSelect = document.getElementById(provinciaSelectId);
+    const municipioSelect = document.getElementById(municipioSelectId);
+    if (!provinciaSelect || !municipioSelect) return;
+    
+    const provincia = provinciaSelect.value;
+    municipioSelect.innerHTML = '<option value="">Primero selecciona provincia</option>';
+    municipioSelect.disabled = true;
+    
+    if (provincia && provinciasYMunicipios[provincia]) {
+        municipioSelect.disabled = false;
+        municipioSelect.innerHTML = '<option value="">Selecciona municipio</option>';
+        provinciasYMunicipios[provincia].forEach(municipio => {
+            const option = document.createElement('option');
+            option.value = municipio;
+            option.textContent = municipio;
+            municipioSelect.appendChild(option);
+        });
+    }
+}
+
+// ==================== CARGAR PROFESIONALES CON FILTROS CORREGIDOS ====================
+async function cargarProfesionales() {
+    try {
+        let query = supabase.from('oferentes').select('*');
+        
+        if (!adminAuthenticated) {
+            query = query.eq('estado', 'aprobado');
+        }
+        
+        const { data, error } = await query.order('created_at', { ascending: false });
+        if (error) throw error;
+        
+        todosLosServicios = data || [];
+        
+        // Actualizar estadísticas generales
+        const aprobados = todosLosServicios.filter(s => s.estado === 'aprobado' && s.perfil_activo !== false).length;
+        const pendientes = todosLosServicios.filter(s => s.estado === 'pendiente').length;
+        document.getElementById('totalProfesionales').textContent = aprobados;
+        document.getElementById('totalPendientes').textContent = pendientes;
+        
+        // Obtener valores de los filtros
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const provincia = document.getElementById('provinciaFilter').value;
+        const municipio = document.getElementById('municipioFilter').value;
+        const categoria = document.getElementById('categoriaFilter').value;
+        
+        // APLICAR FILTROS
+        let serviciosFiltrados = todosLosServicios.filter(s => s.estado === 'aprobado' && s.perfil_activo !== false);
+        
+        // Filtro por categoría (profesión)
+        if (categoria) {
+            serviciosFiltrados = serviciosFiltrados.filter(s => s.categoria === categoria);
+        }
+        
+        // Filtro por provincia
+        if (provincia) {
+            serviciosFiltrados = serviciosFiltrados.filter(s => s.provincia === provincia);
+        }
+        
+        // Filtro por municipio
+        if (municipio) {
+            serviciosFiltrados = serviciosFiltrados.filter(s => s.municipio === municipio);
+        }
+        
+        // Filtro por término de búsqueda
+        if (searchTerm) {
+            serviciosFiltrados = serviciosFiltrados.filter(s => 
+                (s.nombre || '').toLowerCase().includes(searchTerm) ||
+                (s.especialidad || '').toLowerCase().includes(searchTerm) ||
+                (s.municipio || '').toLowerCase().includes(searchTerm) ||
+                (s.zona || '').toLowerCase().includes(searchTerm)
+            );
+        }
+        
+        // Actualizar el mapa con los filtrados
+        actualizarMapaConFiltros(serviciosFiltrados);
+        
+        // Mostrar en la lista
+        const container = document.getElementById('listaProfesionales');
+        if (serviciosFiltrados.length === 0) {
+            container.innerHTML = '<div style="text-align:center;padding:60px;"><i class="fas fa-store-slash" style="font-size:48px;color:#cbd5e1;"></i><h3>No hay profesionales que coincidan con tu búsqueda</h3><p>Intenta con otros filtros o categorías</p></div>';
+            return;
+        }
+        
+        container.innerHTML = serviciosFiltrados.map(s => `
+            <div class="professional-card ${s.perfil_activo === false ? 'perfil-suspendido' : ''}">
+                <div class="card-header">
+                    <div class="card-avatar">${s.foto ? `<img src="${s.foto}">` : `<i class="fas fa-user-circle"></i>`}</div>
+                    <h3>${escapeHtml(s.nombre)}</h3>
+                    <span class="card-badge">${escapeHtml(s.especialidad || s.categoria)}</span>
+                </div>
+                <div class="card-body">
+                    ${renderStars(s.promedio_puntuacion, s.total_calificaciones)}
+                    <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</p>
+                    <p><i class="fab fa-whatsapp"></i> ${escapeHtml(s.telefono)}</p>
+                    ${s.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(s.descripcion.substring(0, 80))}${s.descripcion.length > 80 ? '...' : ''}</p>` : ''}
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary" onclick="abrirEnviarMensaje('${s.id}', '${escapeHtml(s.nombre)}')"><i class="fas fa-comment"></i> Contactar</button>
+                    <button class="btn btn-outline" onclick="verPerfil('${s.id}')"><i class="fas fa-user"></i> Perfil</button>
+                </div>
+            </div>
+        `).join('');
+        
+        // Actualizar populares con filtros
+        actualizarPopularesConFiltros(serviciosFiltrados);
+        
+    } catch (err) { 
+        mostrarToast('Error al cargar profesionales: ' + err.message, 'error'); 
+    }
+}
+
+// ==================== ACTUALIZAR MAPA SOLO CON FILTRADOS ====================
+function actualizarMapaConFiltros(serviciosFiltrados) {
     if (!mapaInstance) {
         mapaInstance = L.map('mapa').setView([23.1, -82.4], 11);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaInstance);
     } else {
-        mapaInstance.eachLayer(layer => { if (layer instanceof L.Marker) mapaInstance.removeLayer(layer); });
+        mapaInstance.eachLayer(layer => { 
+            if (layer instanceof L.Marker) mapaInstance.removeLayer(layer); 
+        });
     }
     
-    const serviciosMostrar = todosLosServicios.filter(s => s.estado === 'aprobado' && s.perfil_activo !== false);
-    
-    serviciosMostrar.forEach(servicio => {
+    serviciosFiltrados.forEach(servicio => {
         let coords = null;
-        if (servicio.latitud && servicio.longitud) coords = [servicio.latitud, servicio.longitud];
-        else if (ZONAS_COORDS[servicio.municipio]) coords = ZONAS_COORDS[servicio.municipio];
-        else if (ZONAS_COORDS[servicio.zona]) coords = ZONAS_COORDS[servicio.zona];
+        if (servicio.latitud && servicio.longitud) {
+            coords = [servicio.latitud, servicio.longitud];
+        } else if (ZONAS_COORDS[servicio.municipio]) {
+            coords = ZONAS_COORDS[servicio.municipio];
+        } else if (ZONAS_COORDS[servicio.zona]) {
+            coords = ZONAS_COORDS[servicio.zona];
+        }
+        
         if (coords) {
             const marker = L.marker(coords).addTo(mapaInstance);
             marker.bindPopup(`
                 <div style="font-family:'Inter',sans-serif;text-align:center;min-width:180px;">
                     ${servicio.foto ? `<img src="${servicio.foto}" style="width:45px;height:45px;border-radius:50%;margin-bottom:8px;">` : `<i class="fas fa-user-circle" style="font-size:36px;color:#2c5f8a;margin-bottom:8px;"></i>`}
-                    <br><strong>${escapeHtml(servicio.nombre)}</strong><br>📍 ${escapeHtml(servicio.municipio || servicio.zona)}<br>🔧 ${escapeHtml(servicio.especialidad || servicio.categoria)}<br>${renderStars(servicio.promedio_puntuacion, servicio.total_calificaciones)}
-                    <hr style="margin:8px 0;"><button onclick="abrirEnviarMensaje('${servicio.id}', '${escapeHtml(servicio.nombre)}')" style="background:#2c5f8a;border:none;padding:8px 12px;border-radius:20px;color:white;cursor:pointer;width:100%;">📩 Contactar</button>
-                    <button onclick="verPerfil('${servicio.id}')" style="background:#5A7D9A;border:none;padding:4px 8px;border-radius:20px;color:white;cursor:pointer;margin-top:5px;">👤 Ver Perfil</button>
+                    <br><strong>${escapeHtml(servicio.nombre)}</strong>
+                    <br>📍 ${escapeHtml(servicio.municipio || servicio.zona)}, ${escapeHtml(servicio.provincia || '')}
+                    <br>🔧 ${escapeHtml(servicio.especialidad || servicio.categoria)}
+                    <br>${renderStars(servicio.promedio_puntuacion, servicio.total_calificaciones)}
+                    <hr style="margin:8px 0;">
+                    <button onclick="abrirEnviarMensaje('${servicio.id}', '${escapeHtml(servicio.nombre)}')" style="background:#2c5f8a;border:none;padding:8px 12px;border-radius:20px;color:white;cursor:pointer;width:100%;">📩 Contactar</button>
+                    <button onclick="verPerfil('${servicio.id}')" style="background:#5A7D9A;border:none;padding:4px 8px;border-radius:20px;color:white;cursor:pointer;margin-top:5px;width:100%;">👤 Ver Perfil</button>
                 </div>
             `);
         }
     });
+    
+    if (serviciosFiltrados.length === 0 && mapaInstance) {
+        mapaInstance.setView([23.1, -82.4], 11);
+    }
+}
+
+// ==================== ACTUALIZAR POPULARES CON FILTROS ====================
+function actualizarPopularesConFiltros(serviciosFiltrados) {
+    const categoriasCount = {};
+    serviciosFiltrados.forEach(s => {
+        if (s.estado === 'aprobado') {
+            categoriasCount[s.categoria] = (categoriasCount[s.categoria] || 0) + 1;
+        }
+    });
+    const categoriasOrdenadas = Object.entries(categoriasCount).sort((a,b) => b[1] - a[1]).slice(0, 6);
+    const nombresCategorias = { 'carpinteria':'Carpintería','construccion':'Construcción','electricidad':'Electricidad','soldadura':'Soldadura','reparaciones':'Reparaciones','transporte':'Transporte','otros':'Otros' };
+    const iconosCategorias = { 'carpinteria':'fa-hammer','construccion':'fa-hard-hat','electricidad':'fa-bolt','soldadura':'fa-wrench','reparaciones':'fa-tools','transporte':'fa-truck','otros':'fa-briefcase' };
+    document.getElementById('popularServicios').innerHTML = categoriasOrdenadas.map(([cat, count]) => `
+        <div class="popular-card" onclick="filtrarPorCategoria('${cat}')">
+            <div class="popular-icon"><i class="fas ${iconosCategorias[cat]}"></i></div>
+            <div class="popular-info"><h4>${nombresCategorias[cat]}</h4><p>Servicios disponibles</p></div>
+            <div class="popular-count">${count}</div>
+        </div>
+    `).join('') || '<p>No hay servicios registrados</p>';
+    
+    const profesionalesDestacados = serviciosFiltrados.slice(0, 6);
+    document.getElementById('popularProfesionales').innerHTML = profesionalesDestacados.map(s => `
+        <div class="popular-card" onclick="verPerfil('${s.id}')">
+            <div class="popular-icon">${s.foto ? `<img src="${s.foto}">` : `<i class="fas fa-user-circle"></i>`}</div>
+            <div class="popular-info"><h4>${escapeHtml(s.nombre)}</h4><p>${escapeHtml(s.especialidad || s.categoria)} • ${escapeHtml(s.municipio || s.zona)}</p></div>
+            <div class="popular-count"><i class="fas fa-star"></i> Destacado</div>
+        </div>
+    `).join('') || '<p>No hay profesionales destacados</p>';
+}
+
+function filtrarPorCategoria(categoria) {
+    document.getElementById('categoriaFilter').value = categoria;
+    cargarProfesionales();
 }
 
 // ==================== VER PERFIL ====================
@@ -981,73 +1122,6 @@ async function verificarTipoUsuario() {
     return null;
 }
 
-// ==================== CARGAR PROFESIONALES ====================
-async function cargarProfesionales() {
-    try {
-        let query = supabase.from('oferentes').select('*');
-        
-        if (!adminAuthenticated) {
-            query = query.eq('estado', 'aprobado');
-        }
-        
-        const { data, error } = await query.order('created_at', { ascending: false });
-        if (error) throw error;
-        
-        todosLosServicios = data || [];
-        const aprobados = todosLosServicios.filter(s => s.estado === 'aprobado' && s.perfil_activo !== false).length;
-        const pendientes = todosLosServicios.filter(s => s.estado === 'pendiente').length;
-        
-        document.getElementById('totalProfesionales').textContent = aprobados;
-        document.getElementById('totalPendientes').textContent = pendientes;
-        
-        // Populares
-        const categoriasCount = {};
-        todosLosServicios.forEach(s => { if (s.estado === 'aprobado') categoriasCount[s.categoria] = (categoriasCount[s.categoria] || 0) + 1; });
-        const categoriasOrdenadas = Object.entries(categoriasCount).sort((a,b) => b[1] - a[1]).slice(0, 6);
-        const nombresCategorias = { 'carpinteria':'Carpintería','construccion':'Construcción','electricidad':'Electricidad','soldadura':'Soldadura','reparaciones':'Reparaciones','transporte':'Transporte','otros':'Otros' };
-        const iconosCategorias = { 'carpinteria':'fa-hammer','construccion':'fa-hard-hat','electricidad':'fa-bolt','soldadura':'fa-wrench','reparaciones':'fa-tools','transporte':'fa-truck','otros':'fa-briefcase' };
-        document.getElementById('popularServicios').innerHTML = categoriasOrdenadas.map(([cat, count]) => `<div class="popular-card"><div class="popular-icon"><i class="fas ${iconosCategorias[cat]}"></i></div><div class="popular-info"><h4>${nombresCategorias[cat]}</h4><p>Servicios disponibles</p></div><div class="popular-count">${count}</div></div>`).join('') || '<p>No hay servicios registrados aún</p>';
-        
-        const profesionalesDestacados = todosLosServicios.filter(s => s.estado === 'aprobado' && s.perfil_activo !== false).slice(0, 6);
-        document.getElementById('popularProfesionales').innerHTML = profesionalesDestacados.map(s => `<div class="popular-card" onclick="verPerfil('${s.id}')"><div class="popular-icon">${s.foto ? `<img src="${s.foto}">` : `<i class="fas fa-user-circle"></i>`}</div><div class="popular-info"><h4>${escapeHtml(s.nombre)}</h4><p>${escapeHtml(s.especialidad || s.categoria)} • ${escapeHtml(s.municipio || s.zona)}</p></div><div class="popular-count"><i class="fas fa-star"></i> Destacado</div></div>`).join('') || '<p>No hay profesionales destacados</p>';
-        
-        let serviciosMostrar = todosLosServicios;
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const provincia = document.getElementById('provinciaFilter').value;
-        const municipio = document.getElementById('municipioFilter').value;
-        const categoria = document.getElementById('categoriaFilter').value;
-        
-        if (searchTerm) serviciosMostrar = serviciosMostrar.filter(s => (s.nombre || '').toLowerCase().includes(searchTerm) || (s.especialidad || '').toLowerCase().includes(searchTerm));
-        if (provincia) serviciosMostrar = serviciosMostrar.filter(s => s.provincia === provincia);
-        if (municipio) serviciosMostrar = serviciosMostrar.filter(s => s.municipio === municipio);
-        if (categoria) serviciosMostrar = serviciosMostrar.filter(s => s.categoria === categoria);
-        
-        const container = document.getElementById('listaProfesionales');
-        if (serviciosMostrar.length === 0) { container.innerHTML = '<div style="text-align:center;padding:60px;"><i class="fas fa-store-slash" style="font-size:48px;color:#cbd5e1;"></i><h3>No hay profesionales</h3></div>'; actualizarMapa(); return; }
-        
-        container.innerHTML = serviciosMostrar.map(s => `
-            <div class="professional-card ${s.perfil_activo === false ? 'perfil-suspendido' : ''}">
-                <div class="card-header">
-                    <div class="card-avatar">${s.foto ? `<img src="${s.foto}">` : `<i class="fas fa-user-circle"></i>`}</div>
-                    <h3>${escapeHtml(s.nombre)}</h3>
-                    <span class="card-badge">${escapeHtml(s.especialidad || s.categoria)}</span>
-                </div>
-                <div class="card-body">
-                    ${renderStars(s.promedio_puntuacion, s.total_calificaciones)}
-                    <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</p>
-                    <p><i class="fab fa-whatsapp"></i> ${escapeHtml(s.telefono)}</p>
-                    ${s.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(s.descripcion.substring(0, 80))}${s.descripcion.length > 80 ? '...' : ''}</p>` : ''}
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-primary" onclick="abrirEnviarMensaje('${s.id}', '${escapeHtml(s.nombre)}')"><i class="fas fa-comment"></i> Contactar</button>
-                    <button class="btn btn-outline" onclick="verPerfil('${s.id}')"><i class="fas fa-user"></i> Perfil</button>
-                </div>
-            </div>
-        `).join('');
-        actualizarMapa();
-    } catch (err) { mostrarToast('Error al cargar profesionales', 'error'); }
-}
-
 // ==================== ENVIAR MENSAJE ====================
 window.abrirEnviarMensaje = function(profesionalId, profesionalNombre) {
     if (!currentUser) {
@@ -1087,7 +1161,7 @@ document.getElementById('btnEnviarMensaje').onclick = async () => {
         
         if (error) throw error;
         
-        mostrarToast('✅ Mensaje enviado. El profesional será notificado.', 'success');
+        mostrarToast('✅ Mensaje enviado', 'success');
         document.getElementById('modalEnviarMensaje').style.display = 'none';
         await cargarProfesionales();
         
@@ -1239,7 +1313,7 @@ async function cargarPanelCliente() {
             <div class="mensaje-item ${m.estado === 'pendiente' ? 'mensaje-pendiente' : 'mensaje-pagado'}">
                 <div><strong>Para:</strong> ${escapeHtml(m.oferentes?.nombre || 'Profesional')}</div>
                 <div><strong>Mensaje:</strong> ${escapeHtml(m.mensaje)}</div>
-                <div><strong>Estado:</strong> ${m.estado === 'pendiente' ? '⏳ Esperando pago del profesional' : '✅ Contacto pagado'}</div>
+                <div><strong>Estado:</strong> ${m.estado === 'pendiente' ? '⏳ Esperando pago' : '✅ Pagado'}</div>
                 <div><strong>Fecha:</strong> ${new Date(m.created_at).toLocaleDateString()}</div>
             </div>
         `).join('');
@@ -1303,7 +1377,7 @@ async function cargarPanelProfesional() {
         let mensajeDeuda = '';
         if (deuda > 0) {
             if (esDomingo) {
-                mensajeDeuda = '<p style="color:var(--error); font-weight:bold;">⚠️ ¡ATENCIÓN! Hoy es el último día para pagar. Si no pagas hoy, mañana tu perfil será suspendido automáticamente.</p>';
+                mensajeDeuda = '<p style="color:var(--error); font-weight:bold;">⚠️ ¡ATENCIÓN! Hoy es el último día para pagar. Si no pagas hoy, mañana tu perfil será suspendido.</p>';
             } else if (esLunes) {
                 mensajeDeuda = '<p style="color:var(--error); font-weight:bold;">⚠️ Tu perfil está SUSPENDIDO por falta de pago. Paga tu deuda para reactivarlo.</p>';
             } else {
@@ -1323,15 +1397,15 @@ async function cargarPanelProfesional() {
             </div>
             <div class="payment-info">
                 <h4><i class="fas fa-info-circle"></i> Información de pago</h4>
-                <p>📱 Transfermóvil: <strong>${ADMIN_TELEFONO}</strong> (Pago inmediato)</p>
-                <p>💵 Efectivo: Selecciona el día para la visita del cobrador</p>
-                <p><strong>⏰ Plazo:</strong> Paga antes del SÁBADO para evitar suspensión el LUNES.</p>
+                <p>📱 Transfermóvil: <strong>${ADMIN_TELEFONO}</strong></p>
+                <p>💵 Efectivo: Selecciona el día para la visita</p>
+                <p><strong>⏰ Plazo:</strong> Paga antes del SÁBADO para evitar suspensión.</p>
             </div>
         `;
         
         document.getElementById('btnPagarDeuda')?.addEventListener('click', () => {
             contactoSeleccionado = { todos: true, deuda: deuda, profesionalId: profesional.id };
-            document.getElementById('pagarContactoInfo').innerHTML = `<p><strong>Monto a pagar:</strong> $${deuda} USD</p><p>Selecciona el método de pago.</p>`;
+            document.getElementById('pagarContactoInfo').innerHTML = `<p><strong>Monto a pagar:</strong> $${deuda} USD</p>`;
             document.getElementById('modalPagarContacto').style.display = 'flex';
         });
         
@@ -1355,7 +1429,7 @@ async function cargarPanelProfesional() {
         
         content.innerHTML = mensajes.map(m => `
             <div class="mensaje-item ${m.estado === 'pendiente' ? 'mensaje-pendiente' : 'mensaje-pagado'}">
-                <div><strong>De:</strong> Cliente (${escapeHtml(m.auth?.users?.email || 'Cliente')})</div>
+                <div><strong>De:</strong> Cliente</div>
                 <div><strong>Mensaje:</strong> ${escapeHtml(m.mensaje)}</div>
                 <div><strong>Fecha:</strong> ${new Date(m.created_at).toLocaleDateString()}</div>
                 ${m.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="pagarContacto('${m.id}')" style="margin-top:8px;"><i class="fas fa-dollar-sign"></i> Pagar $3 USD</button>` : '<div><strong>✅ Pagado</strong></div>'}
@@ -1466,7 +1540,7 @@ document.getElementById('btnPagarTransfermovil').onclick = async () => {
                 estado: 'pagado',
                 metodo_pago: 'transfermovil'
             }).eq('id', contactoSeleccionado.id);
-            mostrarToast('✅ Pago registrado. El administrador confirmará.', 'success');
+            mostrarToast('✅ Pago registrado', 'success');
         }
         
         document.getElementById('modalPagarContacto').style.display = 'none';
@@ -1513,7 +1587,6 @@ document.getElementById('btnConfirmarVisita').onclick = async () => {
 };
 
 // ==================== AUTENTICACIÓN ====================
-let loginMode = 'login';
 async function manejarAuth() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -1596,7 +1669,6 @@ document.getElementById('btnRegistroCliente').onclick = () => {
     }
 };
 
-// Tabs cliente
 document.querySelectorAll('#modalPanelCliente .profile-tab').forEach(tab => {
     tab.onclick = () => {
         document.querySelectorAll('#modalPanelCliente .profile-tab').forEach(t => t.classList.remove('active'));
@@ -1606,7 +1678,6 @@ document.querySelectorAll('#modalPanelCliente .profile-tab').forEach(tab => {
     };
 });
 
-// Tabs profesional
 document.querySelectorAll('#modalPanelProfesional .profile-tab').forEach(tab => {
     tab.onclick = () => {
         document.querySelectorAll('#modalPanelProfesional .profile-tab').forEach(t => t.classList.remove('active'));
@@ -1635,16 +1706,15 @@ document.getElementById('categoriaFilter').onchange = cargarProfesionales;
 document.getElementById('provinciaFilter').onchange = function() { actualizarMunicipios('provinciaFilter', 'municipioFilter'); cargarProfesionales(); };
 document.getElementById('municipioFilter').onchange = cargarProfesionales;
 
-// Cerrar modales
 const closeButtons = ['btnClosePublicar', 'btnCloseLogin', 'btnCloseCompartir', 'btnCloseEnviarMensaje', 'btnClosePagarContacto', 'btnClosePanelCliente', 'btnClosePanelProfesional', 'btnCloseVerPerfil', 'btnCloseCalificar', 'btnCloseRecuperar', 'btnCloseRegistroCliente', 'btnCloseRegistroProfesional', 'btnCloseAdmin'];
 closeButtons.forEach(id => {
     document.getElementById(id)?.addEventListener('click', () => {
-        const modal = document.getElementById(id.replace('btnClose', 'modal'));
+        const modalId = id.replace('btnClose', 'modal');
+        const modal = document.getElementById(modalId);
         if (modal) modal.style.display = 'none';
     });
 });
 
-// Recuperación
 document.getElementById('forgotPasswordLink').onclick = (e) => { e.preventDefault(); document.getElementById('modalLogin').style.display = 'none'; document.getElementById('modalRecuperar').style.display = 'flex'; };
 document.getElementById('btnRecuperarSubmit').onclick = async () => {
     const email = document.getElementById('recuperarEmail').value.trim();
@@ -1654,21 +1724,22 @@ document.getElementById('btnRecuperarSubmit').onclick = async () => {
     else { mostrarToast('📧 Revisa tu correo', 'success'); document.getElementById('modalRecuperar').style.display = 'none'; }
 };
 
-// Switch registros
 document.getElementById('switchToClienteRegistro').onclick = (e) => { e.preventDefault(); document.getElementById('modalLogin').style.display = 'none'; document.getElementById('modalRegistroCliente').style.display = 'flex'; };
 document.getElementById('switchToProfesionalRegistro').onclick = (e) => { e.preventDefault(); document.getElementById('modalLogin').style.display = 'none'; document.getElementById('modalRegistroProfesional').style.display = 'flex'; };
 
-// Mapa controles
 document.getElementById('mapCentroHabana')?.addEventListener('click', () => centrarMapaEnZona('Centro Habana'));
 document.getElementById('mapPlaya')?.addEventListener('click', () => centrarMapaEnZona('Playa'));
 document.getElementById('MapVedado')?.addEventListener('click', () => centrarMapaEnZona('Vedado'));
 document.getElementById('mapSantiago')?.addEventListener('click', () => centrarMapaEnZona('Santiago de Cuba'));
 document.getElementById('mapAll')?.addEventListener('click', () => { if (mapaInstance) mapaInstance.setView([23.1, -82.4], 11); mostrarToast('📍 Mostrando todos', 'info'); });
 
-// Tabs populares
+function centrarMapaEnZona(zona) {
+    const coords = ZONAS_COORDS[zona];
+    if (coords && mapaInstance) { mapaInstance.setView(coords, 13); mostrarToast(`📍 Mostrando zona: ${zona}`, 'info'); }
+}
+
 document.querySelectorAll('.popular-tab').forEach(tab => { tab.onclick = () => { document.querySelectorAll('.popular-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const tabName = tab.dataset.tab; document.getElementById('popularServicios').style.display = tabName === 'servicios' ? 'grid' : 'none'; document.getElementById('popularProfesionales').style.display = tabName === 'profesionales' ? 'grid' : 'none'; }; });
 
-// Compartir
 document.getElementById('shareWhatsApp').onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent('¡Conoce Factor Cuba! ' + window.location.href)}`, '_blank');
 document.getElementById('shareTelegram').onclick = () => window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent('¡Conoce Factor Cuba!')}`, '_blank');
 document.getElementById('copyLinkBtn').onclick = () => { navigator.clipboard.writeText(window.location.href); mostrarToast('✅ Enlace copiado', 'success'); };
@@ -1688,12 +1759,14 @@ function verificarAdminPassword() {
         actualizarStatsAdmin(); cargarAdminPendientes(); actualizarUI();
     } else { mostrarToast('❌ Contraseña incorrecta', 'error'); }
 }
+
 function checkAdminSession() {
     if (sessionStorage.getItem('adminAutenticado') === 'true') {
         adminAuthenticated = true; document.getElementById('passwordSection').style.display = 'none'; document.getElementById('adminPanelSection').style.display = 'block';
         actualizarStatsAdmin(); cargarAdminPendientes(); actualizarUI();
     }
 }
+
 window.aprobarServicio = async function(id) { if (!confirm('¿Aprobar?')) return; await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id); mostrarToast('✅ Aprobado', 'success'); cargarAdminPendientes(); cargarProfesionales(); actualizarStatsAdmin(); };
 window.rechazarServicio = async function(id) { if (!confirm('¿Rechazar?')) return; await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id); mostrarToast('❌ Rechazado', 'warning'); cargarAdminPendientes(); cargarProfesionales(); actualizarStatsAdmin(); };
 window.eliminarServicio = async function(id) { if (!confirm('¿Eliminar?')) return; await supabase.from('oferentes').delete().eq('id', id); mostrarToast('🗑️ Eliminado', 'success'); cargarAdminActual(); cargarProfesionales(); actualizarStatsAdmin(); };
@@ -1706,14 +1779,17 @@ async function cargarAdminPendientes() {
     if (!data || data.length === 0) { content.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios pendientes</div>'; return; }
     content.innerHTML = data.map(s => `<div class="service-item service-pendiente"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</div></div>`).join('');
 }
+
 async function cargarAdminAprobados() {
     adminTabActual = 'aprobados'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*').eq('estado', 'aprobado');
     content.innerHTML = data?.map(s => `<div class="service-item service-aprobado"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</div></div>`).join('') || '<p>No hay servicios aprobados</p>';
 }
+
 async function cargarAdminTodos() {
     adminTabActual = 'todos'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*');
     content.innerHTML = data?.map(s => `<div class="service-item ${s.estado === 'aprobado' ? 'service-aprobado' : 'service-pendiente'}"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${s.estado} - ${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions">${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">Rechazar</button>` : ''}<button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</div></div>`).join('') || '<p>No hay servicios</p>';
 }
+
 async function cargarAdminVisitas() {
     adminTabActual = 'visitas'; const content = document.getElementById('adminContent'); content.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-pulse"></i></div>';
     
@@ -1768,8 +1844,8 @@ async function actualizarStatsAdmin() {
     document.getElementById('adminVisitasPendientes').textContent = visitas.count || 0;
 }
 
-// Eventos admin
 document.getElementById('btnAdmin').onclick = () => { document.getElementById('modalAdmin').style.display = 'flex'; if (adminAuthenticated) { document.getElementById('passwordSection').style.display = 'none'; document.getElementById('adminPanelSection').style.display = 'block'; actualizarStatsAdmin(); cargarAdminPendientes(); } else { document.getElementById('passwordSection').style.display = 'block'; document.getElementById('adminPanelSection').style.display = 'none'; document.getElementById('adminPasswordInput').value = ''; } };
+document.getElementById('btnCloseAdmin').onclick = () => document.getElementById('modalAdmin').style.display = 'none';
 document.getElementById('adminTabPendientes').onclick = cargarAdminPendientes;
 document.getElementById('adminTabAprobados').onclick = cargarAdminAprobados;
 document.getElementById('adminTabTodos').onclick = cargarAdminTodos;
@@ -1778,7 +1854,6 @@ document.getElementById('verifyAdminBtn').onclick = verificarAdminPassword;
 
 window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 
-// Inicializar
 async function init() { 
     cargarProvincias();
     document.getElementById('profProvincia')?.addEventListener('change', function() { actualizarMunicipios('profProvincia', 'profMunicipio'); });
