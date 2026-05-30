@@ -374,7 +374,7 @@
     </div>
     
     <div class="section-title"><i class="fas fa-users"></i> Profesionales Destacados</div>
-    <div class="professionals-grid" id="listaProfesionales"><div style="text-align: center; padding: 60px;"><i class="fas fa-spinner fa-pulse" style="font-size: 48px; color: var(--primary);"></i><p>Cargando profesionales...</p></div></div>
+    <div class="professionals-grid" id="listaProfesionales"><div style="text-align: center; padding: 60px;"><i class="fas fa-spinner fa-pulse" style="font-size: 48px; color: var(--primary);"></i><p>Cargando...</p></div></div>
 </div>
 
 <footer class="footer"><div class="container"><p>Factor Cuba - Conectando la economía cubana</p><p style="margin-top: 10px;">© 2025 - Todos los derechos reservados</p></div></footer>
@@ -446,7 +446,7 @@ let marcadorUbicacion = null;
 const provinciasYMunicipios = {
     'Pinar del Río': ['Pinar del Río', 'Sandino', 'San Juan y Martínez', 'Viñales', 'Consolación del Sur', 'Mantua', 'Minas de Matahambre', 'Los Palacios', 'Guane', 'La Palma', 'Bahía Honda', 'Candelaria', 'San Cristóbal'],
     'Artemisa': ['Artemisa', 'Guanajay', 'Güira de Melena', 'Alquízar', 'Bahía Honda', 'Bauta', 'Caimito', 'Mariel', 'San Antonio de los Baños', 'San Cristóbal'],
-    'La Habana': ['Centro Habana', 'Plaza de la Revolución', 'Playa', 'Vedado', 'Habana Vieja', '10 de Octubre', 'Marianao', 'La Lisa', 'Boyeros', 'Arroyo Naranjo', 'Cerro', 'Guanabacoa', 'San Miguel del Padrón', 'Cotorro', 'Regla', 'La Habana del Este'],
+    'La Habana': ['Centro Habana', 'Playa', 'Vedado', 'Habana Vieja', '10 de Octubre', 'Marianao', 'La Lisa', 'Boyeros', 'Arroyo Naranjo', 'Cerro', 'Guanabacoa', 'San Miguel del Padrón', 'Cotorro', 'Regla', 'La Habana del Este', 'Plaza de la Revolución'],
     'Mayabeque': ['San José de las Lajas', 'Jaruco', 'Santa Cruz del Norte', 'Madruga', 'Nueva Paz', 'Bejucal', 'San Nicolás', 'Güines', 'Melena del Sur', 'Batabanó', 'Quivicán'],
     'Matanzas': ['Matanzas', 'Cárdenas', 'Colón', 'Jovellanos', 'Limonar', 'Pedro Betancourt', 'Perico', 'Unión de Reyes', 'Calimete', 'Jagüey Grande', 'Los Arabos', 'Martí', 'Varadero'],
     'Cienfuegos': ['Cienfuegos', 'Aguada de Pasajeros', 'Rodas', 'Palmira', 'Lajas', 'Cruces', 'Cumanayagua', 'Abreus'],
@@ -857,8 +857,6 @@ async function cargarAdminPanel() {
     const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
     const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
     const aprobadosCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
-    
-    const { data: serviciosPendientes } = await supabase.from('oferentes').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
     
     let html = `
         <div class="admin-stats">
