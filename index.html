@@ -15,11 +15,6 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     
-    <!-- Flatpickr para selector de fecha -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
     
     <style>
@@ -31,13 +26,9 @@
             --primary-light: #e8f0f7;
             --secondary: #5A7D9A;
             --success: #10b981;
-            --success-light: #d1fae5;
             --error: #ef4444;
-            --error-light: #fee2e2;
             --warning: #f59e0b;
-            --warning-light: #fed7aa;
             --info: #3b82f6;
-            --info-light: #dbeafe;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
             --text-muted: #94a3b8;
@@ -47,8 +38,6 @@
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-            --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
             --radius-xl: 24px;
@@ -64,11 +53,6 @@
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
         }
         
         .container { max-width: 1400px; margin: 0 auto; padding: 0 32px; }
@@ -111,7 +95,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            -webkit-text-fill-color: white;
             color: white;
             box-shadow: var(--shadow-md);
         }
@@ -130,14 +113,12 @@
             font-family: 'Inter', sans-serif;
         }
         
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: var(--shadow-sm); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); filter: brightness(1.05); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
         .btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
-        .btn-outline:hover { background: var(--primary-light); transform: translateY(-2px); }
+        .btn-outline:hover { background: var(--primary-light); }
         .btn-danger { background: linear-gradient(135deg, var(--error), #b91c1c); color: white; }
-        .btn-danger:hover { transform: translateY(-2px); }
         .btn-success { background: linear-gradient(135deg, var(--success), #059669); color: white; }
-        .btn-success:hover { transform: translateY(-2px); }
         .btn-admin { background: linear-gradient(135deg, var(--secondary), #4a627a); color: white; }
         .btn-sm { padding: 6px 16px; font-size: 12px; }
         
@@ -152,11 +133,9 @@
             align-items: center;
             gap: 8px;
             background: var(--primary-light);
-            border: 1px solid rgba(44, 95, 138, 0.2);
             border-radius: 100px;
             padding: 6px 16px;
             font-size: 13px;
-            font-weight: 500;
             color: var(--primary);
             margin-bottom: 24px;
         }
@@ -183,23 +162,7 @@
             gap: 12px;
             font-style: italic;
             color: var(--text-secondary);
-            border: 1px solid rgba(44, 95, 138, 0.15);
-            backdrop-filter: blur(10px);
         }
-        
-        .motivational-quote i { color: var(--warning); }
-        
-        .admin-contact {
-            background: var(--primary-light);
-            padding: 12px 20px;
-            border-radius: var(--radius-md);
-            text-align: center;
-            margin: 20px 0;
-            font-size: 14px;
-        }
-        
-        .admin-contact i { color: var(--primary); margin-right: 8px; }
-        .admin-contact strong { color: var(--primary); font-size: 16px; }
         
         .stats-grid {
             display: grid;
@@ -218,66 +181,19 @@
             box-shadow: var(--shadow-sm);
         }
         
-        .stat-card:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: var(--shadow-lg); }
+        .stat-card:hover { transform: translateY(-4px); border-color: var(--primary); }
         .stat-number { font-size: 44px; font-weight: 800; color: var(--primary); line-height: 1; }
         .stat-label { font-size: 14px; color: var(--text-secondary); margin-top: 8px; }
         
-        .deuda-alerta {
-            background: var(--warning-light);
-            border-left: 4px solid var(--warning);
-            padding: 16px;
-            margin-bottom: 20px;
-            border-radius: var(--radius-md);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        
-        .deuda-alerta h3 { color: var(--warning); margin-bottom: 8px; font-size: 16px; }
-        .deuda-alerta p { margin: 4px 0; font-size: 14px; }
-        .deuda-monto { font-size: 24px; font-weight: 800; color: var(--warning); }
-        
-        .mensaje-item {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-lg);
-            padding: 16px;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--primary);
-        }
-        
-        .mensaje-pendiente { border-left-color: var(--warning); }
-        .mensaje-pagado { border-left-color: var(--success); }
-        
-        .profile-tabs {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 12px;
-            flex-wrap: wrap;
-        }
-        
-        .profile-tab {
-            padding: 10px 24px;
-            background: none;
-            border: none;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s;
-            border-radius: var(--radius-md);
-        }
-        
-        .profile-tab.active {
-            background: var(--primary);
-            color: white;
-        }
+        .rating { display: flex; align-items: center; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
+        .stars { display: flex; gap: 4px; }
+        .star { font-size: 14px; cursor: pointer; color: #cbd5e1; }
+        .star.active, .star.hover { color: var(--warning); }
+        .rating-value { font-size: 14px; font-weight: 600; color: var(--primary); }
+        .rating-count { font-size: 12px; color: var(--text-muted); }
         
         .popular-tabs { display: flex; gap: 16px; margin: 40px 0 24px; border-bottom: 2px solid var(--border); padding-bottom: 12px; flex-wrap: wrap; }
-        .popular-tab { padding: 10px 24px; background: none; border: none; font-size: 15px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all 0.3s; border-radius: var(--radius-md); }
+        .popular-tab { padding: 10px 24px; background: none; border: none; font-size: 15px; font-weight: 600; color: var(--text-secondary); cursor: pointer; border-radius: var(--radius-md); }
         .popular-tab.active { background: var(--primary); color: white; }
         .popular-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
         .popular-card { background: var(--bg-primary); border-radius: var(--radius-lg); padding: 20px; display: flex; align-items: center; gap: 16px; border: 1px solid var(--border); cursor: pointer; transition: all 0.3s; }
@@ -290,12 +206,13 @@
         
         .map-container { margin: 32px 0; border-radius: var(--radius-xl); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow-md); }
         #mapa { height: 400px; width: 100%; background: #e2e8f0; }
-        .map-controls { margin: 12px 0; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .map-small { height: 250px; width: 100%; border-radius: var(--radius-md); margin-top: 8px; border: 1px solid var(--border); }
+        .location-info { background: var(--info); color: white; padding: 8px; border-radius: var(--radius-md); font-size: 12px; text-align: center; margin-top: 8px; }
         
         .filters { display: flex; gap: 16px; flex-wrap: wrap; margin: 32px 0; background: var(--bg-primary); padding: 20px 24px; border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
-        .search-input { flex: 1; padding: 12px 20px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); font-size: 14px; transition: all 0.2s; }
-        .search-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.1); }
-        select { padding: 12px 20px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); cursor: pointer; font-size: 14px; }
+        .search-input { flex: 1; padding: 12px 20px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 14px; }
+        .search-input:focus { outline: none; border-color: var(--primary); }
+        select { padding: 12px 20px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; }
         .section-title { font-size: 32px; font-weight: 700; margin: 48px 0 24px; text-align: center; color: var(--text-primary); }
         .section-title i { color: var(--primary); margin-right: 12px; }
         
@@ -303,77 +220,50 @@
         .professional-card { background: var(--bg-primary); border-radius: var(--radius-xl); overflow: hidden; transition: all 0.3s ease; border: 1px solid var(--border); animation: fadeInUp 0.5s ease; box-shadow: var(--shadow-sm); }
         .professional-card:hover { transform: translateY(-6px); border-color: var(--primary); box-shadow: var(--shadow-xl); }
         .card-header { background: linear-gradient(135deg, var(--primary-light), rgba(44, 95, 138, 0.05)); padding: 24px; text-align: center; border-bottom: 1px solid var(--border); }
-        .card-avatar { width: 88px; height: 88px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; margin: 0 auto 16px; overflow: hidden; box-shadow: var(--shadow-md); }
+        .card-avatar { width: 88px; height: 88px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; margin: 0 auto 16px; overflow: hidden; }
         .card-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .card-header h3 { font-size: 20px; margin-bottom: 6px; color: var(--text-primary); }
-        .card-badge { display: inline-block; padding: 4px 14px; background: rgba(44, 95, 138, 0.12); border-radius: 20px; font-size: 12px; font-weight: 500; color: var(--primary); }
+        .card-badge { display: inline-block; padding: 4px 14px; background: rgba(44, 95, 138, 0.12); border-radius: 20px; font-size: 12px; color: var(--primary); }
         .card-body { padding: 20px 24px; }
         .card-body p { margin: 10px 0; color: var(--text-secondary); font-size: 14px; display: flex; align-items: center; gap: 10px; }
         .card-body i { width: 20px; color: var(--primary); }
         .card-footer { padding: 16px 20px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-wrap: wrap; }
         .card-footer button { flex: 1; }
         
-        .perfil-suspendido {
-            opacity: 0.6;
-            filter: grayscale(0.3);
-            position: relative;
-        }
-        .perfil-suspendido::after {
-            content: "⚠️ SUSPENDIDO";
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--error);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-        
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 2000; animation: fadeInUp 0.3s ease; }
         .modal-content { background: var(--bg-primary); border-radius: var(--radius-xl); padding: 32px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; border: 1px solid var(--border); box-shadow: var(--shadow-xl); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
         .modal-header h2 { font-size: 24px; color: var(--primary); }
-        .close-modal { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--text-secondary); transition: all 0.2s; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-        .close-modal:hover { background: var(--error-light); color: var(--error); }
+        .close-modal { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--text-secondary); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .close-modal:hover { background: var(--error); color: white; }
         
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text-secondary); }
         .form-group input, .form-group select, .form-group textarea {
             width: 100%; padding: 12px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md);
-            color: var(--text-primary); font-size: 14px; transition: all 0.2s; font-family: 'Inter', sans-serif;
+            color: var(--text-primary); font-size: 14px; font-family: 'Inter', sans-serif;
         }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.1);
         }
         
         .row-2cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        
-        .file-input-label { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-secondary); border: 1px dashed var(--primary); border-radius: var(--radius-md); cursor: pointer; color: var(--primary); transition: all 0.2s; }
+        .file-input-label { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-secondary); border: 1px dashed var(--primary); border-radius: var(--radius-md); cursor: pointer; color: var(--primary); }
         .file-input-label:hover { background: var(--primary-light); }
         .foto-preview { margin-top: 12px; }
         .foto-preview img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); }
-        
-        .payment-info {
-            background: var(--warning-light);
-            padding: 16px;
-            border-radius: var(--radius-md);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .payment-info h4 { color: var(--warning); margin-bottom: 8px; }
-        
-        .calendario-container { margin: 16px 0; text-align: center; }
-        .flatpickr-input { width: 100%; text-align: center; cursor: pointer; }
         
         .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg-primary); border-left: 4px solid; padding: 14px 20px; border-radius: var(--radius-md); z-index: 3000; animation: slideIn 0.3s ease; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-xl); max-width: 350px; }
         .toast-success { border-left-color: var(--success); }
         .toast-error { border-left-color: var(--error); }
         .toast-info { border-left-color: var(--info); }
-        .toast-warning { border-left-color: var(--warning); }
         
         .footer { text-align: center; padding: 40px; border-top: 1px solid var(--border); margin-top: 48px; color: var(--text-muted); font-size: 13px; }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
         
         @media (max-width: 768px) {
             .container { padding: 0 20px; }
@@ -381,8 +271,6 @@
             .professionals-grid { grid-template-columns: 1fr; }
             .filters { flex-direction: column; }
             .row-2cols { grid-template-columns: 1fr; }
-            .map-controls { flex-wrap: wrap; }
-            .deuda-alerta { flex-direction: column; text-align: center; }
             .stats-grid { gap: 16px; }
             .stat-number { font-size: 32px; }
         }
@@ -405,7 +293,6 @@
                 <span id="userName" style="color: var(--primary); font-weight: 500;"></span>
             </div>
             <button class="btn btn-outline" id="btnLogin"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
-            <button class="btn btn-primary" id="btnRegistroCliente" style="display: none;"><i class="fas fa-user-circle"></i> Mi Panel</button>
             <button class="btn btn-primary" id="btnPublicar" style="display: none;"><i class="fas fa-plus-circle"></i> Publicar Servicio</button>
             <button class="btn btn-outline" id="btnCompartir" style="display: none;"><i class="fas fa-qrcode"></i> Compartir</button>
             <button class="btn btn-admin" id="btnAdmin" style="display: none;"><i class="fas fa-crown"></i> <span id="adminBadge">Admin</span></button>
@@ -418,20 +305,16 @@
     <div class="container">
         <div class="hero-badge"><i class="fas fa-star"></i> Plataforma líder en Cuba</div>
         <h1>Conectamos <span>talento cubano</span><br>con quienes lo necesitan</h1>
-        <p>Encuentra profesionales de confianza o publica tu servicio y haz crecer tu negocio. La comunidad más grande de servicios en Cuba.</p>
-        <div class="motivational-quote"><i class="fas fa-quote-left"></i> "El talento cubano no tiene límites. Juntos construimos un futuro mejor."</div>
+        <p>Encuentra profesionales de confianza o publica tu servicio y haz crecer tu negocio.</p>
+        <div class="motivational-quote"><i class="fas fa-quote-left"></i> "El talento cubano no tiene límites."</div>
     </div>
 </section>
 
 <div class="container">
-    <div class="admin-contact">
-        <i class="fas fa-phone-alt"></i> Contacto para profesionales: <strong>+53 55007966</strong> (Transfermóvil / Información)
-    </div>
-    
     <div class="stats-grid">
         <div class="stat-card"><div class="stat-number" id="totalProfesionales">0</div><div class="stat-label">Profesionales Activos</div></div>
         <div class="stat-card"><div class="stat-number" id="totalPendientes">0</div><div class="stat-label">Pendientes de Aprobación</div></div>
-        <div class="stat-card"><div class="stat-number">16</div><div class="stat-label">Provincias</div></div>
+        <div class="stat-card"><div class="stat-number">7</div><div class="stat-label">Categorías</div></div>
         <div class="stat-card"><div class="stat-number">∞</div><div class="stat-label">Posibilidades</div></div>
     </div>
     
@@ -440,27 +323,14 @@
         <button class="popular-tab" data-tab="profesionales"><i class="fas fa-star"></i> Profesionales más solicitados</button>
     </div>
     
-    <div id="popularServicios" class="popular-grid"><div style="text-align: center; padding: 40px; width: 100%;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div></div>
-    <div id="popularProfesionales" class="popular-grid" style="display: none;"><div style="text-align: center; padding: 40px; width: 100%;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div></div>
+    <div id="popularServicios" class="popular-grid"><div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div></div>
+    <div id="popularProfesionales" class="popular-grid" style="display: none;"><div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div></div>
     
     <div class="map-container"><div id="mapa"></div></div>
-    <div class="map-controls">
-        <button class="btn btn-outline btn-sm" id="mapCentroHabana"><i class="fas fa-map-marker-alt"></i> Centro Habana</button>
-        <button class="btn btn-outline btn-sm" id="mapPlaya"><i class="fas fa-map-marker-alt"></i> Playa</button>
-        <button class="btn btn-outline btn-sm" id="MapVedado"><i class="fas fa-map-marker-alt"></i> Vedado</button>
-        <button class="btn btn-outline btn-sm" id="mapSantiago"><i class="fas fa-map-marker-alt"></i> Santiago</button>
-        <button class="btn btn-outline btn-sm" id="mapAll"><i class="fas fa-globe"></i> Ver todos</button>
-    </div>
     
     <div class="filters">
         <i class="fas fa-search" style="align-self: center; color: var(--primary);"></i>
         <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, oficio o zona...">
-        <select id="provinciaFilter">
-            <option value="">Todas las provincias</option>
-        </select>
-        <select id="municipioFilter">
-            <option value="">Todos los municipios</option>
-        </select>
         <select id="categoriaFilter">
             <option value="">Todas las categorías</option>
             <option value="carpinteria">Carpintería</option>
@@ -478,211 +348,61 @@
     <div class="professionals-grid" id="listaProfesionales"><div style="text-align: center; padding: 60px;"><i class="fas fa-spinner fa-pulse" style="font-size: 48px; color: var(--primary);"></i><p>Cargando profesionales...</p></div></div>
 </div>
 
-<footer class="footer"><div class="container"><p><i class="fas fa-heart" style="color: var(--primary);"></i> Factor Cuba - Conectando la economía cubana <i class="fas fa-heart" style="color: var(--primary);"></i></p><p style="margin-top: 10px;">© 2025 - Todos los derechos reservados</p></div></footer>
+<footer class="footer"><div class="container"><p>Factor Cuba - Conectando la economía cubana</p><p style="margin-top: 10px;">© 2025 - Todos los derechos reservados</p></div></footer>
 
-<!-- ==================== MODALES ==================== -->
-
-<!-- MODAL LOGIN -->
+<!-- MODALES -->
 <div id="modalLogin" class="modal">
     <div class="modal-content">
-        <div class="modal-header"><h2 id="modalLoginTitle"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</h2><button class="close-modal" id="btnCloseLogin">&times;</button></div>
-        <div class="form-group"><label><i class="fas fa-envelope"></i> Correo Electrónico</label><input type="email" id="loginEmail" placeholder="tu@email.com"></div>
-        <div class="form-group"><label><i class="fas fa-lock"></i> Contraseña</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
-        <button class="btn btn-primary" id="btnLoginSubmit" style="width: 100%;"><i class="fas fa-arrow-right"></i> Ingresar</button>
-        <p style="margin-top: 16px; text-align: center;">
-            <a href="#" id="forgotPasswordLink" style="color: var(--primary); font-size: 13px;"><i class="fas fa-key"></i> ¿Olvidaste tu contraseña?</a>
-        </p>
-        <p style="margin-top: 12px; text-align: center;">
-            <a href="#" id="switchToClienteRegistro" style="color: var(--primary);">¿Eres cliente? Regístrate</a> |
-            <a href="#" id="switchToProfesionalRegistro" style="color: var(--success);">¿Eres profesional? Regístrate</a>
-        </p>
+        <div class="modal-header"><h2 id="modalLoginTitle">Iniciar Sesión</h2><button class="close-modal" id="btnCloseLogin">&times;</button></div>
+        <div class="form-group"><label>Correo Electrónico</label><input type="email" id="loginEmail" placeholder="tu@email.com"></div>
+        <div class="form-group"><label>Contraseña</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+        <button class="btn btn-primary" id="btnLoginSubmit" style="width: 100%;">Ingresar</button>
+        <p style="margin-top: 16px; text-align: center;"><a href="#" id="switchAuthMode" style="color: var(--primary);">¿No tienes cuenta? Regístrate</a></p>
     </div>
 </div>
 
-<!-- MODAL REGISTRO CLIENTE -->
-<div id="modalRegistroCliente" class="modal">
+<div id="modalRegistro" class="modal">
     <div class="modal-content">
-        <div class="modal-header"><h2><i class="fas fa-user-plus"></i> Registro de Cliente</h2><button class="close-modal" id="btnCloseRegistroCliente">&times;</button></div>
-        <form id="registroClienteForm">
-            <div class="form-group"><label><i class="fas fa-envelope"></i> Correo Electrónico *</label><input type="email" id="clienteEmail" required placeholder="tu@email.com"></div>
-            <div class="form-group"><label><i class="fas fa-phone"></i> Teléfono (WhatsApp)</label><input type="tel" id="clienteTelefono" placeholder="+53 5XXXXXXXX"></div>
-            <div class="form-group"><label><i class="fas fa-lock"></i> Contraseña *</label><input type="password" id="clientePassword" required placeholder="••••••••"></div>
-            <div class="form-group"><label><i class="fas fa-lock"></i> Confirmar Contraseña *</label><input type="password" id="clientePasswordConfirm" required placeholder="••••••••"></div>
-            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;"><i class="fas fa-info-circle"></i> Recibirás un correo de verificación.</p>
-            <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-envelope"></i> Registrarme</button>
+        <div class="modal-header"><h2>Registrarse</h2><button class="close-modal" id="btnCloseRegistro">&times;</button></div>
+        <form id="registroForm">
+            <div class="form-group"><label>Correo Electrónico *</label><input type="email" id="regEmail" required></div>
+            <div class="form-group"><label>Teléfono (WhatsApp)</label><input type="tel" id="regTelefono" placeholder="+53 5XXXXXXXX"></div>
+            <div class="form-group"><label>Contraseña *</label><input type="password" id="regPassword" required></div>
+            <div class="form-group"><label>Confirmar Contraseña *</label><input type="password" id="regPasswordConfirm" required></div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Registrarse</button>
         </form>
     </div>
 </div>
 
-<!-- MODAL REGISTRO PROFESIONAL -->
-<div id="modalRegistroProfesional" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h2><i class="fas fa-briefcase"></i> Registro de Profesional</h2><button class="close-modal" id="btnCloseRegistroProfesional">&times;</button></div>
-        <div class="payment-info">
-            <h4><i class="fas fa-dollar-sign"></i> Modelo de pago</h4>
-            <p><strong>$3 USD por contacto</strong> - Solo pagas cuando un cliente te contacta.</p>
-            <p style="font-size: 12px; margin-top: 8px;">✅ Sin comisiones | ✅ Pagas solo por resultados | ✅ Pago semanal acumulado</p>
-            <p><strong>⏰ Plazo de pago:</strong> Tienes de lunes a sábado para pagar. Si el domingo tienes deuda, el lunes tu perfil se suspenderá automáticamente.</p>
-        </div>
-        <form id="registroProfesionalForm">
-            <div class="form-group"><label><i class="fas fa-store"></i> Nombre del Negocio *</label><input type="text" id="profNombre" required placeholder="Ej: Carpintería La Habana"></div>
-            <div class="form-group"><label><i class="fas fa-tag"></i> Categoría *</label><select id="profCategoria" required><option value="carpinteria">Carpintería</option><option value="construccion">Construcción</option><option value="electricidad">Electricidad</option><option value="soldadura">Soldadura</option><option value="reparaciones">Reparaciones</option><option value="transporte">Transporte</option><option value="otros">Otros Servicios</option></select></div>
-            <div class="row-2cols">
-                <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Provincia *</label><select id="profProvincia" required><option value="">Selecciona provincia</option></select></div>
-                <div class="form-group"><label><i class="fas fa-city"></i> Municipio *</label><select id="profMunicipio" required disabled><option value="">Primero selecciona provincia</option></select></div>
-            </div>
-            <div class="form-group"><label><i class="fas fa-phone"></i> Teléfono *</label><input type="tel" id="profTelefono" required placeholder="+53 5XXXXXXXX"></div>
-            <div class="form-group"><label><i class="fas fa-envelope"></i> Correo Electrónico *</label><input type="email" id="profEmail" required placeholder="tu@email.com"></div>
-            <div class="form-group"><label><i class="fas fa-lock"></i> Contraseña *</label><input type="password" id="profPassword" required placeholder="••••••••"></div>
-            <div class="form-group"><label><i class="fas fa-lock"></i> Confirmar Contraseña *</label><input type="password" id="profPasswordConfirm" required placeholder="••••••••"></div>
-            <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fas fa-check-circle"></i> Registrarme como Profesional</button>
-        </form>
-    </div>
-</div>
-
-<!-- MODAL PUBLICAR SERVICIO -->
 <div id="modalPublicar" class="modal">
     <div class="modal-content">
-        <div class="modal-header"><h2><i class="fas fa-plus-circle"></i> Publicar Servicio</h2><button class="close-modal" id="btnClosePublicar">&times;</button></div>
-        <div class="form-group"><label><i class="fas fa-store"></i> Nombre del Negocio *</label><input type="text" id="pubNombre" placeholder="Ej: Carpintería La Habana"></div>
-        <div class="form-group"><label><i class="fas fa-tag"></i> Categoría *</label><select id="pubCategoria"><option value="carpinteria">Carpintería</option><option value="construccion">Construcción</option><option value="electricidad">Electricidad</option><option value="soldadura">Soldadura</option><option value="reparaciones">Reparaciones</option><option value="transporte">Transporte</option><option value="otros">Otros Servicios</option></select></div>
-        <div class="row-2cols">
-            <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Provincia *</label><select id="pubProvincia" required><option value="">Selecciona provincia</option></select></div>
-            <div class="form-group"><label><i class="fas fa-city"></i> Municipio *</label><select id="pubMunicipio" required disabled><option value="">Primero selecciona provincia</option></select></div>
-        </div>
-        <div class="form-group"><label><i class="fas fa-map-pin"></i> Ubicación exacta en el mapa *</label><div id="ubicacionMapa" class="map-small"></div><div class="location-info" id="ubicacionInfo"><i class="fas fa-info-circle"></i> Haz clic en el mapa para marcar la ubicación de tu negocio</div><input type="hidden" id="pubLatitud" value=""><input type="hidden" id="pubLongitud" value=""></div>
-        <div class="form-group"><label><i class="fab fa-whatsapp"></i> Teléfono / WhatsApp *</label><input type="tel" id="pubTelefono" placeholder="+53 5XXXXXXXX"></div>
-        <div class="form-group"><label><i class="fas fa-image"></i> Foto de Perfil</label><label for="fotoPerfil" class="file-input-label"><i class="fas fa-cloud-upload-alt"></i> Seleccionar imagen</label><input type="file" id="fotoPerfil" accept="image/*" style="display: none;"><div class="foto-preview" id="previewFoto"></div></div>
-        <div class="form-group"><label><i class="fas fa-info-circle"></i> Descripción</label><textarea id="pubDescripcion" rows="3" placeholder="Describe tu experiencia..."></textarea></div>
-        <div class="payment-info" style="background: var(--info-light);"><i class="fas fa-shield-alt"></i> Tu servicio será revisado por un administrador.</div>
-        <button class="btn btn-primary" id="btnGuardarServicio" style="width: 100%; margin-top: 16px;"><i class="fas fa-cloud-upload-alt"></i> Publicar</button>
-        <p style="font-size: 12px; margin-top: 16px; text-align: center; color: var(--text-muted);"><i class="fas fa-clock"></i> Tu servicio será revisado por un administrador</p>
+        <div class="modal-header"><h2>Publicar Servicio</h2><button class="close-modal" id="btnClosePublicar">&times;</button></div>
+        <div class="form-group"><label>Nombre del Negocio *</label><input type="text" id="pubNombre" placeholder="Ej: Carpintería La Habana"></div>
+        <div class="form-group"><label>Categoría *</label><select id="pubCategoria"><option value="carpinteria">Carpintería</option><option value="construccion">Construcción</option><option value="electricidad">Electricidad</option><option value="soldadura">Soldadura</option><option value="reparaciones">Reparaciones</option><option value="transporte">Transporte</option><option value="otros">Otros Servicios</option></select></div>
+        <div class="form-group"><label>Zona / Municipio *</label><input type="text" id="pubZona" placeholder="Ej: Centro Habana, Playa, Vedado"></div>
+        <div class="form-group"><label>Ubicación exacta en el mapa</label><div id="ubicacionMapa" class="map-small"></div><div class="location-info" id="ubicacionInfo">Haz clic en el mapa para marcar tu ubicación</div><input type="hidden" id="pubLatitud" value=""><input type="hidden" id="pubLongitud" value=""></div>
+        <div class="form-group"><label>Teléfono / WhatsApp *</label><input type="tel" id="pubTelefono" placeholder="+53 5XXXXXXXX"></div>
+        <div class="form-group"><label>Foto de Perfil</label><label for="fotoPerfil" class="file-input-label"><i class="fas fa-cloud-upload-alt"></i> Seleccionar imagen</label><input type="file" id="fotoPerfil" accept="image/*" style="display: none;"><div class="foto-preview" id="previewFoto"></div></div>
+        <div class="form-group"><label>Descripción</label><textarea id="pubDescripcion" rows="3" placeholder="Describe tu experiencia..."></textarea></div>
+        <button class="btn btn-primary" id="btnGuardarServicio" style="width: 100%;">Publicar Servicio</button>
+        <p style="font-size: 12px; margin-top: 16px; text-align: center;">Tu servicio será revisado por un administrador</p>
     </div>
 </div>
 
-<!-- MODAL PANEL CLIENTE -->
-<div id="modalPanelCliente" class="modal">
-    <div class="modal-content" style="max-width: 700px;">
-        <div class="modal-header"><h2><i class="fas fa-user-circle"></i> Mi Panel - Cliente</h2><button class="close-modal" id="btnClosePanelCliente">&times;</button></div>
-        <div class="profile-tabs">
-            <button class="profile-tab active" data-panel-tab="mensajes">💬 Mis Mensajes</button>
-            <button class="profile-tab" data-panel-tab="calificaciones">⭐ Mis Calificaciones</button>
-            <button class="profile-tab" data-panel-tab="perfil">👤 Mi Perfil</button>
-        </div>
-        <div id="panelClienteContent"></div>
-    </div>
-</div>
-
-<!-- MODAL PANEL PROFESIONAL -->
-<div id="modalPanelProfesional" class="modal">
-    <div class="modal-content" style="max-width: 800px;">
-        <div class="modal-header"><h2><i class="fas fa-briefcase"></i> Mi Panel - Profesional</h2><button class="close-modal" id="btnClosePanelProfesional">&times;</button></div>
-        <div class="profile-tabs">
-            <button class="profile-tab active" data-prof-panel-tab="resumen">📊 Resumen</button>
-            <button class="profile-tab" data-prof-panel-tab="mensajes">💬 Mensajes Recibidos</button>
-            <button class="profile-tab" data-prof-panel-tab="pagos">💰 Pagos</button>
-            <button class="profile-tab" data-prof-panel-tab="perfil">👤 Mi Perfil</button>
-        </div>
-        <div id="panelProfesionalContent"></div>
-    </div>
-</div>
-
-<!-- MODAL VER PERFIL -->
-<div id="modalVerPerfil" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h2><i class="fas fa-user-circle"></i> Perfil Profesional</h2><button class="close-modal" id="btnCloseVerPerfil">&times;</button></div>
-        <div id="verPerfilContent"></div>
-    </div>
-</div>
-
-<!-- MODAL CALIFICAR -->
-<div id="modalCalificar" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h2><i class="fas fa-star"></i> Calificar Servicio</h2><button class="close-modal" id="btnCloseCalificar">&times;</button></div>
-        <div class="rating-modal" style="text-align: center;">
-            <h3 id="calificarNombre"></h3>
-            <div class="stars" id="calificarStars" style="justify-content: center; margin: 20px 0;">
-                <i class="fas fa-star star" data-rating="1"></i>
-                <i class="fas fa-star star" data-rating="2"></i>
-                <i class="fas fa-star star" data-rating="3"></i>
-                <i class="fas fa-star star" data-rating="4"></i>
-                <i class="fas fa-star star" data-rating="5"></i>
-            </div>
-            <textarea id="calificarComentario" rows="3" placeholder="Escribe tu experiencia con este profesional (opcional)..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px;"></textarea>
-            <button class="btn btn-primary" id="btnEnviarCalificacion" style="width: 100%;"><i class="fas fa-star"></i> Enviar Calificación</button>
-            <p style="font-size: 12px; margin-top: 12px; color: var(--text-muted);">Tu calificación ayuda a otros clientes a elegir mejores profesionales</p>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL ENVIAR MENSAJE -->
-<div id="modalEnviarMensaje" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h2><i class="fas fa-paper-plane"></i> Contactar al Profesional</h2><button class="close-modal" id="btnCloseEnviarMensaje">&times;</button></div>
-        <div id="mensajeProfesionalInfo"></div>
-        <div class="form-group"><label><i class="fas fa-comment"></i> Tu mensaje</label><textarea id="mensajeTexto" rows="4" placeholder="Escribe tu mensaje aquí..."></textarea></div>
-        <button class="btn btn-primary" id="btnEnviarMensaje" style="width: 100%;"><i class="fas fa-paper-plane"></i> Enviar Mensaje</button>
-        <p style="font-size: 12px; margin-top: 12px; text-align: center; color: var(--text-muted);"><i class="fas fa-lock"></i> El profesional deberá pagar $3 USD para ver tus datos de contacto.</p>
-    </div>
-</div>
-
-<!-- MODAL PAGAR CONTACTO -->
-<div id="modalPagarContacto" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h2><i class="fas fa-dollar-sign"></i> Pagar Contacto</h2><button class="close-modal" id="btnClosePagarContacto">&times;</button></div>
-        <div id="pagarContactoInfo"></div>
-        <div class="payment-info">
-            <h4><i class="fas fa-info-circle"></i> Métodos de pago</h4>
-            <p><strong>📱 Transfermóvil:</strong> Paga inmediatamente al número <strong>+53 55007966</strong></p>
-            <p><strong>💵 Efectivo:</strong> Elige el día para que pasen a recoger el dinero a tu negocio</p>
-        </div>
-        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-            <button class="btn btn-success" id="btnPagarTransfermovil" style="flex: 1;"><i class="fas fa-mobile-alt"></i> Pagar por Transfermóvil</button>
-            <button class="btn btn-outline" id="btnPagarEfectivo" style="flex: 1;"><i class="fas fa-money-bill"></i> Pagar en Efectivo</button>
-        </div>
-        <div id="efectivoCalendario" style="display: none; margin-top: 20px;">
-            <p><strong>Selecciona el día para la visita del cobrador:</strong></p>
-            <input type="text" id="fechaVisitaInput" class="form-control" placeholder="Selecciona una fecha">
-            <button class="btn btn-primary" id="btnConfirmarVisita" style="width: 100%; margin-top: 12px;"><i class="fas fa-calendar-check"></i> Confirmar visita</button>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL RECUPERAR CONTRASEÑA -->
-<div id="modalRecuperar" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h2><i class="fas fa-key"></i> Recuperar Contraseña</h2><button class="close-modal" id="btnCloseRecuperar">&times;</button></div>
-        <div class="form-group"><label><i class="fas fa-envelope"></i> Correo Electrónico</label><input type="email" id="recuperarEmail" placeholder="tu@email.com"></div>
-        <button class="btn btn-primary" id="btnRecuperarSubmit" style="width: 100%;"><i class="fas fa-paper-plane"></i> Enviar enlace</button>
-    </div>
-</div>
-
-<!-- MODAL COMPARTIR -->
-<div id="modalCompartir" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h2><i class="fas fa-qrcode"></i> Compartir Factor Cuba</h2><button class="close-modal" id="btnCloseCompartir">&times;</button></div>
-        <div class="qr-container" id="qrContainer"><div style="text-align: center;"><i class="fas fa-spinner fa-pulse"></i><p>Generando QR...</p></div></div>
-        <div class="share-buttons"><button class="btn btn-primary" id="shareWhatsApp"><i class="fab fa-whatsapp"></i> WhatsApp</button><button class="btn btn-primary" id="shareTelegram"><i class="fab fa-telegram"></i> Telegram</button><button class="btn btn-outline" id="copyLinkBtn"><i class="fas fa-copy"></i> Copiar</button></div>
-    </div>
-</div>
-
-<!-- MODAL ADMIN -->
 <div id="modalAdmin" class="modal">
-    <div class="modal-content" style="max-width: 900px;">
-        <div class="modal-header"><h2><i class="fas fa-crown"></i> Panel de Administrador</h2><button class="close-modal" id="btnCloseAdmin">&times;</button></div>
-        <div class="password-container" id="passwordSection" style="background: var(--primary-light); padding: 20px; border-radius: 16px;"><h3><i class="fas fa-lock"></i> Verificación</h3><input type="password" id="adminPasswordInput" placeholder="Contraseña de administrador" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin: 10px 0;"><button class="btn btn-primary" id="verifyAdminBtn" style="width: 100%;"><i class="fas fa-check"></i> Verificar</button></div>
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header"><h2>Panel de Administrador</h2><button class="close-modal" id="btnCloseAdmin">&times;</button></div>
+        <div class="password-container" id="passwordSection"><h3>Verificación</h3><input type="password" id="adminPasswordInput" placeholder="Contraseña de administrador"><button class="btn btn-primary" id="verifyAdminBtn" style="width: 100%; margin-top: 10px;">Verificar</button></div>
         <div id="adminPanelSection" style="display: none;">
-            <div class="admin-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
-                <div class="admin-stat" style="background: var(--primary-light); padding: 16px; border-radius: var(--radius-lg); text-align: center;"><div class="stat-number" id="adminTotal">0</div><div>Total</div></div>
-                <div class="admin-stat"><div class="stat-number" id="adminPendientes">0</div><div>Servicios Pendientes</div></div>
+            <div class="admin-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+                <div class="admin-stat"><div class="stat-number" id="adminTotal">0</div><div>Total</div></div>
+                <div class="admin-stat"><div class="stat-number" id="adminPendientes">0</div><div>Pendientes</div></div>
                 <div class="admin-stat"><div class="stat-number" id="adminAprobados">0</div><div>Aprobados</div></div>
-                <div class="admin-stat"><div class="stat-number" id="adminVisitasPendientes">0</div><div>Visitas Pendientes</div></div>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
-                <button class="btn btn-outline" id="adminTabPendientes"><i class="fas fa-clock"></i> Servicios Pendientes</button>
-                <button class="btn btn-outline" id="adminTabAprobados"><i class="fas fa-check-circle"></i> Aprobados</button>
-                <button class="btn btn-outline" id="adminTabTodos"><i class="fas fa-list"></i> Todos</button>
-                <button class="btn btn-outline" id="adminTabVisitas"><i class="fas fa-calendar-alt"></i> Visitas Programadas</button>
+                <button class="btn btn-outline" id="adminTabPendientes">⏳ Pendientes</button>
+                <button class="btn btn-outline" id="adminTabAprobados">✅ Aprobados</button>
+                <button class="btn btn-outline" id="adminTabTodos">📋 Todos</button>
             </div>
             <div id="adminContent"></div>
         </div>
@@ -696,52 +416,26 @@ const SUPABASE_ANON_KEY = 'sb_publishable_FkeG4_g-P6g3Nqi1YYgFBQ_7nrnIW-P';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const ADMIN_PASSWORD = "FactorCuba2025";
-const ADMIN_TELEFONO = "+53 55007966";
-
 let adminAuthenticated = false;
 let currentUser = null;
-let currentUserTipo = null;
 let todosLosServicios = [];
 let mapaInstance = null;
 let mapaUbicacionInstance = null;
 let marcadorUbicacion = null;
-let profesionalSeleccionado = null;
-let servicioActualCalificar = null;
-let puntuacionSeleccionada = 0;
-let contactoSeleccionado = null;
-let flatpickrInstance = null;
-
-// ==================== PROVINCIAS Y MUNICIPIOS DE CUBA ====================
-const provinciasYMunicipios = {
-    'Pinar del Río': ['Pinar del Río', 'Sandino', 'San Juan y Martínez', 'Viñales', 'Consolación del Sur', 'Mantua', 'Minas de Matahambre', 'Los Palacios', 'Guane', 'La Palma', 'Bahía Honda', 'Candelaria', 'San Cristóbal'],
-    'Artemisa': ['Artemisa', 'Guanajay', 'Güira de Melena', 'Alquízar', 'Bahía Honda', 'Bauta', 'Caimito', 'Mariel', 'San Antonio de los Baños', 'San Cristóbal'],
-    'La Habana': ['Centro Habana', 'Playa', 'Vedado', 'Habana Vieja', '10 de Octubre', 'Marianao', 'La Lisa', 'Boyeros', 'Arroyo Naranjo', 'Cerro', 'Guanabacoa', 'San Miguel del Padrón', 'Cotorro', 'Regla', 'La Habana del Este'],
-    'Mayabeque': ['San José de las Lajas', 'Jaruco', 'Santa Cruz del Norte', 'Madruga', 'Nueva Paz', 'Bejucal', 'San Nicolás', 'Güines', 'Melena del Sur', 'Batabanó', 'Quivicán'],
-    'Matanzas': ['Matanzas', 'Cárdenas', 'Colón', 'Jovellanos', 'Limonar', 'Pedro Betancourt', 'Perico', 'Unión de Reyes', 'Calimete', 'Jagüey Grande', 'Los Arabos', 'Martí', 'Varadero'],
-    'Cienfuegos': ['Cienfuegos', 'Aguada de Pasajeros', 'Rodas', 'Palmira', 'Lajas', 'Cruces', 'Cumanayagua', 'Abreus'],
-    'Villa Clara': ['Santa Clara', 'Placetas', 'Sagua la Grande', 'Encrucijada', 'Camajuaní', 'Caibarién', 'Remedios', 'Manicaragua', 'Cifuentes', 'Santo Domingo', 'Ranchuelo', 'Quemado de Güines'],
-    'Sancti Spíritus': ['Sancti Spíritus', 'Cabaiguán', 'Fomento', 'Jatibonico', 'La Sierpe', 'Taguasco', 'Trinidad', 'Yaguajay'],
-    'Ciego de Ávila': ['Ciego de Ávila', 'Morón', 'Chambas', 'Florencia', 'Majagua', 'Primero de Enero', 'Venezuela', 'Baraguá', 'Ciro Redondo'],
-    'Camagüey': ['Camagüey', 'Florida', 'Nuevitas', 'Vertientes', 'Jimaguayú', 'Esmeralda', 'Minas', 'Sibanicú', 'Guáimaro', 'Santa Cruz del Sur', 'Najasa'],
-    'Las Tunas': ['Las Tunas', 'Puerto Padre', 'Amancio', 'Jobabo', 'Colombia', 'Manatí', 'Majibacoa', 'Jesús Menéndez'],
-    'Holguín': ['Holguín', 'Banes', 'Antilla', 'Mayarí', 'Moa', 'Sagua de Tánamo', 'Gibara', 'Cacocum', 'Cueto', 'Frank País', 'Urbano Noris', 'Baguanos'],
-    'Granma': ['Bayamo', 'Manzanillo', 'Jiguaní', 'Yara', 'Campechuela', 'Cauto Cristo', 'Guisa', 'Media Luna', 'Niquero', 'Río Cauto', 'Buey Arriba', 'Bartolomé Masó'],
-    'Santiago de Cuba': ['Santiago de Cuba', 'Contramaestre', 'San Luis', 'Palma Soriano', 'Songo-La Maya', 'Tercer Frente', 'Guamá', 'Mella'],
-    'Guantánamo': ['Guantánamo', 'Baracoa', 'Maisí', 'San Antonio del Sur', 'Imías', 'Caimanera', 'El Salvador', 'Yateras', 'Niceto Pérez'],
-    'Isla de la Juventud': ['Nueva Gerona', 'Santa Fe', 'La Fe', 'Columbia']
-};
 
 const ZONAS_COORDS = {
-    'Centro Habana': [23.1365, -82.3810], 'Playa': [23.0949, -82.4485], 'Vedado': [23.1415, -82.3850],
-    'Habana Vieja': [23.1389, -82.3572], 'Guanabacoa': [23.1167, -82.3000], 'Santiago de Cuba': [20.0247, -75.8218],
-    'Camagüey': [21.3844, -77.9075], 'Holguín': [20.8882, -76.2631], 'Santa Clara': [22.4067, -79.9648]
+    'Centro Habana': [23.1365, -82.3810], 'Playa': [23.0949, -82.4485],
+    '10 de Octubre': [23.0833, -82.3500], 'Habana Vieja': [23.1389, -82.3572],
+    'Vedado': [23.1415, -82.3850], 'Marianao': [23.0833, -82.4167],
+    'Guanabacoa': [23.1167, -82.3000], 'Cotorro': [23.0333, -82.3167],
+    'Santiago de Cuba': [20.0247, -75.8218], 'Camagüey': [21.3844, -77.9075],
+    'Holguín': [20.8882, -76.2631], 'Santa Clara': [22.4067, -79.9648]
 };
 
-// ==================== UTILIDADES ====================
 function mostrarToast(mensaje, tipo = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${tipo}`;
-    const iconos = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
+    const iconos = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
     toast.innerHTML = `<i class="fas ${iconos[tipo] || iconos.success}"></i><span>${mensaje}</span>`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3500);
@@ -768,314 +462,6 @@ function renderStars(promedio, total) {
     return `<div class="rating"><div class="stars">${starsHtml}</div><span class="rating-value">${promedio.toFixed(1)}</span><span class="rating-count">(${total} ${total === 1 ? 'reseña' : 'reseñas'})</span></div>`;
 }
 
-// ==================== MAPA DE UBICACIÓN ====================
-function iniciarMapaUbicacion() {
-    if (mapaUbicacionInstance) mapaUbicacionInstance.remove();
-    mapaUbicacionInstance = L.map('ubicacionMapa').setView([23.1, -82.4], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaUbicacionInstance);
-    mapaUbicacionInstance.on('click', function(e) {
-        const lat = e.latlng.lat, lng = e.latlng.lng;
-        if (marcadorUbicacion) mapaUbicacionInstance.removeLayer(marcadorUbicacion);
-        marcadorUbicacion = L.marker([lat, lng]).addTo(mapaUbicacionInstance);
-        document.getElementById('pubLatitud').value = lat;
-        document.getElementById('pubLongitud').value = lng;
-        document.getElementById('ubicacionInfo').innerHTML = `<i class="fas fa-check-circle" style="color:#10b981;"></i> Ubicación marcada: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    });
-}
-
-// ==================== CARGAR PROVINCIAS ====================
-function cargarProvincias() {
-    const selects = ['profProvincia', 'pubProvincia', 'provinciaFilter'];
-    selects.forEach(id => {
-        const select = document.getElementById(id);
-        if (select) {
-            select.innerHTML = '<option value="">Selecciona provincia</option>';
-            for (const provincia of Object.keys(provinciasYMunicipios)) {
-                const option = document.createElement('option');
-                option.value = provincia;
-                option.textContent = provincia;
-                select.appendChild(option);
-            }
-        }
-    });
-}
-
-function actualizarMunicipios(provinciaSelectId, municipioSelectId) {
-    const provinciaSelect = document.getElementById(provinciaSelectId);
-    const municipioSelect = document.getElementById(municipioSelectId);
-    if (!provinciaSelect || !municipioSelect) return;
-    
-    const provincia = provinciaSelect.value;
-    municipioSelect.innerHTML = '<option value="">Primero selecciona provincia</option>';
-    municipioSelect.disabled = true;
-    
-    if (provincia && provinciasYMunicipios[provincia]) {
-        municipioSelect.disabled = false;
-        municipioSelect.innerHTML = '<option value="">Selecciona municipio</option>';
-        provinciasYMunicipios[provincia].forEach(municipio => {
-            const option = document.createElement('option');
-            option.value = municipio;
-            option.textContent = municipio;
-            municipioSelect.appendChild(option);
-        });
-    }
-}
-
-// ==================== CARGAR PROFESIONALES CON FILTROS CORREGIDOS ====================
-async function cargarProfesionales() {
-    try {
-        let query = supabase.from('oferentes').select('*');
-        
-        if (!adminAuthenticated) {
-            query = query.eq('estado', 'aprobado');
-        }
-        
-        const { data, error } = await query.order('created_at', { ascending: false });
-        if (error) throw error;
-        
-        todosLosServicios = data || [];
-        
-        // Actualizar estadísticas generales
-        const aprobados = todosLosServicios.filter(s => s.estado === 'aprobado' && s.perfil_activo !== false).length;
-        const pendientes = todosLosServicios.filter(s => s.estado === 'pendiente').length;
-        document.getElementById('totalProfesionales').textContent = aprobados;
-        document.getElementById('totalPendientes').textContent = pendientes;
-        
-        // Obtener valores de los filtros
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const provincia = document.getElementById('provinciaFilter').value;
-        const municipio = document.getElementById('municipioFilter').value;
-        const categoria = document.getElementById('categoriaFilter').value;
-        
-        // APLICAR FILTROS
-        let serviciosFiltrados = todosLosServicios.filter(s => s.estado === 'aprobado' && s.perfil_activo !== false);
-        
-        // Filtro por categoría (profesión)
-        if (categoria) {
-            serviciosFiltrados = serviciosFiltrados.filter(s => s.categoria === categoria);
-        }
-        
-        // Filtro por provincia
-        if (provincia) {
-            serviciosFiltrados = serviciosFiltrados.filter(s => s.provincia === provincia);
-        }
-        
-        // Filtro por municipio
-        if (municipio) {
-            serviciosFiltrados = serviciosFiltrados.filter(s => s.municipio === municipio);
-        }
-        
-        // Filtro por término de búsqueda
-        if (searchTerm) {
-            serviciosFiltrados = serviciosFiltrados.filter(s => 
-                (s.nombre || '').toLowerCase().includes(searchTerm) ||
-                (s.especialidad || '').toLowerCase().includes(searchTerm) ||
-                (s.municipio || '').toLowerCase().includes(searchTerm) ||
-                (s.zona || '').toLowerCase().includes(searchTerm)
-            );
-        }
-        
-        // Actualizar el mapa con los filtrados
-        actualizarMapaConFiltros(serviciosFiltrados);
-        
-        // Mostrar en la lista
-        const container = document.getElementById('listaProfesionales');
-        if (serviciosFiltrados.length === 0) {
-            container.innerHTML = '<div style="text-align:center;padding:60px;"><i class="fas fa-store-slash" style="font-size:48px;color:#cbd5e1;"></i><h3>No hay profesionales que coincidan con tu búsqueda</h3><p>Intenta con otros filtros o categorías</p></div>';
-            return;
-        }
-        
-        container.innerHTML = serviciosFiltrados.map(s => `
-            <div class="professional-card ${s.perfil_activo === false ? 'perfil-suspendido' : ''}">
-                <div class="card-header">
-                    <div class="card-avatar">${s.foto ? `<img src="${s.foto}">` : `<i class="fas fa-user-circle"></i>`}</div>
-                    <h3>${escapeHtml(s.nombre)}</h3>
-                    <span class="card-badge">${escapeHtml(s.especialidad || s.categoria)}</span>
-                </div>
-                <div class="card-body">
-                    ${renderStars(s.promedio_puntuacion, s.total_calificaciones)}
-                    <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</p>
-                    <p><i class="fab fa-whatsapp"></i> ${escapeHtml(s.telefono)}</p>
-                    ${s.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(s.descripcion.substring(0, 80))}${s.descripcion.length > 80 ? '...' : ''}</p>` : ''}
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-primary" onclick="abrirEnviarMensaje('${s.id}', '${escapeHtml(s.nombre)}')"><i class="fas fa-comment"></i> Contactar</button>
-                    <button class="btn btn-outline" onclick="verPerfil('${s.id}')"><i class="fas fa-user"></i> Perfil</button>
-                </div>
-            </div>
-        `).join('');
-        
-        // Actualizar populares con filtros
-        actualizarPopularesConFiltros(serviciosFiltrados);
-        
-    } catch (err) { 
-        mostrarToast('Error al cargar profesionales: ' + err.message, 'error'); 
-    }
-}
-
-// ==================== ACTUALIZAR MAPA SOLO CON FILTRADOS ====================
-function actualizarMapaConFiltros(serviciosFiltrados) {
-    if (!mapaInstance) {
-        mapaInstance = L.map('mapa').setView([23.1, -82.4], 11);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaInstance);
-    } else {
-        mapaInstance.eachLayer(layer => { 
-            if (layer instanceof L.Marker) mapaInstance.removeLayer(layer); 
-        });
-    }
-    
-    serviciosFiltrados.forEach(servicio => {
-        let coords = null;
-        if (servicio.latitud && servicio.longitud) {
-            coords = [servicio.latitud, servicio.longitud];
-        } else if (ZONAS_COORDS[servicio.municipio]) {
-            coords = ZONAS_COORDS[servicio.municipio];
-        } else if (ZONAS_COORDS[servicio.zona]) {
-            coords = ZONAS_COORDS[servicio.zona];
-        }
-        
-        if (coords) {
-            const marker = L.marker(coords).addTo(mapaInstance);
-            marker.bindPopup(`
-                <div style="font-family:'Inter',sans-serif;text-align:center;min-width:180px;">
-                    ${servicio.foto ? `<img src="${servicio.foto}" style="width:45px;height:45px;border-radius:50%;margin-bottom:8px;">` : `<i class="fas fa-user-circle" style="font-size:36px;color:#2c5f8a;margin-bottom:8px;"></i>`}
-                    <br><strong>${escapeHtml(servicio.nombre)}</strong>
-                    <br>📍 ${escapeHtml(servicio.municipio || servicio.zona)}, ${escapeHtml(servicio.provincia || '')}
-                    <br>🔧 ${escapeHtml(servicio.especialidad || servicio.categoria)}
-                    <br>${renderStars(servicio.promedio_puntuacion, servicio.total_calificaciones)}
-                    <hr style="margin:8px 0;">
-                    <button onclick="abrirEnviarMensaje('${servicio.id}', '${escapeHtml(servicio.nombre)}')" style="background:#2c5f8a;border:none;padding:8px 12px;border-radius:20px;color:white;cursor:pointer;width:100%;">📩 Contactar</button>
-                    <button onclick="verPerfil('${servicio.id}')" style="background:#5A7D9A;border:none;padding:4px 8px;border-radius:20px;color:white;cursor:pointer;margin-top:5px;width:100%;">👤 Ver Perfil</button>
-                </div>
-            `);
-        }
-    });
-    
-    if (serviciosFiltrados.length === 0 && mapaInstance) {
-        mapaInstance.setView([23.1, -82.4], 11);
-    }
-}
-
-// ==================== ACTUALIZAR POPULARES CON FILTROS ====================
-function actualizarPopularesConFiltros(serviciosFiltrados) {
-    const categoriasCount = {};
-    serviciosFiltrados.forEach(s => {
-        if (s.estado === 'aprobado') {
-            categoriasCount[s.categoria] = (categoriasCount[s.categoria] || 0) + 1;
-        }
-    });
-    const categoriasOrdenadas = Object.entries(categoriasCount).sort((a,b) => b[1] - a[1]).slice(0, 6);
-    const nombresCategorias = { 'carpinteria':'Carpintería','construccion':'Construcción','electricidad':'Electricidad','soldadura':'Soldadura','reparaciones':'Reparaciones','transporte':'Transporte','otros':'Otros' };
-    const iconosCategorias = { 'carpinteria':'fa-hammer','construccion':'fa-hard-hat','electricidad':'fa-bolt','soldadura':'fa-wrench','reparaciones':'fa-tools','transporte':'fa-truck','otros':'fa-briefcase' };
-    document.getElementById('popularServicios').innerHTML = categoriasOrdenadas.map(([cat, count]) => `
-        <div class="popular-card" onclick="filtrarPorCategoria('${cat}')">
-            <div class="popular-icon"><i class="fas ${iconosCategorias[cat]}"></i></div>
-            <div class="popular-info"><h4>${nombresCategorias[cat]}</h4><p>Servicios disponibles</p></div>
-            <div class="popular-count">${count}</div>
-        </div>
-    `).join('') || '<p>No hay servicios registrados</p>';
-    
-    const profesionalesDestacados = serviciosFiltrados.slice(0, 6);
-    document.getElementById('popularProfesionales').innerHTML = profesionalesDestacados.map(s => `
-        <div class="popular-card" onclick="verPerfil('${s.id}')">
-            <div class="popular-icon">${s.foto ? `<img src="${s.foto}">` : `<i class="fas fa-user-circle"></i>`}</div>
-            <div class="popular-info"><h4>${escapeHtml(s.nombre)}</h4><p>${escapeHtml(s.especialidad || s.categoria)} • ${escapeHtml(s.municipio || s.zona)}</p></div>
-            <div class="popular-count"><i class="fas fa-star"></i> Destacado</div>
-        </div>
-    `).join('') || '<p>No hay profesionales destacados</p>';
-}
-
-function filtrarPorCategoria(categoria) {
-    document.getElementById('categoriaFilter').value = categoria;
-    cargarProfesionales();
-}
-
-// ==================== VER PERFIL ====================
-window.verPerfil = async function(servicioId) {
-    const servicio = todosLosServicios.find(s => s.id === servicioId);
-    if (!servicio) return;
-    
-    const modal = document.getElementById('modalVerPerfil');
-    const content = document.getElementById('verPerfilContent');
-    
-    const { data: reseñas } = await supabase
-        .from('calificaciones')
-        .select('*')
-        .eq('servicio_id', servicioId)
-        .order('created_at', { ascending: false });
-    
-    const reseñasHtml = reseñas && reseñas.length > 0 ? `
-        <div style="margin-top:20px;">
-            <h4><i class="fas fa-comments"></i> Reseñas de clientes</h4>
-            ${reseñas.map(r => `
-                <div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:10px;">
-                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-                        <span>${new Date(r.created_at).toLocaleDateString()}</span>
-                        <div>${'⭐'.repeat(r.puntuacion)}</div>
-                    </div>
-                    ${r.comentario ? `<div>"${escapeHtml(r.comentario)}"</div>` : ''}
-                </div>
-            `).join('')}
-        </div>
-    ` : '<p style="margin-top:16px;">📝 Aún no hay reseñas.</p>';
-    
-    content.innerHTML = `
-        <div style="text-align:center;">
-            <div style="width:100px;height:100px;background:linear-gradient(135deg,#2c5f8a,#5A7D9A);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:48px;color:white;overflow:hidden;">
-                ${servicio.foto ? `<img src="${servicio.foto}" style="width:100%;height:100%;object-fit:cover;">` : `<i class="fas fa-user-circle"></i>`}
-            </div>
-            <h3>${escapeHtml(servicio.nombre)}</h3>
-            <span style="display:inline-block;padding:4px 12px;background:#e8f0f7;border-radius:20px;font-size:12px;">${escapeHtml(servicio.especialidad || servicio.categoria)}</span>
-            <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(servicio.municipio || servicio.zona)}, ${escapeHtml(servicio.provincia || '')}</p>
-            <p><i class="fab fa-whatsapp"></i> ${escapeHtml(servicio.telefono)}</p>
-            ${servicio.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(servicio.descripcion)}</p>` : ''}
-            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px;">
-                <button class="btn btn-primary" onclick="abrirEnviarMensaje('${servicio.id}', '${escapeHtml(servicio.nombre)}')"><i class="fas fa-comment"></i> Contactar</button>
-                ${currentUser && currentUserTipo === 'cliente' ? `<button class="btn btn-outline" onclick="abrirCalificar('${servicio.id}', '${escapeHtml(servicio.nombre)}')"><i class="fas fa-star"></i> Calificar</button>` : ''}
-            </div>
-            ${reseñasHtml}
-        </div>
-    `;
-    modal.style.display = 'flex';
-};
-
-// ==================== CALIFICACIONES ====================
-window.abrirCalificar = function(servicioId, servicioNombre) {
-    servicioActualCalificar = servicioId;
-    document.getElementById('calificarNombre').innerHTML = `Calificar a: <strong>${escapeHtml(servicioNombre)}</strong>`;
-    document.getElementById('calificarComentario').value = '';
-    puntuacionSeleccionada = 0;
-    document.querySelectorAll('#calificarStars .star').forEach(star => star.classList.remove('active'));
-    document.getElementById('modalCalificar').style.display = 'flex';
-};
-
-function initRatingStars() {
-    const stars = document.querySelectorAll('#calificarStars .star');
-    stars.forEach(star => {
-        star.onmouseenter = () => { const rating = parseInt(star.dataset.rating); stars.forEach((s, i) => { if (i < rating) s.classList.add('hover'); else s.classList.remove('hover'); }); };
-        star.onmouseleave = () => { stars.forEach(s => s.classList.remove('hover')); stars.forEach((s, i) => { if (i < puntuacionSeleccionada) s.classList.add('active'); else s.classList.remove('active'); }); };
-        star.onclick = () => { puntuacionSeleccionada = parseInt(star.dataset.rating); stars.forEach((s, i) => { if (i < puntuacionSeleccionada) s.classList.add('active'); else s.classList.remove('active'); }); };
-    });
-}
-
-async function enviarCalificacion() {
-    if (!servicioActualCalificar) return;
-    if (puntuacionSeleccionada === 0) { mostrarToast('Selecciona una puntuación', 'error'); return; }
-    const comentario = document.getElementById('calificarComentario').value.trim();
-    try {
-        await supabase.from('calificaciones').insert([{
-            servicio_id: servicioActualCalificar,
-            usuario_id: currentUser.id,
-            puntuacion: puntuacionSeleccionada,
-            comentario: comentario || null
-        }]);
-        mostrarToast('⭐ Calificación enviada', 'success');
-        document.getElementById('modalCalificar').style.display = 'none';
-        await cargarProfesionales();
-    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
-}
-
-// ==================== SUBIR IMAGEN ====================
 async function subirImagen(file, userId) {
     if (!file) return null;
     const ext = file.name.split('.').pop();
@@ -1092,521 +478,210 @@ async function subirImagen(file, userId) {
     }
 }
 
-// ==================== VERIFICAR TIPO DE USUARIO ====================
-async function verificarTipoUsuario() {
-    if (!currentUser) return null;
-    
-    const { data: profesional } = await supabase
-        .from('oferentes')
-        .select('id, user_id, deuda_semanal, perfil_activo, provincia, municipio')
-        .eq('user_id', currentUser.id)
-        .maybeSingle();
-    
-    if (profesional) {
-        currentUserTipo = 'profesional';
-        return { tipo: 'profesional', data: profesional };
-    }
-    
-    const { data: cliente } = await supabase
-        .from('clientes')
-        .select('id, user_id, email_verificado')
-        .eq('user_id', currentUser.id)
-        .maybeSingle();
-    
-    if (cliente) {
-        currentUserTipo = 'cliente';
-        return { tipo: 'cliente', data: cliente };
-    }
-    
-    currentUserTipo = null;
-    return null;
+// ==================== MAPA DE UBICACIÓN ====================
+function iniciarMapaUbicacion() {
+    if (mapaUbicacionInstance) mapaUbicacionInstance.remove();
+    mapaUbicacionInstance = L.map('ubicacionMapa').setView([23.1, -82.4], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaUbicacionInstance);
+    mapaUbicacionInstance.on('click', function(e) {
+        const lat = e.latlng.lat, lng = e.latlng.lng;
+        if (marcadorUbicacion) mapaUbicacionInstance.removeLayer(marcadorUbicacion);
+        marcadorUbicacion = L.marker([lat, lng]).addTo(mapaUbicacionInstance);
+        document.getElementById('pubLatitud').value = lat;
+        document.getElementById('pubLongitud').value = lng;
+        document.getElementById('ubicacionInfo').innerHTML = `<i class="fas fa-check-circle"></i> Ubicación marcada: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        document.getElementById('ubicacionInfo').style.background = '#10b981';
+    });
 }
 
-// ==================== ENVIAR MENSAJE ====================
-window.abrirEnviarMensaje = function(profesionalId, profesionalNombre) {
-    if (!currentUser) {
-        mostrarToast('Debes iniciar sesión para contactar', 'info');
-        document.getElementById('modalLogin').style.display = 'flex';
-        return;
+// ==================== MAPA PRINCIPAL ====================
+function actualizarMapa() {
+    if (!mapaInstance) {
+        mapaInstance = L.map('mapa').setView([23.1, -82.4], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaInstance);
+    } else {
+        mapaInstance.eachLayer(layer => { if (layer instanceof L.Marker) mapaInstance.removeLayer(layer); });
     }
     
-    if (currentUserTipo !== 'cliente') {
-        mostrarToast('Solo los clientes pueden contactar a profesionales', 'info');
-        return;
-    }
+    const serviciosMostrar = adminAuthenticated ? todosLosServicios : todosLosServicios.filter(s => s.estado === 'aprobado');
     
-    profesionalSeleccionado = { id: profesionalId, nombre: profesionalNombre };
-    document.getElementById('mensajeProfesionalInfo').innerHTML = `<p><strong>Contactando a:</strong> ${escapeHtml(profesionalNombre)}</p>`;
-    document.getElementById('mensajeTexto').value = '';
-    document.getElementById('modalEnviarMensaje').style.display = 'flex';
-};
-
-document.getElementById('btnEnviarMensaje').onclick = async () => {
-    if (!profesionalSeleccionado) return;
-    
-    const texto = document.getElementById('mensajeTexto').value.trim();
-    if (!texto) {
-        mostrarToast('Escribe un mensaje', 'error');
-        return;
-    }
-    
-    try {
-        const { error } = await supabase.from('mensajes_clientes').insert([{
-            profesional_id: profesionalSeleccionado.id,
-            cliente_id: currentUser.id,
-            mensaje: texto,
-            estado: 'pendiente',
-            created_at: new Date().toISOString()
-        }]);
+    serviciosMostrar.forEach(servicio => {
+        let coords = null;
+        if (servicio.latitud && servicio.longitud) {
+            coords = [servicio.latitud, servicio.longitud];
+        } else if (ZONAS_COORDS[servicio.zona]) {
+            coords = ZONAS_COORDS[servicio.zona];
+        }
         
+        if (coords) {
+            const marker = L.marker(coords).addTo(mapaInstance);
+            marker.bindPopup(`
+                <div style="text-align:center;min-width:160px;">
+                    ${servicio.foto ? `<img src="${servicio.foto}" style="width:45px;height:45px;border-radius:50%;margin-bottom:8px;">` : `<i class="fas fa-user-circle" style="font-size:36px;color:#2c5f8a;"></i>`}
+                    <br><strong>${escapeHtml(servicio.nombre)}</strong>
+                    <br>📍 ${escapeHtml(servicio.zona)}
+                    <br>🔧 ${escapeHtml(servicio.especialidad || servicio.categoria)}
+                    <br>⭐ ${servicio.promedio_puntuacion ? servicio.promedio_puntuacion.toFixed(1) : 'Nuevo'} (${servicio.total_calificaciones || 0})
+                    <hr>
+                    <button onclick="window.open('https://wa.me/${servicio.telefono.replace(/[^0-9]/g, '')}')" style="background:#25D366;border:none;padding:4px 10px;border-radius:20px;color:white;cursor:pointer;">💬 WhatsApp</button>
+                </div>
+            `);
+        }
+    });
+}
+
+// ==================== CARGAR PROFESIONALES ====================
+async function cargarProfesionales() {
+    try {
+        let query = supabase.from('oferentes').select('*');
+        if (!adminAuthenticated) {
+            query = query.eq('estado', 'aprobado');
+        }
+        const { data, error } = await query.order('created_at', { ascending: false });
         if (error) throw error;
         
-        mostrarToast('✅ Mensaje enviado', 'success');
-        document.getElementById('modalEnviarMensaje').style.display = 'none';
-        await cargarProfesionales();
+        todosLosServicios = data || [];
+        const aprobados = todosLosServicios.filter(s => s.estado === 'aprobado').length;
+        const pendientes = todosLosServicios.filter(s => s.estado === 'pendiente').length;
+        document.getElementById('totalProfesionales').textContent = aprobados;
+        document.getElementById('totalPendientes').textContent = pendientes;
         
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
+        // Populares
+        const categoriasCount = {};
+        todosLosServicios.forEach(s => { if (s.estado === 'aprobado') categoriasCount[s.categoria] = (categoriasCount[s.categoria] || 0) + 1; });
+        const categoriasOrdenadas = Object.entries(categoriasCount).sort((a,b) => b[1] - a[1]).slice(0, 6);
+        const nombresCategorias = { 'carpinteria':'Carpintería','construccion':'Construcción','electricidad':'Electricidad','soldadura':'Soldadura','reparaciones':'Reparaciones','transporte':'Transporte','otros':'Otros' };
+        const iconosCategorias = { 'carpinteria':'fa-hammer','construccion':'fa-hard-hat','electricidad':'fa-bolt','soldadura':'fa-wrench','reparaciones':'fa-tools','transporte':'fa-truck','otros':'fa-briefcase' };
+        document.getElementById('popularServicios').innerHTML = categoriasOrdenadas.map(([cat, count]) => `<div class="popular-card"><div class="popular-icon"><i class="fas ${iconosCategorias[cat]}"></i></div><div class="popular-info"><h4>${nombresCategorias[cat]}</h4><p>Servicios disponibles</p></div><div class="popular-count">${count}</div></div>`).join('') || '<p>No hay servicios registrados aún</p>';
+        
+        const profesionalesDestacados = todosLosServicios.filter(s => s.estado === 'aprobado').slice(0, 6);
+        document.getElementById('popularProfesionales').innerHTML = profesionalesDestacados.map(s => `<div class="popular-card" onclick="verPerfil('${s.id}')"><div class="popular-icon">${s.foto ? `<img src="${s.foto}">` : `<i class="fas fa-user-circle"></i>`}</div><div class="popular-info"><h4>${escapeHtml(s.nombre)}</h4><p>${escapeHtml(s.especialidad || s.categoria)} • ${escapeHtml(s.zona)}</p></div><div class="popular-count"><i class="fas fa-star"></i> Destacado</div></div>`).join('') || '<p>No hay profesionales destacados</p>';
+        
+        let serviciosMostrar = adminAuthenticated ? todosLosServicios : todosLosServicios.filter(s => s.estado === 'aprobado');
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const categoria = document.getElementById('categoriaFilter').value;
+        if (searchTerm) serviciosMostrar = serviciosMostrar.filter(s => (s.nombre || '').toLowerCase().includes(searchTerm) || (s.especialidad || '').toLowerCase().includes(searchTerm) || (s.zona || '').toLowerCase().includes(searchTerm));
+        if (categoria) serviciosMostrar = serviciosMostrar.filter(s => s.categoria === categoria);
+        
+        const container = document.getElementById('listaProfesionales');
+        if (serviciosMostrar.length === 0) { container.innerHTML = '<div style="text-align:center;padding:60px;"><i class="fas fa-store-slash" style="font-size:48px;"></i><h3>No hay profesionales</h3></div>'; actualizarMapa(); return; }
+        
+        container.innerHTML = serviciosMostrar.map(s => `
+            <div class="professional-card">
+                <div class="card-header">
+                    <div class="card-avatar">${s.foto ? `<img src="${s.foto}">` : `<i class="fas fa-user-circle"></i>`}</div>
+                    <h3>${escapeHtml(s.nombre)}</h3>
+                    <span class="card-badge">${escapeHtml(s.especialidad || s.categoria)}</span>
+                </div>
+                <div class="card-body">
+                    ${renderStars(s.promedio_puntuacion, s.total_calificaciones)}
+                    <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(s.zona)}</p>
+                    <p><i class="fab fa-whatsapp"></i> ${escapeHtml(s.telefono)}</p>
+                    ${s.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(s.descripcion.substring(0, 80))}${s.descripcion.length > 80 ? '...' : ''}</p>` : ''}
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-outline" onclick="verPerfil('${s.id}')"><i class="fas fa-user"></i> Ver Perfil</button>
+                    <button class="btn btn-primary" style="background:#25D366;" onclick="window.open('https://wa.me/${s.telefono.replace(/[^0-9]/g, '')}')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                </div>
+            </div>
+        `).join('');
+        actualizarMapa();
+    } catch (err) { mostrarToast('Error al cargar profesionales', 'error'); }
+}
+
+// ==================== VER PERFIL ====================
+window.verPerfil = async function(servicioId) {
+    const servicio = todosLosServicios.find(s => s.id === servicioId);
+    if (!servicio) return;
+    
+    const modal = document.getElementById('modalVerPerfil');
+    if (!modal) {
+        mostrarToast('Función en desarrollo', 'info');
+        return;
     }
+    modal.style.display = 'flex';
 };
 
 // ==================== PUBLICAR SERVICIO ====================
 async function publicarServicio() {
     const nombre = document.getElementById('pubNombre').value.trim();
     const categoria = document.getElementById('pubCategoria').value;
-    const provincia = document.getElementById('pubProvincia').value;
-    const municipio = document.getElementById('pubMunicipio').value;
+    const zona = document.getElementById('pubZona').value.trim();
     const telefono = document.getElementById('pubTelefono').value.trim();
     const descripcion = document.getElementById('pubDescripcion').value.trim();
     const fotoFile = document.getElementById('fotoPerfil').files[0];
     const latitud = document.getElementById('pubLatitud').value;
     const longitud = document.getElementById('pubLongitud').value;
     
-    if (!nombre || !provincia || !municipio || !telefono) { mostrarToast('Completa todos los campos', 'error'); return; }
+    if (!nombre || !zona || !telefono) { mostrarToast('Completa nombre, zona y teléfono', 'error'); return; }
     
     const categoriaTexto = document.getElementById('pubCategoria').options[document.getElementById('pubCategoria').selectedIndex]?.text || categoria;
     try {
         let fotoUrl = null;
         if (fotoFile) { mostrarToast('Subiendo imagen...', 'info'); fotoUrl = await subirImagen(fotoFile, currentUser.id); }
-        
         const { error } = await supabase.from('oferentes').insert([{ 
-            nombre, categoria, provincia, municipio, telefono, descripcion, foto: fotoUrl, 
+            nombre, categoria, zona, telefono, descripcion, foto: fotoUrl, 
             especialidad: categoriaTexto, estado: 'pendiente', 
             latitud: latitud ? parseFloat(latitud) : null, 
             longitud: longitud ? parseFloat(longitud) : null,
             user_id: currentUser?.id, 
-            deuda_semanal: 0,
-            perfil_activo: true,
             created_at: new Date().toISOString() 
         }]);
-        
         if (error) throw error;
-        
         mostrarToast('✅ Servicio publicado. Espera aprobación.', 'success');
         document.getElementById('modalPublicar').style.display = 'none';
         document.getElementById('pubNombre').value = '';
+        document.getElementById('pubZona').value = '';
         document.getElementById('pubTelefono').value = '';
         document.getElementById('pubDescripcion').value = '';
         document.getElementById('previewFoto').innerHTML = '';
         document.getElementById('pubLatitud').value = '';
         document.getElementById('pubLongitud').value = '';
         if (marcadorUbicacion) mapaUbicacionInstance?.removeLayer(marcadorUbicacion);
-        document.getElementById('ubicacionInfo').innerHTML = '<i class="fas fa-info-circle"></i> Haz clic en el mapa para marcar la ubicación';
+        document.getElementById('ubicacionInfo').innerHTML = 'Haz clic en el mapa para marcar tu ubicación';
+        document.getElementById('ubicacionInfo').style.background = '#3b82f6';
         await cargarProfesionales();
     } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 }
 
-// ==================== REGISTROS ====================
-document.getElementById('registroClienteForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('clienteEmail').value.trim();
-    const telefono = document.getElementById('clienteTelefono').value.trim();
-    const password = document.getElementById('clientePassword').value;
-    const passwordConfirm = document.getElementById('clientePasswordConfirm').value;
-    
-    if (password !== passwordConfirm) {
-        mostrarToast('Las contraseñas no coinciden', 'error');
-        return;
-    }
-    
-    try {
-        const { data, error } = await supabase.auth.signUp({
-            email, password,
-            options: { data: { role: 'cliente', telefono } }
-        });
-        
-        if (error) throw error;
-        
-        await supabase.from('clientes').insert([{
-            user_id: data.user.id, email, telefono, email_verificado: false
-        }]);
-        
-        mostrarToast('✅ Registro exitoso. Revisa tu correo.', 'success');
-        document.getElementById('modalRegistroCliente').style.display = 'none';
-        document.getElementById('loginEmail').value = email;
-        document.getElementById('loginPassword').value = password;
-        await manejarAuth();
-        
-    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
+document.getElementById('fotoPerfil')?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) { const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('previewFoto').innerHTML = `<img src="${ev.target.result}" alt="preview">`; }; reader.readAsDataURL(file); }
 });
-
-document.getElementById('registroProfesionalForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('profEmail').value.trim();
-    const password = document.getElementById('profPassword').value;
-    const passwordConfirm = document.getElementById('profPasswordConfirm').value;
-    const nombre = document.getElementById('profNombre').value.trim();
-    const categoria = document.getElementById('profCategoria').value;
-    const provincia = document.getElementById('profProvincia').value;
-    const municipio = document.getElementById('profMunicipio').value;
-    const telefono = document.getElementById('profTelefono').value.trim();
-    
-    if (password !== passwordConfirm) {
-        mostrarToast('Las contraseñas no coinciden', 'error');
-        return;
-    }
-    
-    try {
-        const { data, error } = await supabase.auth.signUp({
-            email, password,
-            options: { data: { role: 'profesional' } }
-        });
-        
-        if (error) throw error;
-        
-        const categoriaTexto = document.getElementById('profCategoria').options[document.getElementById('profCategoria').selectedIndex]?.text || categoria;
-        
-        await supabase.from('oferentes').insert([{
-            nombre, categoria, provincia, municipio, telefono,
-            especialidad: categoriaTexto, estado: 'pendiente',
-            user_id: data.user.id, deuda_semanal: 0, perfil_activo: true,
-            created_at: new Date().toISOString()
-        }]);
-        
-        mostrarToast('✅ Registro exitoso. Tu servicio será revisado.', 'success');
-        document.getElementById('modalRegistroProfesional').style.display = 'none';
-        document.getElementById('loginEmail').value = email;
-        document.getElementById('loginPassword').value = password;
-        await manejarAuth();
-        
-    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
-});
-
-// ==================== PANEL CLIENTE ====================
-async function cargarPanelCliente() {
-    const content = document.getElementById('panelClienteContent');
-    const activeTab = document.querySelector('#panelClienteContent').getAttribute('data-tab') || 'mensajes';
-    
-    if (activeTab === 'mensajes') {
-        const { data: mensajes } = await supabase
-            .from('mensajes_clientes')
-            .select('*, oferentes!profesional_id(nombre, id)')
-            .eq('cliente_id', currentUser.id)
-            .order('created_at', { ascending: false });
-        
-        if (!mensajes || mensajes.length === 0) {
-            content.innerHTML = '<div style="text-align:center;padding:40px;">No has enviado mensajes aún</div>';
-            return;
-        }
-        
-        content.innerHTML = mensajes.map(m => `
-            <div class="mensaje-item ${m.estado === 'pendiente' ? 'mensaje-pendiente' : 'mensaje-pagado'}">
-                <div><strong>Para:</strong> ${escapeHtml(m.oferentes?.nombre || 'Profesional')}</div>
-                <div><strong>Mensaje:</strong> ${escapeHtml(m.mensaje)}</div>
-                <div><strong>Estado:</strong> ${m.estado === 'pendiente' ? '⏳ Esperando pago' : '✅ Pagado'}</div>
-                <div><strong>Fecha:</strong> ${new Date(m.created_at).toLocaleDateString()}</div>
-            </div>
-        `).join('');
-        
-    } else if (activeTab === 'calificaciones') {
-        const { data: calificaciones } = await supabase
-            .from('calificaciones')
-            .select('*, oferentes!servicio_id(nombre)')
-            .eq('usuario_id', currentUser.id)
-            .order('created_at', { ascending: false });
-        
-        if (!calificaciones || calificaciones.length === 0) {
-            content.innerHTML = '<div style="text-align:center;padding:40px;">No has calificado ningún servicio aún</div>';
-            return;
-        }
-        
-        content.innerHTML = calificaciones.map(c => `
-            <div class="mensaje-item">
-                <div><strong>Profesional:</strong> ${escapeHtml(c.oferentes?.nombre || 'Desconocido')}</div>
-                <div><strong>Calificación:</strong> ${'⭐'.repeat(c.puntuacion)}</div>
-                ${c.comentario ? `<div><strong>Comentario:</strong> ${escapeHtml(c.comentario)}</div>` : ''}
-                <div><strong>Fecha:</strong> ${new Date(c.created_at).toLocaleDateString()}</div>
-            </div>
-        `).join('');
-        
-    } else if (activeTab === 'perfil') {
-        const { data: cliente } = await supabase.from('clientes').select('*').eq('user_id', currentUser.id).single();
-        content.innerHTML = `
-            <div class="form-group"><label>Correo</label><input type="email" value="${escapeHtml(currentUser.email)}" disabled></div>
-            <div class="form-group"><label>Teléfono</label><input type="tel" id="perfilTelefonoCliente" value="${escapeHtml(cliente?.telefono || '')}"></div>
-            <button class="btn btn-primary" id="btnActualizarPerfilCliente"><i class="fas fa-save"></i> Actualizar</button>
-        `;
-        document.getElementById('btnActualizarPerfilCliente').onclick = async () => {
-            const telefono = document.getElementById('perfilTelefonoCliente').value.trim();
-            await supabase.from('clientes').update({ telefono }).eq('user_id', currentUser.id);
-            mostrarToast('Perfil actualizado', 'success');
-        };
-    }
-}
-
-// ==================== PANEL PROFESIONAL ====================
-async function cargarPanelProfesional() {
-    const content = document.getElementById('panelProfesionalContent');
-    const activeTab = document.querySelector('#panelProfesionalContent').getAttribute('data-tab') || 'resumen';
-    
-    const { data: profesional } = await supabase.from('oferentes').select('*').eq('user_id', currentUser.id).single();
-    
-    if (activeTab === 'resumen') {
-        const { data: mensajes } = await supabase
-            .from('mensajes_clientes')
-            .select('*')
-            .eq('profesional_id', profesional.id)
-            .order('created_at', { ascending: false });
-        
-        const pendientes = mensajes?.filter(m => m.estado === 'pendiente').length || 0;
-        const deuda = pendientes * 3;
-        const hoy = new Date();
-        const esDomingo = hoy.getDay() === 0;
-        const esLunes = hoy.getDay() === 1;
-        
-        let mensajeDeuda = '';
-        if (deuda > 0) {
-            if (esDomingo) {
-                mensajeDeuda = '<p style="color:var(--error); font-weight:bold;">⚠️ ¡ATENCIÓN! Hoy es el último día para pagar. Si no pagas hoy, mañana tu perfil será suspendido.</p>';
-            } else if (esLunes) {
-                mensajeDeuda = '<p style="color:var(--error); font-weight:bold;">⚠️ Tu perfil está SUSPENDIDO por falta de pago. Paga tu deuda para reactivarlo.</p>';
-            } else {
-                mensajeDeuda = `<p>Debes pagar antes del <strong>SÁBADO</strong> para evitar la suspensión el lunes.</p>`;
-            }
-        }
-        
-        content.innerHTML = `
-            <div class="${profesional.perfil_activo === false ? 'deuda-alerta' : ''}" style="margin-bottom:20px;">
-                <h3>📊 Resumen de cuenta</h3>
-                <p><strong>Perfil:</strong> ${profesional.perfil_activo ? '✅ Activo' : '⚠️ Suspendido'}</p>
-                <p><strong>Contactos pendientes:</strong> ${pendientes}</p>
-                <p><strong>Deuda acumulada:</strong> <span class="deuda-monto">$${deuda} USD</span></p>
-                ${deuda > 0 ? mensajeDeuda : '<p>✅ No tienes deuda pendiente.</p>'}
-                ${deuda > 0 && profesional.perfil_activo ? `<button class="btn btn-primary" id="btnPagarDeuda" style="margin-top:10px;"><i class="fas fa-dollar-sign"></i> Pagar $${deuda} USD</button>` : ''}
-                ${profesional.perfil_activo === false ? `<button class="btn btn-success" id="btnReactivar" style="margin-top:10px;"><i class="fas fa-sync-alt"></i> Pagar y Reactivar</button>` : ''}
-            </div>
-            <div class="payment-info">
-                <h4><i class="fas fa-info-circle"></i> Información de pago</h4>
-                <p>📱 Transfermóvil: <strong>${ADMIN_TELEFONO}</strong></p>
-                <p>💵 Efectivo: Selecciona el día para la visita</p>
-                <p><strong>⏰ Plazo:</strong> Paga antes del SÁBADO para evitar suspensión.</p>
-            </div>
-        `;
-        
-        document.getElementById('btnPagarDeuda')?.addEventListener('click', () => {
-            contactoSeleccionado = { todos: true, deuda: deuda, profesionalId: profesional.id };
-            document.getElementById('pagarContactoInfo').innerHTML = `<p><strong>Monto a pagar:</strong> $${deuda} USD</p>`;
-            document.getElementById('modalPagarContacto').style.display = 'flex';
-        });
-        
-        document.getElementById('btnReactivar')?.addEventListener('click', () => {
-            contactoSeleccionado = { todos: true, deuda: deuda, profesionalId: profesional.id };
-            document.getElementById('pagarContactoInfo').innerHTML = `<p><strong>Monto a pagar para reactivar:</strong> $${deuda} USD</p>`;
-            document.getElementById('modalPagarContacto').style.display = 'flex';
-        });
-        
-    } else if (activeTab === 'mensajes') {
-        const { data: mensajes } = await supabase
-            .from('mensajes_clientes')
-            .select('*, auth.users!cliente_id(email)')
-            .eq('profesional_id', profesional.id)
-            .order('created_at', { ascending: false });
-        
-        if (!mensajes || mensajes.length === 0) {
-            content.innerHTML = '<div style="text-align:center;padding:40px;">No has recibido mensajes</div>';
-            return;
-        }
-        
-        content.innerHTML = mensajes.map(m => `
-            <div class="mensaje-item ${m.estado === 'pendiente' ? 'mensaje-pendiente' : 'mensaje-pagado'}">
-                <div><strong>De:</strong> Cliente</div>
-                <div><strong>Mensaje:</strong> ${escapeHtml(m.mensaje)}</div>
-                <div><strong>Fecha:</strong> ${new Date(m.created_at).toLocaleDateString()}</div>
-                ${m.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="pagarContacto('${m.id}')" style="margin-top:8px;"><i class="fas fa-dollar-sign"></i> Pagar $3 USD</button>` : '<div><strong>✅ Pagado</strong></div>'}
-            </div>
-        `).join('');
-        
-    } else if (activeTab === 'pagos') {
-        const { data: pagos } = await supabase
-            .from('pagos_profesionales')
-            .select('*')
-            .eq('profesional_id', profesional.id)
-            .order('fecha_pago', { ascending: false });
-        
-        if (!pagos || pagos.length === 0) {
-            content.innerHTML = '<div style="text-align:center;padding:40px;">No hay registros de pagos</div>';
-            return;
-        }
-        
-        content.innerHTML = pagos.map(p => `
-            <div class="mensaje-item">
-                <div><strong>Monto:</strong> $${p.monto} USD</div>
-                <div><strong>Método:</strong> ${p.metodo || 'N/A'}</div>
-                <div><strong>Fecha:</strong> ${new Date(p.fecha_pago).toLocaleDateString()}</div>
-                <div><strong>Estado:</strong> ${p.estado === 'pagado' ? '✅ Confirmado' : '⏳ Pendiente'}</div>
-            </div>
-        `).join('');
-        
-    } else if (activeTab === 'perfil') {
-        content.innerHTML = `
-            <div class="form-group"><label>Nombre</label><input type="text" id="perfilNombre" value="${escapeHtml(profesional.nombre)}"></div>
-            <div class="form-group"><label>Teléfono</label><input type="tel" id="perfilTelefonoProf" value="${escapeHtml(profesional.telefono)}"></div>
-            <div class="row-2cols">
-                <div class="form-group"><label>Provincia</label><select id="perfilProvincia">${generarOpcionesProvincias(profesional.provincia)}</select></div>
-                <div class="form-group"><label>Municipio</label><select id="perfilMunicipio">${generarOpcionesMunicipios(profesional.provincia, profesional.municipio)}</select></div>
-            </div>
-            <div class="form-group"><label>Descripción</label><textarea id="perfilDescripcion" rows="3">${escapeHtml(profesional.descripcion || '')}</textarea></div>
-            <button class="btn btn-primary" id="btnActualizarPerfilProfesional"><i class="fas fa-save"></i> Actualizar</button>
-        `;
-        
-        document.getElementById('perfilProvincia')?.addEventListener('change', function() {
-            const provincia = this.value;
-            const municipioSelect = document.getElementById('perfilMunicipio');
-            municipioSelect.innerHTML = '<option value="">Selecciona municipio</option>';
-            if (provincia && provinciasYMunicipios[provincia]) {
-                provinciasYMunicipios[provincia].forEach(m => {
-                    const option = document.createElement('option');
-                    option.value = m;
-                    option.textContent = m;
-                    municipioSelect.appendChild(option);
-                });
-            }
-        });
-        
-        document.getElementById('btnActualizarPerfilProfesional').onclick = async () => {
-            const updates = {
-                nombre: document.getElementById('perfilNombre').value.trim(),
-                telefono: document.getElementById('perfilTelefonoProf').value.trim(),
-                provincia: document.getElementById('perfilProvincia').value,
-                municipio: document.getElementById('perfilMunicipio').value,
-                descripcion: document.getElementById('perfilDescripcion').value.trim()
-            };
-            await supabase.from('oferentes').update(updates).eq('id', profesional.id);
-            mostrarToast('Perfil actualizado', 'success');
-        };
-    }
-}
-
-function generarOpcionesProvincias(selected) {
-    let html = '<option value="">Selecciona provincia</option>';
-    for (const provincia of Object.keys(provinciasYMunicipios)) {
-        html += `<option value="${provincia}" ${provincia === selected ? 'selected' : ''}>${provincia}</option>`;
-    }
-    return html;
-}
-
-function generarOpcionesMunicipios(provincia, selected) {
-    if (!provincia || !provinciasYMunicipios[provincia]) return '<option value="">Selecciona provincia primero</option>';
-    let html = '<option value="">Selecciona municipio</option>';
-    provinciasYMunicipios[provincia].forEach(m => {
-        html += `<option value="${m}" ${m === selected ? 'selected' : ''}>${m}</option>`;
-    });
-    return html;
-}
-
-window.pagarContacto = function(mensajeId) {
-    contactoSeleccionado = { id: mensajeId, todos: false };
-    document.getElementById('pagarContactoInfo').innerHTML = `<p><strong>Monto a pagar:</strong> $3 USD</p>`;
-    document.getElementById('modalPagarContacto').style.display = 'flex';
-};
-
-// Pagos
-document.getElementById('btnPagarTransfermovil').onclick = async () => {
-    if (!contactoSeleccionado) return;
-    
-    try {
-        if (contactoSeleccionado.todos) {
-            await supabase.from('pagos_profesionales').insert([{
-                profesional_id: contactoSeleccionado.profesionalId,
-                monto: contactoSeleccionado.deuda,
-                contactos_count: Math.floor(contactoSeleccionado.deuda / 3),
-                metodo: 'transfermovil',
-                estado: 'pendiente',
-                fecha_pago: new Date().toISOString()
-            }]);
-            mostrarToast('✅ Pago registrado. El administrador confirmará.', 'success');
-        } else {
-            await supabase.from('mensajes_clientes').update({ 
-                estado: 'pagado',
-                metodo_pago: 'transfermovil'
-            }).eq('id', contactoSeleccionado.id);
-            mostrarToast('✅ Pago registrado', 'success');
-        }
-        
-        document.getElementById('modalPagarContacto').style.display = 'none';
-        contactoSeleccionado = null;
-        if (currentUserTipo === 'profesional') cargarPanelProfesional();
-        
-    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
-};
-
-document.getElementById('btnPagarEfectivo').onclick = () => {
-    document.getElementById('efectivoCalendario').style.display = 'block';
-    if (flatpickrInstance) flatpickrInstance.destroy();
-    flatpickrInstance = flatpickr("#fechaVisitaInput", {
-        locale: "es",
-        minDate: "today",
-        dateFormat: "Y-m-d",
-        disable: [function(date) { return date.getDay() === 0; }]
-    });
-};
-
-document.getElementById('btnConfirmarVisita').onclick = async () => {
-    const fechaVisita = document.getElementById('fechaVisitaInput').value;
-    if (!fechaVisita) {
-        mostrarToast('Selecciona una fecha', 'error');
-        return;
-    }
-    
-    try {
-        await supabase.from('solicitudes_visita').insert([{
-            profesional_id: contactoSeleccionado.todos ? contactoSeleccionado.profesionalId : null,
-            mensaje_id: contactoSeleccionado.todos ? null : contactoSeleccionado.id,
-            fecha_visita: fechaVisita,
-            monto: contactoSeleccionado.todos ? contactoSeleccionado.deuda : 3,
-            estado: 'pendiente'
-        }]);
-        
-        mostrarToast('✅ Visita programada. Un cobrador pasará el día seleccionado.', 'success');
-        document.getElementById('modalPagarContacto').style.display = 'none';
-        document.getElementById('efectivoCalendario').style.display = 'none';
-        document.getElementById('fechaVisitaInput').value = '';
-        contactoSeleccionado = null;
-        
-    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
-};
 
 // ==================== AUTENTICACIÓN ====================
+let loginMode = 'login';
 async function manejarAuth() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
     if (!email || !password) { mostrarToast('Completa email y contraseña', 'error'); return; }
     try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        currentUser = data.user;
-        mostrarToast('✅ Sesión iniciada', 'success');
-        document.getElementById('modalLogin').style.display = 'none';
-        await verificarTipoUsuario();
-        actualizarUI();
-        await cargarProfesionales();
+        if (loginMode === 'login') {
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            currentUser = data.user;
+            mostrarToast('✅ Sesión iniciada', 'success');
+            document.getElementById('modalLogin').style.display = 'none';
+            actualizarUI();
+            await cargarProfesionales();
+        } else {
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            if (error) throw error;
+            mostrarToast('✅ Registro exitoso. Ahora inicia sesión.', 'success');
+            loginMode = 'login';
+            document.getElementById('modalLoginTitle').innerHTML = 'Iniciar Sesión';
+            document.getElementById('btnLoginSubmit').innerHTML = 'Ingresar';
+            document.getElementById('switchAuthMode').innerHTML = '¿No tienes cuenta? Regístrate';
+            document.getElementById('regEmail').value = '';
+            document.getElementById('regPassword').value = '';
+            document.getElementById('regPasswordConfirm').value = '';
+        }
     } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 }
 
 async function logout() { 
     await supabase.auth.signOut(); 
     currentUser = null; 
-    currentUserTipo = null;
     adminAuthenticated = false; 
     sessionStorage.removeItem('adminAutenticado'); 
     actualizarUI(); 
@@ -1618,39 +693,23 @@ function actualizarUI() {
     const userInfo = document.getElementById('userInfo');
     const userName = document.getElementById('userName');
     const btnLogin = document.getElementById('btnLogin');
-    const btnRegistroCliente = document.getElementById('btnRegistroCliente');
     const btnPublicar = document.getElementById('btnPublicar');
     const btnCompartir = document.getElementById('btnCompartir');
     const btnAdmin = document.getElementById('btnAdmin');
     const btnLogout = document.getElementById('btnLogout');
-    
     const ADMIN_EMAIL = 'ch361892@gmail.com';
     
     if (currentUser) {
         userInfo.style.display = 'flex';
         userName.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email.split('@')[0]}`;
         btnLogin.style.display = 'none';
+        btnPublicar.style.display = 'inline-block';
         btnCompartir.style.display = 'inline-block';
         btnLogout.style.display = 'inline-block';
-        
-        if (currentUserTipo === 'cliente') {
-            btnRegistroCliente.style.display = 'inline-block';
-            btnPublicar.style.display = 'none';
-            btnRegistroCliente.innerHTML = '<i class="fas fa-user-circle"></i> Mi Panel';
-        } else if (currentUserTipo === 'profesional') {
-            btnRegistroCliente.style.display = 'inline-block';
-            btnPublicar.style.display = 'inline-block';
-            btnRegistroCliente.innerHTML = '<i class="fas fa-briefcase"></i> Mi Panel';
-        } else {
-            btnRegistroCliente.style.display = 'none';
-            btnPublicar.style.display = 'none';
-        }
-        
         btnAdmin.style.display = currentUser.email === ADMIN_EMAIL ? 'inline-block' : 'none';
     } else {
         userInfo.style.display = 'none';
         btnLogin.style.display = 'inline-block';
-        btnRegistroCliente.style.display = 'none';
         btnPublicar.style.display = 'none';
         btnCompartir.style.display = 'none';
         btnAdmin.style.display = 'none';
@@ -1658,97 +717,22 @@ function actualizarUI() {
     }
 }
 
-// ==================== PANELES ====================
-document.getElementById('btnRegistroCliente').onclick = () => {
-    if (currentUserTipo === 'cliente') {
-        document.getElementById('modalPanelCliente').style.display = 'flex';
-        cargarPanelCliente();
-    } else if (currentUserTipo === 'profesional') {
-        document.getElementById('modalPanelProfesional').style.display = 'flex';
-        cargarPanelProfesional();
-    }
-};
-
-document.querySelectorAll('#modalPanelCliente .profile-tab').forEach(tab => {
-    tab.onclick = () => {
-        document.querySelectorAll('#modalPanelCliente .profile-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById('panelClienteContent').setAttribute('data-tab', tab.dataset.panelTab);
-        cargarPanelCliente();
-    };
+// ==================== REGISTRO ====================
+document.getElementById('registroForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('regEmail').value.trim();
+    const telefono = document.getElementById('regTelefono').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+    if (password !== passwordConfirm) { mostrarToast('Las contraseñas no coinciden', 'error'); return; }
+    try {
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { role: 'cliente', telefono } } });
+        if (error) throw error;
+        await supabase.from('clientes').insert([{ user_id: data.user.id, email, telefono, email_verificado: false }]);
+        mostrarToast('✅ Registro exitoso. Ahora inicia sesión.', 'success');
+        document.getElementById('modalRegistro').style.display = 'none';
+    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 });
-
-document.querySelectorAll('#modalPanelProfesional .profile-tab').forEach(tab => {
-    tab.onclick = () => {
-        document.querySelectorAll('#modalPanelProfesional .profile-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById('panelProfesionalContent').setAttribute('data-tab', tab.dataset.profPanelTab);
-        cargarPanelProfesional();
-    };
-});
-
-// ==================== EVENTOS GENERALES ====================
-document.getElementById('btnLogin').onclick = () => document.getElementById('modalLogin').style.display = 'flex';
-document.getElementById('btnLogout').onclick = logout;
-document.getElementById('btnPublicar').onclick = () => { 
-    if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); document.getElementById('modalLogin').style.display = 'flex'; return; }
-    if (currentUserTipo !== 'profesional') { mostrarToast('Solo profesionales pueden publicar', 'error'); return; }
-    document.getElementById('modalPublicar').style.display = 'flex';
-    setTimeout(() => iniciarMapaUbicacion(), 300);
-};
-document.getElementById('btnCompartir').onclick = () => { generarQR(); document.getElementById('modalCompartir').style.display = 'flex'; };
-document.getElementById('btnGuardarServicio').onclick = publicarServicio;
-document.getElementById('btnEnviarCalificacion').onclick = enviarCalificacion;
-document.getElementById('btnLoginSubmit').onclick = manejarAuth;
-document.getElementById('btnBuscar').onclick = cargarProfesionales;
-document.getElementById('searchInput').onkeyup = (e) => { if(e.key === 'Enter') cargarProfesionales(); };
-document.getElementById('categoriaFilter').onchange = cargarProfesionales;
-document.getElementById('provinciaFilter').onchange = function() { actualizarMunicipios('provinciaFilter', 'municipioFilter'); cargarProfesionales(); };
-document.getElementById('municipioFilter').onchange = cargarProfesionales;
-
-const closeButtons = ['btnClosePublicar', 'btnCloseLogin', 'btnCloseCompartir', 'btnCloseEnviarMensaje', 'btnClosePagarContacto', 'btnClosePanelCliente', 'btnClosePanelProfesional', 'btnCloseVerPerfil', 'btnCloseCalificar', 'btnCloseRecuperar', 'btnCloseRegistroCliente', 'btnCloseRegistroProfesional', 'btnCloseAdmin'];
-closeButtons.forEach(id => {
-    document.getElementById(id)?.addEventListener('click', () => {
-        const modalId = id.replace('btnClose', 'modal');
-        const modal = document.getElementById(modalId);
-        if (modal) modal.style.display = 'none';
-    });
-});
-
-document.getElementById('forgotPasswordLink').onclick = (e) => { e.preventDefault(); document.getElementById('modalLogin').style.display = 'none'; document.getElementById('modalRecuperar').style.display = 'flex'; };
-document.getElementById('btnRecuperarSubmit').onclick = async () => {
-    const email = document.getElementById('recuperarEmail').value.trim();
-    if (!email) { mostrarToast('Ingresa tu correo', 'error'); return; }
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
-    if (error) { mostrarToast('Error: ' + error.message, 'error'); } 
-    else { mostrarToast('📧 Revisa tu correo', 'success'); document.getElementById('modalRecuperar').style.display = 'none'; }
-};
-
-document.getElementById('switchToClienteRegistro').onclick = (e) => { e.preventDefault(); document.getElementById('modalLogin').style.display = 'none'; document.getElementById('modalRegistroCliente').style.display = 'flex'; };
-document.getElementById('switchToProfesionalRegistro').onclick = (e) => { e.preventDefault(); document.getElementById('modalLogin').style.display = 'none'; document.getElementById('modalRegistroProfesional').style.display = 'flex'; };
-
-document.getElementById('mapCentroHabana')?.addEventListener('click', () => centrarMapaEnZona('Centro Habana'));
-document.getElementById('mapPlaya')?.addEventListener('click', () => centrarMapaEnZona('Playa'));
-document.getElementById('MapVedado')?.addEventListener('click', () => centrarMapaEnZona('Vedado'));
-document.getElementById('mapSantiago')?.addEventListener('click', () => centrarMapaEnZona('Santiago de Cuba'));
-document.getElementById('mapAll')?.addEventListener('click', () => { if (mapaInstance) mapaInstance.setView([23.1, -82.4], 11); mostrarToast('📍 Mostrando todos', 'info'); });
-
-function centrarMapaEnZona(zona) {
-    const coords = ZONAS_COORDS[zona];
-    if (coords && mapaInstance) { mapaInstance.setView(coords, 13); mostrarToast(`📍 Mostrando zona: ${zona}`, 'info'); }
-}
-
-document.querySelectorAll('.popular-tab').forEach(tab => { tab.onclick = () => { document.querySelectorAll('.popular-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const tabName = tab.dataset.tab; document.getElementById('popularServicios').style.display = tabName === 'servicios' ? 'grid' : 'none'; document.getElementById('popularProfesionales').style.display = tabName === 'profesionales' ? 'grid' : 'none'; }; });
-
-document.getElementById('shareWhatsApp').onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent('¡Conoce Factor Cuba! ' + window.location.href)}`, '_blank');
-document.getElementById('shareTelegram').onclick = () => window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent('¡Conoce Factor Cuba!')}`, '_blank');
-document.getElementById('copyLinkBtn').onclick = () => { navigator.clipboard.writeText(window.location.href); mostrarToast('✅ Enlace copiado', 'success'); };
-document.getElementById('fotoPerfil')?.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) { const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('previewFoto').innerHTML = `<img src="${ev.target.result}" alt="preview">`; }; reader.readAsDataURL(file); }
-});
-
-function generarQR() { const url = window.location.href; document.getElementById('shareUrl').value = url; document.getElementById('qrContainer').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}" style="margin:0 auto;border-radius:12px;background:white;padding:10px;">`; }
 
 // ==================== ADMIN ====================
 function verificarAdminPassword() {
@@ -1772,101 +756,62 @@ window.rechazarServicio = async function(id) { if (!confirm('¿Rechazar?')) retu
 window.eliminarServicio = async function(id) { if (!confirm('¿Eliminar?')) return; await supabase.from('oferentes').delete().eq('id', id); mostrarToast('🗑️ Eliminado', 'success'); cargarAdminActual(); cargarProfesionales(); actualizarStatsAdmin(); };
 
 let adminTabActual = 'pendientes';
-async function cargarAdminActual() { if (adminTabActual === 'pendientes') await cargarAdminPendientes(); else if (adminTabActual === 'aprobados') await cargarAdminAprobados(); else if (adminTabActual === 'visitas') await cargarAdminVisitas(); else await cargarAdminTodos(); }
+async function cargarAdminActual() { if (adminTabActual === 'pendientes') await cargarAdminPendientes(); else if (adminTabActual === 'aprobados') await cargarAdminAprobados(); else await cargarAdminTodos(); }
 
 async function cargarAdminPendientes() {
     adminTabActual = 'pendientes'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*').eq('estado', 'pendiente');
     if (!data || data.length === 0) { content.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios pendientes</div>'; return; }
-    content.innerHTML = data.map(s => `<div class="service-item service-pendiente"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</div></div>`).join('');
+    content.innerHTML = data.map(s => `<div class="service-item service-pendiente"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('');
 }
-
 async function cargarAdminAprobados() {
     adminTabActual = 'aprobados'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*').eq('estado', 'aprobado');
-    content.innerHTML = data?.map(s => `<div class="service-item service-aprobado"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</div></div>`).join('') || '<p>No hay servicios aprobados</p>';
+    content.innerHTML = data?.map(s => `<div class="service-item service-aprobado"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions"><button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('') || '<p>No hay servicios aprobados</p>';
 }
-
 async function cargarAdminTodos() {
     adminTabActual = 'todos'; const content = document.getElementById('adminContent'); const { data } = await supabase.from('oferentes').select('*');
-    content.innerHTML = data?.map(s => `<div class="service-item ${s.estado === 'aprobado' ? 'service-aprobado' : 'service-pendiente'}"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${s.estado} - ${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions">${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">Rechazar</button>` : ''}<button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</div></div>`).join('') || '<p>No hay servicios</p>';
+    content.innerHTML = data?.map(s => `<div class="service-item ${s.estado === 'aprobado' ? 'service-aprobado' : 'service-pendiente'}"><div class="service-header"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${s.estado} - ${escapeHtml(s.especialidad || s.categoria)}</small></div><div class="service-actions">${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">Rechazar</button>` : ''}<button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div class="service-details">📍 ${escapeHtml(s.zona)} | 📞 ${escapeHtml(s.telefono)}</div></div>`).join('') || '<p>No hay servicios</p>';
 }
-
-async function cargarAdminVisitas() {
-    adminTabActual = 'visitas'; const content = document.getElementById('adminContent'); content.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-pulse"></i></div>';
-    
-    const { data: visitas } = await supabase.from('solicitudes_visita').select('*, oferentes!profesional_id(nombre, telefono)').eq('estado', 'pendiente').order('fecha_visita', { ascending: true });
-    
-    if (!visitas || visitas.length === 0) {
-        content.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay visitas programadas pendientes</div>';
-        return;
-    }
-    
-    content.innerHTML = `
-        <h3>📅 Visitas programadas para cobro en efectivo</h3>
-        ${visitas.map(v => `
-            <div class="service-item service-pendiente">
-                <div class="service-header">
-                    <div><strong>${escapeHtml(v.oferentes?.nombre || 'Profesional')}</strong><br>📞 ${escapeHtml(v.oferentes?.telefono || 'N/A')}<br>📅 Fecha: ${new Date(v.fecha_visita).toLocaleDateString()}<br>💰 Monto: $${v.monto} USD</div>
-                    <div class="service-actions">
-                        <button class="btn btn-success btn-sm" onclick="marcarVisitaCompletada('${v.id}', ${v.monto}, '${v.profesional_id}')"><i class="fas fa-check"></i> Marcar como cobrado</button>
-                    </div>
-                </div>
-            </div>
-        `).join('')}
-    `;
-}
-
-window.marcarVisitaCompletada = async function(visitaId, monto, profesionalId) {
-    if (!confirm('¿Confirmar que se realizó el cobro en efectivo?')) return;
-    await supabase.from('solicitudes_visita').update({ estado: 'completado' }).eq('id', visitaId);
-    await supabase.from('pagos_profesionales').insert([{
-        profesional_id: profesionalId,
-        monto: monto,
-        contactos_count: Math.floor(monto / 3),
-        metodo: 'efectivo',
-        estado: 'pagado',
-        fecha_pago: new Date().toISOString()
-    }]);
-    await supabase.from('oferentes').update({ deuda_semanal: 0, perfil_activo: true }).eq('id', profesionalId);
-    mostrarToast('✅ Cobro registrado. Perfil reactivado.', 'success');
-    cargarAdminVisitas();
-    cargarProfesionales();
-    actualizarStatsAdmin();
-};
-
 async function actualizarStatsAdmin() {
     const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
     const pendientes = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
     const aprobados = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
-    const visitas = await supabase.from('solicitudes_visita').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
     document.getElementById('adminTotal').textContent = total.count || 0;
     document.getElementById('adminPendientes').textContent = pendientes.count || 0;
     document.getElementById('adminAprobados').textContent = aprobados.count || 0;
-    document.getElementById('adminVisitasPendientes').textContent = visitas.count || 0;
 }
 
-document.getElementById('btnAdmin').onclick = () => { document.getElementById('modalAdmin').style.display = 'flex'; if (adminAuthenticated) { document.getElementById('passwordSection').style.display = 'none'; document.getElementById('adminPanelSection').style.display = 'block'; actualizarStatsAdmin(); cargarAdminPendientes(); } else { document.getElementById('passwordSection').style.display = 'block'; document.getElementById('adminPanelSection').style.display = 'none'; document.getElementById('adminPasswordInput').value = ''; } };
+// ==================== EVENTOS ====================
+document.getElementById('btnLogin').onclick = () => document.getElementById('modalLogin').style.display = 'flex';
+document.getElementById('btnLogout').onclick = logout;
+document.getElementById('btnCompartir').onclick = () => { alert('Función en desarrollo'); };
+document.getElementById('btnPublicar').onclick = () => { 
+    if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); document.getElementById('modalLogin').style.display = 'flex'; return; }
+    document.getElementById('modalPublicar').style.display = 'flex';
+    setTimeout(() => iniciarMapaUbicacion(), 300);
+};
+document.getElementById('btnGuardarServicio').onclick = publicarServicio;
+document.getElementById('btnClosePublicar').onclick = () => document.getElementById('modalPublicar').style.display = 'none';
+document.getElementById('btnCloseLogin').onclick = () => document.getElementById('modalLogin').style.display = 'none';
+document.getElementById('btnCloseRegistro').onclick = () => document.getElementById('modalRegistro').style.display = 'none';
 document.getElementById('btnCloseAdmin').onclick = () => document.getElementById('modalAdmin').style.display = 'none';
-document.getElementById('adminTabPendientes').onclick = cargarAdminPendientes;
-document.getElementById('adminTabAprobados').onclick = cargarAdminAprobados;
-document.getElementById('adminTabTodos').onclick = cargarAdminTodos;
-document.getElementById('adminTabVisitas').onclick = cargarAdminVisitas;
+document.getElementById('btnLoginSubmit').onclick = manejarAuth;
+document.getElementById('btnBuscar').onclick = cargarProfesionales;
+document.getElementById('searchInput').onkeyup = (e) => { if(e.key === 'Enter') cargarProfesionales(); };
+document.getElementById('categoriaFilter').onchange = cargarProfesionales;
 document.getElementById('verifyAdminBtn').onclick = verificarAdminPassword;
+
+document.querySelectorAll('.popular-tab').forEach(tab => { tab.onclick = () => { document.querySelectorAll('.popular-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const tabName = tab.dataset.tab; document.getElementById('popularServicios').style.display = tabName === 'servicios' ? 'grid' : 'none'; document.getElementById('popularProfesionales').style.display = tabName === 'profesionales' ? 'grid' : 'none'; }; });
+
+document.getElementById('switchAuthMode').onclick = (e) => { e.preventDefault(); if (loginMode === 'login') { loginMode = 'register'; document.getElementById('modalLoginTitle').innerHTML = 'Crear Cuenta'; document.getElementById('btnLoginSubmit').innerHTML = 'Registrarse'; document.getElementById('switchAuthMode').innerHTML = '¿Ya tienes cuenta? Inicia sesión'; document.getElementById('modalLogin').style.display = 'none'; document.getElementById('modalRegistro').style.display = 'flex'; } else { loginMode = 'login'; document.getElementById('modalLoginTitle').innerHTML = 'Iniciar Sesión'; document.getElementById('btnLoginSubmit').innerHTML = 'Ingresar'; document.getElementById('switchAuthMode').innerHTML = '¿No tienes cuenta? Regístrate'; document.getElementById('modalRegistro').style.display = 'none'; document.getElementById('modalLogin').style.display = 'flex'; } };
 
 window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 
 async function init() { 
-    cargarProvincias();
-    document.getElementById('profProvincia')?.addEventListener('change', function() { actualizarMunicipios('profProvincia', 'profMunicipio'); });
-    document.getElementById('pubProvincia')?.addEventListener('change', function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); });
-    document.getElementById('provinciaFilter')?.addEventListener('change', function() { actualizarMunicipios('provinciaFilter', 'municipioFilter'); });
-    
     const { data: { session } } = await supabase.auth.getSession(); 
     currentUser = session?.user || null; 
-    if (currentUser) await verificarTipoUsuario();
     actualizarUI(); 
     await cargarProfesionales(); 
     checkAdminSession(); 
-    initRatingStars();
 }
 init();
 </script>
