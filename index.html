@@ -274,9 +274,45 @@
             margin-top: 20px;
         }
         
+        /* Estilos para la tabla de contactos en admin */
+        .contactos-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .contactos-table th,
+        .contactos-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .contactos-table th {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .contactos-table tr:hover {
+            background: var(--bg-secondary);
+        }
+        .estado-pendiente {
+            background: var(--warning-light);
+            color: var(--warning);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .estado-pagado {
+            background: var(--success-light);
+            color: var(--success);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
         .admin-stats {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 16px;
             margin-bottom: 24px;
         }
@@ -317,7 +353,9 @@
             .row-3cols { grid-template-columns: 1fr; }
             .stats-grid { gap: 16px; }
             .stat-number { font-size: 32px; }
-            .admin-stats { grid-template-columns: 1fr; }
+            .admin-stats { grid-template-columns: repeat(2, 1fr); }
+            .contactos-table { font-size: 12px; }
+            .contactos-table th, .contactos-table td { padding: 6px; }
         }
         
         ::-webkit-scrollbar { width: 8px; }
@@ -509,7 +547,7 @@
 </div>
 
 <div id="modalAdmin" class="modal">
-    <div class="modal-content" style="max-width: 900px;">
+    <div class="modal-content" style="max-width: 1000px;">
         <div class="modal-header"><h2>Panel de Administrador</h2><button class="close-modal" id="btnCloseAdmin">&times;</button></div>
         <div id="adminContent"></div>
     </div>
@@ -607,6 +645,57 @@ async function subirImagen(file, userId) {
     }
 }
 
+// ==================== REGISTRAR CONTACTO (CLIC A WHATSAPP) ====================
+async function registrarContacto(profesionalId, profesionalNombre) {
+    if (!currentUser) {
+        mostrarToast('Debes iniciar sesión para contactar al profesional', 'info');
+        document.getElementById('modalLogin').style.display = 'flex';
+        return false;
+    }
+    
+    try {
+        // Registrar el clic en la base de datos
+        const { error } = await supabase.from('contactos').insert([{
+            profesional_id: profesionalId,
+            cliente_id: currentUser.id,
+            fecha_contacto: new Date().toISOString(),
+            estado: 'pendiente',
+            ip: 'cliente',
+            user_agent: navigator.userAgent
+        }]);
+        
+        if (error) throw error;
+        
+        console.log('✅ Contacto registrado para:', profesionalNombre);
+        return true;
+        
+    } catch (err) {
+        console.error('Error registrando contacto:', err);
+        return true; // Continuar de todas formas para no bloquear al usuario
+    }
+}
+
+// ==================== FUNCIÓN WHATSAPP CON REGISTRO ====================
+async function abrirWhatsAppConRegistro(telefono, nombre, profesionalId) {
+    // Registrar el contacto
+    await registrarContacto(profesionalId, nombre);
+    
+    // Limpiar número
+    let numeroLimpio = telefono.replace(/[^0-9]/g, '');
+    if (!numeroLimpio.startsWith('53')) {
+        numeroLimpio = '53' + numeroLimpio;
+    }
+    const numeroFormateado = '+' + numeroLimpio;
+    const mensaje = encodeURIComponent(`Hola, vi tu perfil "${nombre}" en Factor Cuba y me interesa tu servicio.`);
+    
+    const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (esMovil) {
+        window.location.href = `whatsapp://send?phone=${numeroFormateado}&text=${mensaje}`;
+    } else {
+        window.open(`https://web.whatsapp.com/send?phone=${numeroFormateado}&text=${mensaje}`);
+    }
+}
+
 // ==================== RECUPERAR CONTRASEÑA ====================
 async function enviarRecuperacion() {
     const email = document.getElementById('recuperarEmail').value.trim();
@@ -631,7 +720,6 @@ async function enviarRecuperacion() {
     }
 }
 
-// ==================== VERIFICAR RECUPERACIÓN EN URL ====================
 async function verificarRecuperacion() {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const accessToken = hashParams.get('access_token');
@@ -802,7 +890,7 @@ function actualizarMapa() {
                     <br>🔧 ${escapeHtml(servicio.especialidad || servicio.categoria)}
                     <br>⭐ ${servicio.promedio_puntuacion ? servicio.promedio_puntuacion.toFixed(1) : 'Nuevo'} (${servicio.total_calificaciones || 0})
                     <hr>
-                    <button onclick="window.open('https://wa.me/${servicio.telefono.replace(/[^0-9]/g, '')}')" style="background:#25D366;border:none;padding:4px 10px;border-radius:20px;color:white;cursor:pointer;">💬 WhatsApp</button>
+                    <button onclick="abrirWhatsAppConRegistro('${servicio.telefono}', '${escapeHtml(servicio.nombre)}', '${servicio.id}')" style="background:#25D366;border:none;padding:4px 10px;border-radius:20px;color:white;cursor:pointer;">💬 WhatsApp</button>
                 </div>
             `);
         }
@@ -865,7 +953,7 @@ async function cargarProfesionales() {
                 </div>
                 <div class="card-footer">
                     <button class="btn btn-outline" onclick="verPerfil('${s.id}')"><i class="fas fa-user"></i> Ver Perfil</button>
-                    <button class="btn btn-primary" style="background:#25D366;" onclick="window.open('https://wa.me/${s.telefono.replace(/[^0-9]/g, '')}')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    <button class="btn btn-primary" onclick="abrirWhatsAppConRegistro('${s.telefono}', '${escapeHtml(s.nombre)}', '${s.id}')" style="background:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
                 </div>
             </div>
         `).join('');
@@ -896,7 +984,7 @@ window.verPerfil = async function(servicioId) {
             <p><i class="fab fa-whatsapp"></i> ${escapeHtml(servicio.telefono)}</p>
             ${servicio.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(servicio.descripcion)}</p>` : ''}
             <div style="margin-top:15px;">
-                <button class="btn btn-primary" onclick="window.open('https://wa.me/${servicio.telefono.replace(/[^0-9]/g, '')}')" style="background:#25D366;">💬 Contactar por WhatsApp</button>
+                <button class="btn btn-primary" onclick="abrirWhatsAppConRegistro('${servicio.telefono}', '${escapeHtml(servicio.nombre)}', '${servicio.id}')" style="background:#25D366;">💬 Contactar por WhatsApp</button>
                 ${currentUser && currentUser.id === servicio.user_id ? `<button class="btn btn-outline" id="btnEditarPerfilDesdeVista" style="margin-top:10px;"><i class="fas fa-edit"></i> Editar Perfil</button>` : ''}
             </div>
             ${calificaciones}
@@ -1226,19 +1314,22 @@ async function cargarAdminPanel() {
     const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
     const aprobadosCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
     const cambiosCount = await supabase.from('cambios_pendientes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+    const contactosCount = await supabase.from('contactos').select('*', { count: 'exact', head: true });
     
     let html = `
         <div class="admin-stats">
-            <div class="admin-stat"><div class="stat-number">${total.count || 0}</div><div>Total</div></div>
+            <div class="admin-stat"><div class="stat-number">${total.count || 0}</div><div>Total Servicios</div></div>
             <div class="admin-stat"><div class="stat-number" style="color:#f59e0b;">${pendientesCount.count || 0}</div><div>Pendientes</div></div>
             <div class="admin-stat"><div class="stat-number" style="color:#10b981;">${aprobadosCount.count || 0}</div><div>Aprobados</div></div>
-            <div class="admin-stat"><div class="stat-number" style="color:#3b82f6;">${cambiosCount.count || 0}</div><div>Cambios Pendientes</div></div>
+            <div class="admin-stat"><div class="stat-number" style="color:#3b82f6;">${cambiosCount.count || 0}</div><div>Cambios</div></div>
+            <div class="admin-stat"><div class="stat-number" style="color:#8b5cf6;">${contactosCount.count || 0}</div><div>Contactos</div></div>
         </div>
         <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
             <button class="btn btn-outline" id="adminTabPendientes" style="background:#f59e0b; color:white;">⏳ Servicios Pendientes</button>
             <button class="btn btn-outline" id="adminTabAprobados">✅ Aprobados</button>
             <button class="btn btn-outline" id="adminTabTodos">📋 Todos</button>
-            <button class="btn btn-outline" id="adminTabCambios">🔄 Cambios Pendientes</button>
+            <button class="btn btn-outline" id="adminTabCambios">🔄 Cambios</button>
+            <button class="btn btn-outline" id="adminTabContactos" style="background:#8b5cf6; color:white;">📞 Contactos</button>
         </div>
         <div id="adminLista"></div>
     `;
@@ -1250,12 +1341,69 @@ async function cargarAdminPanel() {
     document.getElementById('adminTabAprobados').onclick = () => cargarAdminLista('aprobado');
     document.getElementById('adminTabTodos').onclick = () => cargarAdminLista('todos');
     document.getElementById('adminTabCambios').onclick = () => cargarAdminLista('cambios');
+    document.getElementById('adminTabContactos').onclick = () => cargarAdminLista('contactos');
 }
 
 async function cargarAdminLista(tipo) {
     const listaDiv = document.getElementById('adminLista');
     if (!listaDiv) return;
     
+    // CONTACTOS
+    if (tipo === 'contactos') {
+        const { data: contactos } = await supabase
+            .from('contactos')
+            .select('*, oferentes!profesional_id(nombre, telefono, especialidad), auth.users!cliente_id(email)')
+            .order('fecha_contacto', { ascending: false });
+        
+        if (!contactos || contactos.length === 0) {
+            listaDiv.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-phone-slash" style="font-size:48px;color:#cbd5e1;"></i><p>No hay contactos registrados aún</p><p style="font-size:12px;">Cuando un cliente haga clic en WhatsApp, aparecerá aquí.</p></div>';
+            return;
+        }
+        
+        // Calcular totales
+        const totalContactos = contactos.length;
+        const pendientes = contactos.filter(c => c.estado === 'pendiente').length;
+        const ingresoPotencial = pendientes * 3;
+        
+        listaDiv.innerHTML = `
+            <div style="background:var(--primary-light); padding:16px; border-radius:var(--radius-lg); margin-bottom:20px;">
+                <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; text-align:center;">
+                    <div><strong style="font-size:24px;">${totalContactos}</strong><br>Total Contactos</div>
+                    <div><strong style="font-size:24px; color:#f59e0b;">${pendientes}</strong><br>Pendientes de pago</div>
+                    <div><strong style="font-size:24px; color:#10b981;">$${ingresoPotencial}</strong><br>Ingreso potencial</div>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="contactos-table">
+                    <thead>
+                        <tr><th>Fecha</th><th>Cliente</th><th>Profesional</th><th>Especialidad</th><th>Estado</th><th>Acción</th></tr>
+                    </thead>
+                    <tbody>
+                        ${contactos.map(c => `
+                            <tr>
+                                <td>${new Date(c.fecha_contacto).toLocaleString()}</td>
+                                <td>${escapeHtml(c.auth?.users?.email?.split('@')[0] || c.cliente_id?.substring(0,8) || 'N/A')}</td>
+                                <td><strong>${escapeHtml(c.oferentes?.nombre || 'N/A')}</strong></td>
+                                <td>${escapeHtml(c.oferentes?.especialidad || c.oferentes?.categoria || 'N/A')}</td>
+                                <td><span class="estado-${c.estado === 'pendiente' ? 'pendiente' : 'pagado'}">${c.estado === 'pendiente' ? '⏳ Pendiente' : '✅ Pagado'}</span></td>
+                                <td>
+                                    ${c.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="marcarContactoPagado('${c.id}')">💰 Marcar pagado</button>` : '—'}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top:20px;">
+                <button class="btn btn-primary" id="btnExportarContactos" style="background:#10b981;"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
+            </div>
+        `;
+        
+        document.getElementById('btnExportarContactos')?.addEventListener('click', exportarContactosExcel);
+        return;
+    }
+    
+    // CAMBIOS
     if (tipo === 'cambios') {
         const { data: cambios } = await supabase.from('cambios_pendientes').select('*, oferentes!servicio_id(nombre, telefono, zona)').eq('estado', 'pendiente').order('created_at', { ascending: false });
         
@@ -1293,6 +1441,7 @@ async function cargarAdminLista(tipo) {
         return;
     }
     
+    // SERVICIOS (pendiente, aprobado, todos)
     let query = supabase.from('oferentes').select('*');
     if (tipo === 'pendiente') query = query.eq('estado', 'pendiente');
     else if (tipo === 'aprobado') query = query.eq('estado', 'aprobado');
@@ -1319,6 +1468,42 @@ async function cargarAdminLista(tipo) {
         </div>
     `).join('');
 }
+
+// Función para exportar contactos a Excel
+async function exportarContactosExcel() {
+    const { data: contactos } = await supabase
+        .from('contactos')
+        .select('*, oferentes!profesional_id(nombre, telefono, especialidad), auth.users!cliente_id(email)')
+        .order('fecha_contacto', { ascending: false });
+    
+    if (!contactos || contactos.length === 0) {
+        mostrarToast('No hay contactos para exportar', 'error');
+        return;
+    }
+    
+    let csv = "Fecha,Cliente,Profesional,Especialidad,Teléfono Profesional,Estado\n";
+    contactos.forEach(c => {
+        csv += `"${new Date(c.fecha_contacto).toLocaleString()}","${c.auth?.users?.email || 'N/A'}","${c.oferentes?.nombre || 'N/A'}","${c.oferentes?.especialidad || 'N/A'}","${c.oferentes?.telefono || 'N/A'}","${c.estado}"\n`;
+    });
+    
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute("download", `contactos_factor_cuba_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    mostrarToast('✅ Contactos exportados', 'success');
+}
+
+window.marcarContactoPagado = async function(contactoId) {
+    if (!confirm('¿Marcar este contacto como pagado? Se registrará un ingreso de $3 USD.')) return;
+    await supabase.from('contactos').update({ estado: 'pagado' }).eq('id', contactoId);
+    mostrarToast('✅ Contacto marcado como pagado', 'success');
+    cargarAdminLista('contactos');
+};
 
 window.aprobarServicio = async function(id) { 
     if (!confirm('¿Aprobar este servicio?')) return; 
