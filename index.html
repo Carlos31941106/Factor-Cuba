@@ -274,7 +274,7 @@
             margin-top: 20px;
         }
         
-        /* Estilos para la tabla de contactos en admin */
+        /* Tabla de contactos */
         .contactos-table {
             width: 100%;
             border-collapse: collapse;
@@ -654,33 +654,29 @@ async function registrarContacto(profesionalId, profesionalNombre) {
     }
     
     try {
-        // Registrar el clic en la base de datos
         const { error } = await supabase.from('contactos').insert([{
             profesional_id: profesionalId,
             cliente_id: currentUser.id,
             fecha_contacto: new Date().toISOString(),
-            estado: 'pendiente',
-            ip: 'cliente',
-            user_agent: navigator.userAgent
+            estado: 'pendiente'
         }]);
         
         if (error) throw error;
         
         console.log('✅ Contacto registrado para:', profesionalNombre);
+        mostrarToast('✅ Mensaje enviado. El profesional ha sido notificado.', 'success');
         return true;
         
     } catch (err) {
         console.error('Error registrando contacto:', err);
-        return true; // Continuar de todas formas para no bloquear al usuario
+        return true;
     }
 }
 
 // ==================== FUNCIÓN WHATSAPP CON REGISTRO ====================
 async function abrirWhatsAppConRegistro(telefono, nombre, profesionalId) {
-    // Registrar el contacto
     await registrarContacto(profesionalId, nombre);
     
-    // Limpiar número
     let numeroLimpio = telefono.replace(/[^0-9]/g, '');
     if (!numeroLimpio.startsWith('53')) {
         numeroLimpio = '53' + numeroLimpio;
@@ -703,18 +699,12 @@ async function enviarRecuperacion() {
         mostrarToast('Ingresa tu correo electrónico', 'error');
         return;
     }
-    
     try {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.href,
-        });
-        
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
         if (error) throw error;
-        
         mostrarToast('📧 Se ha enviado un enlace de recuperación a tu correo', 'success');
         document.getElementById('modalRecuperar').style.display = 'none';
         document.getElementById('recuperarEmail').value = '';
-        
     } catch (err) {
         mostrarToast('Error: ' + err.message, 'error');
     }
@@ -724,16 +714,14 @@ async function verificarRecuperacion() {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const accessToken = hashParams.get('access_token');
     const type = hashParams.get('type');
-    
     if (type === 'recovery' && accessToken) {
-        mostrarToast('🔐 Puedes restablecer tu contraseña. Ingresa una nueva contraseña.', 'info');
         const nuevaPassword = prompt('Ingresa tu nueva contraseña (mínimo 6 caracteres):');
         if (nuevaPassword && nuevaPassword.length >= 6) {
             const { error } = await supabase.auth.updateUser({ password: nuevaPassword });
             if (error) {
                 mostrarToast('Error: ' + error.message, 'error');
             } else {
-                mostrarToast('✅ Contraseña actualizada correctamente. Inicia sesión con tu nueva contraseña.', 'success');
+                mostrarToast('✅ Contraseña actualizada correctamente.', 'success');
                 window.location.hash = '';
             }
         } else if (nuevaPassword) {
@@ -745,11 +733,8 @@ async function verificarRecuperacion() {
 // ==================== COMPARTIR QR ====================
 function generarQR() {
     const url = window.location.href;
-    const qrContainer = document.getElementById('qrContainer');
-    const shareUrlInput = document.getElementById('shareUrl');
-    
-    shareUrlInput.value = url;
-    qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}" alt="Código QR">`;
+    document.getElementById('shareUrl').value = url;
+    document.getElementById('qrContainer').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}" alt="Código QR">`;
 }
 
 function abrirCompartir() {
@@ -778,11 +763,9 @@ function actualizarMunicipios(provinciaSelectId, municipioSelectId) {
     const provinciaSelect = document.getElementById(provinciaSelectId);
     const municipioSelect = document.getElementById(municipioSelectId);
     if (!provinciaSelect || !municipioSelect) return;
-    
     const provincia = provinciaSelect.value;
     municipioSelect.innerHTML = '<option value="">Primero selecciona provincia</option>';
     municipioSelect.disabled = true;
-    
     if (provincia && provinciasYMunicipios[provincia]) {
         municipioSelect.disabled = false;
         municipioSelect.innerHTML = '<option value="">Selecciona municipio</option>';
@@ -798,23 +781,16 @@ function actualizarMunicipios(provinciaSelectId, municipioSelectId) {
 // ==================== VERIFICAR TIPO DE USUARIO ====================
 async function verificarTipoUsuario() {
     if (!currentUser) return null;
-    
-    const { data: profesional } = await supabase
-        .from('oferentes')
-        .select('id, user_id')
-        .eq('user_id', currentUser.id)
-        .maybeSingle();
-    
+    const { data: profesional } = await supabase.from('oferentes').select('id, user_id').eq('user_id', currentUser.id).maybeSingle();
     if (profesional) {
         currentUserTipo = 'profesional';
         return { tipo: 'profesional', data: profesional };
     }
-    
     currentUserTipo = null;
     return null;
 }
 
-// ==================== MAPA DE UBICACIÓN (para publicación) ====================
+// ==================== MAPA DE UBICACIÓN ====================
 function iniciarMapaUbicacion() {
     if (mapaUbicacionInstance) mapaUbicacionInstance.remove();
     mapaUbicacionInstance = L.map('ubicacionMapa').setView([23.1, -82.4], 12);
@@ -830,16 +806,13 @@ function iniciarMapaUbicacion() {
     });
 }
 
-// ==================== MAPA DE EDICIÓN ====================
 function iniciarEditMapa(lat, lng) {
     if (editMapaInstance) editMapaInstance.remove();
     const centerLat = lat || 23.1;
     const centerLng = lng || -82.4;
     const zoom = (lat && lng) ? 14 : 12;
-    
     editMapaInstance = L.map('editMapa').setView([centerLat, centerLng], zoom);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(editMapaInstance);
-    
     if (lat && lng) {
         editMarcador = L.marker([lat, lng]).addTo(editMapaInstance);
         document.getElementById('editLatitud').value = lat;
@@ -847,7 +820,6 @@ function iniciarEditMapa(lat, lng) {
         document.getElementById('editUbicacionInfo').innerHTML = `<i class="fas fa-check-circle"></i> Ubicación actual: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
         document.getElementById('editUbicacionInfo').style.background = '#10b981';
     }
-    
     editMapaInstance.on('click', function(e) {
         const newLat = e.latlng.lat, newLng = e.latlng.lng;
         if (editMarcador) editMapaInstance.removeLayer(editMarcador);
@@ -867,9 +839,7 @@ function actualizarMapa() {
     } else {
         mapaInstance.eachLayer(layer => { if (layer instanceof L.Marker) mapaInstance.removeLayer(layer); });
     }
-    
     const serviciosMostrar = adminAuthenticated ? todosLosServicios : todosLosServicios.filter(s => s.estado === 'aprobado');
-    
     serviciosMostrar.forEach(servicio => {
         let coords = null;
         if (servicio.latitud && servicio.longitud) {
@@ -879,7 +849,6 @@ function actualizarMapa() {
         } else if (ZONAS_COORDS[servicio.zona]) {
             coords = ZONAS_COORDS[servicio.zona];
         }
-        
         if (coords) {
             const marker = L.marker(coords).addTo(mapaInstance);
             marker.bindPopup(`
@@ -913,7 +882,6 @@ async function cargarProfesionales() {
         document.getElementById('totalProfesionales').textContent = aprobados;
         document.getElementById('totalPendientes').textContent = pendientes;
         
-        // Populares
         const categoriasCount = {};
         todosLosServicios.forEach(s => { if (s.estado === 'aprobado') categoriasCount[s.categoria] = (categoriasCount[s.categoria] || 0) + 1; });
         const categoriasOrdenadas = Object.entries(categoriasCount).sort((a,b) => b[1] - a[1]).slice(0, 6);
@@ -1164,7 +1132,6 @@ document.getElementById('editFotoFile')?.addEventListener('change', (e) => {
 // ==================== PANEL PROFESIONAL ====================
 async function abrirPanelProfesional() {
     if (!currentUser || currentUserTipo !== 'profesional') return;
-    
     const { data: profesional } = await supabase.from('oferentes').select('*').eq('user_id', currentUser.id).single();
     if (!profesional) return;
     
@@ -1189,7 +1156,6 @@ async function abrirPanelProfesional() {
         </div>
     `;
     document.body.appendChild(modal);
-    
     document.getElementById('panelEditarPerfil').onclick = () => {
         modal.remove();
         abrirEditarPerfil(profesional.id);
@@ -1348,49 +1314,91 @@ async function cargarAdminLista(tipo) {
     const listaDiv = document.getElementById('adminLista');
     if (!listaDiv) return;
     
-    // CONTACTOS
+    // CONTACTOS - Versión simplificada y corregida
     if (tipo === 'contactos') {
-        const { data: contactos } = await supabase
+        console.log('Cargando contactos...');
+        
+        // Obtener todos los contactos
+        const { data: contactos, error: contactosError } = await supabase
             .from('contactos')
-            .select('*, oferentes!profesional_id(nombre, telefono, especialidad), auth.users!cliente_id(email)')
+            .select('*')
             .order('fecha_contacto', { ascending: false });
+        
+        if (contactosError) {
+            console.error('Error en contactos:', contactosError);
+            listaDiv.innerHTML = `<div style="text-align:center;padding:40px;color:red;">❌ Error: ${contactosError.message}</div>`;
+            return;
+        }
+        
+        console.log('Contactos encontrados:', contactos?.length || 0);
         
         if (!contactos || contactos.length === 0) {
             listaDiv.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-phone-slash" style="font-size:48px;color:#cbd5e1;"></i><p>No hay contactos registrados aún</p><p style="font-size:12px;">Cuando un cliente haga clic en WhatsApp, aparecerá aquí.</p></div>';
             return;
         }
         
-        // Calcular totales
+        // Obtener información de profesionales
+        const profesionalIds = [...new Set(contactos.map(c => c.profesional_id).filter(id => id))];
+        let profesionalesMap = {};
+        
+        if (profesionalIds.length > 0) {
+            const { data: profesionales } = await supabase
+                .from('oferentes')
+                .select('id, nombre, especialidad, telefono')
+                .in('id', profesionalIds);
+            if (profesionales) {
+                profesionales.forEach(p => { profesionalesMap[p.id] = p; });
+            }
+        }
+        
+        // Obtener información de clientes
+        const clienteIds = [...new Set(contactos.map(c => c.cliente_id).filter(id => id))];
+        let clientesMap = {};
+        
+        if (clienteIds.length > 0) {
+            const { data: clientes } = await supabase
+                .from('clientes')
+                .select('user_id, email')
+                .in('user_id', clienteIds);
+            if (clientes) {
+                clientes.forEach(c => { clientesMap[c.user_id] = c; });
+            }
+        }
+        
         const totalContactos = contactos.length;
         const pendientes = contactos.filter(c => c.estado === 'pendiente').length;
+        const pagados = contactos.filter(c => c.estado === 'pagado').length;
         const ingresoPotencial = pendientes * 3;
         
         listaDiv.innerHTML = `
             <div style="background:var(--primary-light); padding:16px; border-radius:var(--radius-lg); margin-bottom:20px;">
-                <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; text-align:center;">
-                    <div><strong style="font-size:24px;">${totalContactos}</strong><br>Total Contactos</div>
-                    <div><strong style="font-size:24px; color:#f59e0b;">${pendientes}</strong><br>Pendientes de pago</div>
-                    <div><strong style="font-size:24px; color:#10b981;">$${ingresoPotencial}</strong><br>Ingreso potencial</div>
+                <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; text-align:center;">
+                    <div><strong style="font-size:24px;">${totalContactos}</strong><br>Total</div>
+                    <div><strong style="font-size:24px; color:#f59e0b;">${pendientes}</strong><br>Pendientes</div>
+                    <div><strong style="font-size:24px; color:#10b981;">${pagados}</strong><br>Pagados</div>
+                    <div><strong style="font-size:24px; color:#8b5cf6;">$${ingresoPotencial}</strong><br>Ingreso potencial</div>
                 </div>
             </div>
             <div style="overflow-x:auto;">
                 <table class="contactos-table">
                     <thead>
-                        <tr><th>Fecha</th><th>Cliente</th><th>Profesional</th><th>Especialidad</th><th>Estado</th><th>Acción</th></tr>
+                        <tr><th>Fecha</th><th>Cliente</th><th>Profesional</th><th>Teléfono</th><th>Estado</th><th>Acción</th></tr>
                     </thead>
                     <tbody>
-                        ${contactos.map(c => `
+                        ${contactos.map(c => {
+                            const profesional = profesionalesMap[c.profesional_id];
+                            return `
                             <tr>
                                 <td>${new Date(c.fecha_contacto).toLocaleString()}</td>
-                                <td>${escapeHtml(c.auth?.users?.email?.split('@')[0] || c.cliente_id?.substring(0,8) || 'N/A')}</td>
-                                <td><strong>${escapeHtml(c.oferentes?.nombre || 'N/A')}</strong></td>
-                                <td>${escapeHtml(c.oferentes?.especialidad || c.oferentes?.categoria || 'N/A')}</td>
+                                <td>${escapeHtml(clientesMap[c.cliente_id]?.email?.split('@')[0] || c.cliente_id?.substring(0,8) || 'N/A')}</td>
+                                <td><strong>${escapeHtml(profesional?.nombre || 'N/A')}</strong><br><small>${escapeHtml(profesional?.especialidad || 'N/A')}</small></td>
+                                <td>${escapeHtml(profesional?.telefono || 'N/A')}</td>
                                 <td><span class="estado-${c.estado === 'pendiente' ? 'pendiente' : 'pagado'}">${c.estado === 'pendiente' ? '⏳ Pendiente' : '✅ Pagado'}</span></td>
                                 <td>
                                     ${c.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="marcarContactoPagado('${c.id}')">💰 Marcar pagado</button>` : '—'}
                                 </td>
                             </tr>
-                        `).join('')}
+                        `}).join('')}
                     </tbody>
                 </table>
             </div>
@@ -1406,18 +1414,15 @@ async function cargarAdminLista(tipo) {
     // CAMBIOS
     if (tipo === 'cambios') {
         const { data: cambios } = await supabase.from('cambios_pendientes').select('*, oferentes!servicio_id(nombre, telefono, zona)').eq('estado', 'pendiente').order('created_at', { ascending: false });
-        
         if (!cambios || cambios.length === 0) {
             listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay cambios pendientes</div>';
             return;
         }
-        
         const cambiosPorServicio = {};
         cambios.forEach(c => {
             if (!cambiosPorServicio[c.servicio_id]) cambiosPorServicio[c.servicio_id] = [];
             cambiosPorServicio[c.servicio_id].push(c);
         });
-        
         let html = '';
         for (const [servicioId, cambiosServicio] of Object.entries(cambiosPorServicio)) {
             const servicio = cambiosServicio[0]?.oferentes;
@@ -1469,40 +1474,17 @@ async function cargarAdminLista(tipo) {
     `).join('');
 }
 
-// Función para exportar contactos a Excel
-async function exportarContactosExcel() {
-    const { data: contactos } = await supabase
-        .from('contactos')
-        .select('*, oferentes!profesional_id(nombre, telefono, especialidad), auth.users!cliente_id(email)')
-        .order('fecha_contacto', { ascending: false });
-    
-    if (!contactos || contactos.length === 0) {
-        mostrarToast('No hay contactos para exportar', 'error');
-        return;
-    }
-    
-    let csv = "Fecha,Cliente,Profesional,Especialidad,Teléfono Profesional,Estado\n";
-    contactos.forEach(c => {
-        csv += `"${new Date(c.fecha_contacto).toLocaleString()}","${c.auth?.users?.email || 'N/A'}","${c.oferentes?.nombre || 'N/A'}","${c.oferentes?.especialidad || 'N/A'}","${c.oferentes?.telefono || 'N/A'}","${c.estado}"\n`;
-    });
-    
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.setAttribute("download", `contactos_factor_cuba_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    mostrarToast('✅ Contactos exportados', 'success');
-}
-
 window.marcarContactoPagado = async function(contactoId) {
-    if (!confirm('¿Marcar este contacto como pagado? Se registrará un ingreso de $3 USD.')) return;
-    await supabase.from('contactos').update({ estado: 'pagado' }).eq('id', contactoId);
-    mostrarToast('✅ Contacto marcado como pagado', 'success');
-    cargarAdminLista('contactos');
+    if (!confirm('¿Marcar este contacto como pagado? Esto registrará un ingreso de $3 USD para este contacto.')) return;
+    try {
+        const { error } = await supabase.from('contactos').update({ estado: 'pagado' }).eq('id', contactoId);
+        if (error) throw error;
+        mostrarToast('✅ Contacto marcado como pagado', 'success');
+        cargarAdminLista('contactos');
+        actualizarStatsAdmin();
+    } catch (err) {
+        mostrarToast('Error: ' + err.message, 'error');
+    }
 };
 
 window.aprobarServicio = async function(id) { 
@@ -1531,16 +1513,12 @@ window.eliminarServicio = async function(id) {
 
 window.aprobarCambios = async function(servicioId) { 
     if (!confirm('¿Aprobar todos los cambios para este servicio?')) return; 
-    
     const { data: cambios } = await supabase.from('cambios_pendientes').select('*').eq('servicio_id', servicioId).eq('estado', 'pendiente');
     if (!cambios || cambios.length === 0) return;
-    
     const updates = {};
     cambios.forEach(c => { updates[c.campo] = c.valor_nuevo; });
-    
     await supabase.from('oferentes').update(updates).eq('id', servicioId);
     await supabase.from('cambios_pendientes').update({ estado: 'aprobado' }).eq('servicio_id', servicioId).eq('estado', 'pendiente');
-    
     mostrarToast('✅ Cambios aprobados y aplicados', 'success');
     cargarAdminLista('cambios');
     await cargarProfesionales();
@@ -1552,6 +1530,41 @@ window.rechazarCambios = async function(servicioId) {
     mostrarToast('❌ Cambios rechazados', 'warning');
     cargarAdminLista('cambios');
 };
+
+async function exportarContactosExcel() {
+    const { data: contactos } = await supabase.from('contactos').select('*').order('fecha_contacto', { ascending: false });
+    if (!contactos || contactos.length === 0) {
+        mostrarToast('No hay contactos para exportar', 'error');
+        return;
+    }
+    let csv = "Fecha,Cliente ID,Profesional ID,Estado\n";
+    contactos.forEach(c => {
+        csv += `"${new Date(c.fecha_contacto).toLocaleString()}","${c.cliente_id || 'N/A'}","${c.profesional_id || 'N/A'}","${c.estado}"\n`;
+    });
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute("download", `contactos_factor_cuba_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    mostrarToast('✅ Contactos exportados', 'success');
+}
+
+async function actualizarStatsAdmin() {
+    const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
+    const pendientes = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+    const aprobados = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
+    const cambios = await supabase.from('cambios_pendientes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+    const contactos = await supabase.from('contactos').select('*', { count: 'exact', head: true });
+    document.getElementById('adminTotal').textContent = total.count || 0;
+    document.getElementById('adminPendientes').textContent = pendientes.count || 0;
+    document.getElementById('adminAprobados').textContent = aprobados.count || 0;
+    document.getElementById('adminCambiosPendientes').textContent = cambios.count || 0;
+    document.getElementById('adminVisitasPendientes').textContent = contactos.count || 0;
+}
 
 // ==================== REGISTRO ====================
 document.getElementById('registroForm').addEventListener('submit', async (e) => {
@@ -1585,7 +1598,6 @@ document.getElementById('btnPublicar').onclick = () => {
     document.getElementById('pubMunicipio').disabled = true;
 };
 
-// Recuperación de contraseña
 document.getElementById('forgotPasswordLink').onclick = (e) => { e.preventDefault(); document.getElementById('modalLogin').style.display = 'none'; document.getElementById('modalRecuperar').style.display = 'flex'; };
 document.getElementById('btnRecuperarSubmit').onclick = enviarRecuperacion;
 document.getElementById('btnCloseRecuperar').onclick = () => document.getElementById('modalRecuperar').style.display = 'none';
@@ -1605,7 +1617,7 @@ document.getElementById('shareFacebook').onclick = () => {
 document.getElementById('copyLinkBtn').onclick = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
-    mostrarToast('✅ Enlace copiado al portapapeles', 'success');
+    mostrarToast('✅ Enlace copiado', 'success');
 };
 
 document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
