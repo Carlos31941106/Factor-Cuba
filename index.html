@@ -248,6 +248,7 @@
         }
         
         .row-2cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .row-3cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
         .file-input-label { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-secondary); border: 1px dashed var(--primary); border-radius: var(--radius-md); cursor: pointer; color: var(--primary); }
         .file-input-label:hover { background: var(--primary-light); }
         .foto-preview { margin-top: 12px; }
@@ -255,7 +256,7 @@
         
         .admin-stats {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 16px;
             margin-bottom: 24px;
         }
@@ -293,6 +294,7 @@
             .professionals-grid { grid-template-columns: 1fr; }
             .filters { flex-direction: column; }
             .row-2cols { grid-template-columns: 1fr; }
+            .row-3cols { grid-template-columns: 1fr; }
             .stats-grid { gap: 16px; }
             .stat-number { font-size: 32px; }
             .admin-stats { grid-template-columns: 1fr; }
@@ -421,8 +423,37 @@
     </div>
 </div>
 
+<!-- MODAL EDITAR PERFIL PROFESIONAL -->
+<div id="modalEditarPerfil" class="modal">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header"><h2><i class="fas fa-edit"></i> Editar Perfil Profesional</h2><button class="close-modal" id="btnCloseEditarPerfil">&times;</button></div>
+        <form id="editarPerfilForm">
+            <input type="hidden" id="editId">
+            <div class="form-group"><label><i class="fas fa-store"></i> Nombre del Negocio</label><input type="text" id="editNombre" required></div>
+            <div class="form-group"><label><i class="fas fa-tag"></i> Categoría</label><select id="editCategoria"><option value="carpinteria">Carpintería</option><option value="construccion">Construcción</option><option value="electricidad">Electricidad</option><option value="soldadura">Soldadura</option><option value="reparaciones">Reparaciones</option><option value="transporte">Transporte</option><option value="otros">Otros Servicios</option></select></div>
+            <div class="row-2cols">
+                <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Provincia</label><select id="editProvincia" required><option value="">Selecciona provincia</option></select></div>
+                <div class="form-group"><label><i class="fas fa-city"></i> Municipio</label><select id="editMunicipio" required disabled><option value="">Primero selecciona provincia</option></select></div>
+            </div>
+            <div class="form-group"><label><i class="fas fa-map-pin"></i> Ubicación exacta</label><div id="editMapa" class="map-small"></div><div class="location-info" id="editUbicacionInfo">Haz clic en el mapa para marcar tu ubicación</div><input type="hidden" id="editLatitud" value=""><input type="hidden" id="editLongitud" value=""></div>
+            <div class="form-group"><label><i class="fab fa-whatsapp"></i> Teléfono / WhatsApp</label><input type="tel" id="editTelefono" required></div>
+            <div class="form-group"><label><i class="fas fa-image"></i> Foto de Perfil</label>
+                <div id="editFotoActual"></div>
+                <label for="editFotoFile" class="file-input-label"><i class="fas fa-cloud-upload-alt"></i> Cambiar imagen</label>
+                <input type="file" id="editFotoFile" accept="image/*" style="display: none;">
+                <div class="foto-preview" id="editPreviewFoto"></div>
+            </div>
+            <div class="form-group"><label><i class="fas fa-info-circle"></i> Descripción</label><textarea id="editDescripcion" rows="3"></textarea></div>
+            <div class="admin-notice" style="background: var(--warning-light); padding: 12px; border-radius: 8px; font-size: 12px; text-align: center; margin-bottom: 16px;">
+                <i class="fas fa-clock"></i> Los cambios serán revisados por un administrador antes de ser publicados.
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-paper-plane"></i> Enviar cambios para revisión</button>
+        </form>
+    </div>
+</div>
+
 <div id="modalAdmin" class="modal">
-    <div class="modal-content" style="max-width: 800px;">
+    <div class="modal-content" style="max-width: 900px;">
         <div class="modal-header"><h2>Panel de Administrador</h2><button class="close-modal" id="btnCloseAdmin">&times;</button></div>
         <div id="adminContent"></div>
     </div>
@@ -437,10 +468,13 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const ADMIN_PASSWORD = "FactorCuba2025";
 let adminAuthenticated = false;
 let currentUser = null;
+let currentUserTipo = null;
 let todosLosServicios = [];
 let mapaInstance = null;
 let mapaUbicacionInstance = null;
 let marcadorUbicacion = null;
+let editMapaInstance = null;
+let editMarcador = null;
 
 // ==================== PROVINCIAS Y MUNICIPIOS DE CUBA ====================
 const provinciasYMunicipios = {
@@ -519,7 +553,7 @@ async function subirImagen(file, userId) {
 
 // ==================== CARGAR PROVINCIAS Y MUNICIPIOS ====================
 function cargarProvincias() {
-    const selects = ['pubProvincia', 'provinciaFilter'];
+    const selects = ['pubProvincia', 'provinciaFilter', 'editProvincia'];
     selects.forEach(id => {
         const select = document.getElementById(id);
         if (select) {
@@ -555,7 +589,26 @@ function actualizarMunicipios(provinciaSelectId, municipioSelectId) {
     }
 }
 
-// ==================== MAPA DE UBICACIÓN ====================
+// ==================== VERIFICAR TIPO DE USUARIO ====================
+async function verificarTipoUsuario() {
+    if (!currentUser) return null;
+    
+    const { data: profesional } = await supabase
+        .from('oferentes')
+        .select('id, user_id')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+    
+    if (profesional) {
+        currentUserTipo = 'profesional';
+        return { tipo: 'profesional', data: profesional };
+    }
+    
+    currentUserTipo = null;
+    return null;
+}
+
+// ==================== MAPA DE UBICACIÓN (para publicación) ====================
 function iniciarMapaUbicacion() {
     if (mapaUbicacionInstance) mapaUbicacionInstance.remove();
     mapaUbicacionInstance = L.map('ubicacionMapa').setView([23.1, -82.4], 12);
@@ -568,6 +621,35 @@ function iniciarMapaUbicacion() {
         document.getElementById('pubLongitud').value = lng;
         document.getElementById('ubicacionInfo').innerHTML = `<i class="fas fa-check-circle"></i> Ubicación marcada: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
         document.getElementById('ubicacionInfo').style.background = '#10b981';
+    });
+}
+
+// ==================== MAPA DE EDICIÓN ====================
+function iniciarEditMapa(lat, lng) {
+    if (editMapaInstance) editMapaInstance.remove();
+    const centerLat = lat || 23.1;
+    const centerLng = lng || -82.4;
+    const zoom = (lat && lng) ? 14 : 12;
+    
+    editMapaInstance = L.map('editMapa').setView([centerLat, centerLng], zoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(editMapaInstance);
+    
+    if (lat && lng) {
+        editMarcador = L.marker([lat, lng]).addTo(editMapaInstance);
+        document.getElementById('editLatitud').value = lat;
+        document.getElementById('editLongitud').value = lng;
+        document.getElementById('editUbicacionInfo').innerHTML = `<i class="fas fa-check-circle"></i> Ubicación actual: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        document.getElementById('editUbicacionInfo').style.background = '#10b981';
+    }
+    
+    editMapaInstance.on('click', function(e) {
+        const newLat = e.latlng.lat, newLng = e.latlng.lng;
+        if (editMarcador) editMapaInstance.removeLayer(editMarcador);
+        editMarcador = L.marker([newLat, newLng]).addTo(editMapaInstance);
+        document.getElementById('editLatitud').value = newLat;
+        document.getElementById('editLongitud').value = newLng;
+        document.getElementById('editUbicacionInfo').innerHTML = `<i class="fas fa-check-circle"></i> Nueva ubicación: ${newLat.toFixed(6)}, ${newLng.toFixed(6)}`;
+        document.getElementById('editUbicacionInfo').style.background = '#10b981';
     });
 }
 
@@ -697,6 +779,7 @@ window.verPerfil = async function(servicioId) {
             ${servicio.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(servicio.descripcion)}</p>` : ''}
             <div style="margin-top:15px;">
                 <button class="btn btn-primary" onclick="window.open('https://wa.me/${servicio.telefono.replace(/[^0-9]/g, '')}')" style="background:#25D366;">💬 Contactar por WhatsApp</button>
+                ${currentUser && currentUser.id === servicio.user_id ? `<button class="btn btn-outline" id="btnEditarPerfilDesdeVista" style="margin-top:10px;"><i class="fas fa-edit"></i> Editar Perfil</button>` : ''}
             </div>
             ${calificaciones}
         </div>
@@ -707,7 +790,133 @@ window.verPerfil = async function(servicioId) {
     modal.style.display = 'flex';
     modal.innerHTML = `<div class="modal-content" style="max-width:500px;"><div class="modal-header"><h2>Perfil Profesional</h2><button class="close-modal" onclick="this.closest('.modal').remove()">&times;</button></div>${contenido}</div>`;
     document.body.appendChild(modal);
+    
+    document.getElementById('btnEditarPerfilDesdeVista')?.addEventListener('click', () => {
+        modal.remove();
+        abrirEditarPerfil(servicio.id);
+    });
 };
+
+// ==================== ABRIR EDITAR PERFIL ====================
+window.abrirEditarPerfil = async function(servicioId) {
+    const servicio = todosLosServicios.find(s => s.id === servicioId);
+    if (!servicio) return;
+    
+    document.getElementById('editId').value = servicio.id;
+    document.getElementById('editNombre').value = servicio.nombre || '';
+    document.getElementById('editCategoria').value = servicio.categoria || '';
+    document.getElementById('editTelefono').value = servicio.telefono || '';
+    document.getElementById('editDescripcion').value = servicio.descripcion || '';
+    document.getElementById('editLatitud').value = servicio.latitud || '';
+    document.getElementById('editLongitud').value = servicio.longitud || '';
+    
+    // Foto actual
+    const fotoActualDiv = document.getElementById('editFotoActual');
+    if (servicio.foto) {
+        fotoActualDiv.innerHTML = `<img src="${servicio.foto}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;margin-bottom:10px;"><br><small>Foto actual</small>`;
+    } else {
+        fotoActualDiv.innerHTML = '<small>Sin foto de perfil</small>';
+    }
+    document.getElementById('editPreviewFoto').innerHTML = '';
+    document.getElementById('editFotoFile').value = '';
+    
+    // Provincias y municipios
+    cargarProvincias();
+    if (servicio.provincia) {
+        document.getElementById('editProvincia').value = servicio.provincia;
+        actualizarMunicipios('editProvincia', 'editMunicipio');
+        setTimeout(() => {
+            if (servicio.municipio) {
+                document.getElementById('editMunicipio').value = servicio.municipio;
+            }
+        }, 100);
+    }
+    
+    // Mapa
+    setTimeout(() => {
+        iniciarEditMapa(servicio.latitud, servicio.longitud);
+    }, 200);
+    
+    document.getElementById('modalEditarPerfil').style.display = 'flex';
+};
+
+// ==================== GUARDAR EDICIÓN DE PERFIL ====================
+document.getElementById('editarPerfilForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const id = document.getElementById('editId').value;
+    const servicioOriginal = todosLosServicios.find(s => s.id === id);
+    if (!servicioOriginal) return;
+    
+    const nuevoNombre = document.getElementById('editNombre').value.trim();
+    const nuevaCategoria = document.getElementById('editCategoria').value;
+    const nuevaProvincia = document.getElementById('editProvincia').value;
+    const nuevoMunicipio = document.getElementById('editMunicipio').value;
+    const nuevoTelefono = document.getElementById('editTelefono').value.trim();
+    const nuevaDescripcion = document.getElementById('editDescripcion').value.trim();
+    const nuevaLatitud = document.getElementById('editLatitud').value;
+    const nuevaLongitud = document.getElementById('editLongitud').value;
+    const fotoFile = document.getElementById('editFotoFile').files[0];
+    
+    const cambios = [];
+    
+    if (nuevoNombre !== servicioOriginal.nombre) {
+        cambios.push({ campo: 'nombre', valor_viejo: servicioOriginal.nombre, valor_nuevo: nuevoNombre });
+    }
+    if (nuevaCategoria !== servicioOriginal.categoria) {
+        cambios.push({ campo: 'categoria', valor_viejo: servicioOriginal.categoria, valor_nuevo: nuevaCategoria });
+    }
+    if (nuevaProvincia !== servicioOriginal.provincia) {
+        cambios.push({ campo: 'provincia', valor_viejo: servicioOriginal.provincia, valor_nuevo: nuevaProvincia });
+    }
+    if (nuevoMunicipio !== servicioOriginal.municipio) {
+        cambios.push({ campo: 'municipio', valor_viejo: servicioOriginal.municipio, valor_nuevo: nuevoMunicipio });
+    }
+    if (nuevoTelefono !== servicioOriginal.telefono) {
+        cambios.push({ campo: 'telefono', valor_viejo: servicioOriginal.telefono, valor_nuevo: nuevoTelefono });
+    }
+    if (nuevaDescripcion !== servicioOriginal.descripcion) {
+        cambios.push({ campo: 'descripcion', valor_viejo: servicioOriginal.descripcion, valor_nuevo: nuevaDescripcion });
+    }
+    if (nuevaLatitud && nuevaLongitud && (parseFloat(nuevaLatitud) !== servicioOriginal.latitud || parseFloat(nuevaLongitud) !== servicioOriginal.longitud)) {
+        cambios.push({ campo: 'latitud', valor_viejo: servicioOriginal.latitud, valor_nuevo: nuevaLatitud });
+        cambios.push({ campo: 'longitud', valor_viejo: servicioOriginal.longitud, valor_nuevo: nuevaLongitud });
+    }
+    
+    if (cambios.length === 0 && !fotoFile) {
+        mostrarToast('No se detectaron cambios', 'info');
+        document.getElementById('modalEditarPerfil').style.display = 'none';
+        return;
+    }
+    
+    try {
+        // Subir nueva foto si hay
+        let nuevaFotoUrl = null;
+        if (fotoFile) {
+            mostrarToast('Subiendo nueva imagen...', 'info');
+            nuevaFotoUrl = await subirImagen(fotoFile, currentUser.id);
+            cambios.push({ campo: 'foto', valor_viejo: servicioOriginal.foto, valor_nuevo: nuevaFotoUrl });
+        }
+        
+        // Guardar cambios pendientes
+        for (const cambio of cambios) {
+            await supabase.from('cambios_pendientes').insert([{
+                servicio_id: id,
+                usuario_id: currentUser.id,
+                campo: cambio.campo,
+                valor_viejo: cambio.valor_viejo,
+                valor_nuevo: cambio.valor_nuevo,
+                estado: 'pendiente'
+            }]);
+        }
+        
+        mostrarToast('✅ Cambios enviados para revisión. Un administrador los aprobará.', 'success');
+        document.getElementById('modalEditarPerfil').style.display = 'none';
+        
+    } catch (err) {
+        mostrarToast('Error: ' + err.message, 'error');
+    }
+});
 
 // ==================== PUBLICAR SERVICIO ====================
 async function publicarServicio() {
@@ -758,6 +967,49 @@ document.getElementById('fotoPerfil')?.addEventListener('change', (e) => {
     if (file) { const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('previewFoto').innerHTML = `<img src="${ev.target.result}" alt="preview">`; }; reader.readAsDataURL(file); }
 });
 
+document.getElementById('editFotoFile')?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) { const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('editPreviewFoto').innerHTML = `<img src="${ev.target.result}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`; }; reader.readAsDataURL(file); }
+});
+
+// ==================== PANEL PROFESIONAL ====================
+async function abrirPanelProfesional() {
+    if (!currentUser || currentUserTipo !== 'profesional') return;
+    
+    const { data: profesional } = await supabase.from('oferentes').select('*').eq('user_id', currentUser.id).single();
+    if (!profesional) return;
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width:600px;">
+            <div class="modal-header"><h2><i class="fas fa-briefcase"></i> Mi Panel Profesional</h2><button class="close-modal" onclick="this.closest('.modal').remove()">&times;</button></div>
+            <div style="text-align:center; margin-bottom:20px;">
+                <div style="width:80px;height:80px;background:linear-gradient(135deg,#2c5f8a,#5A7D9A);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:36px;color:white;overflow:hidden;">
+                    ${profesional.foto ? `<img src="${profesional.foto}" style="width:100%;height:100%;object-fit:cover;">` : `<i class="fas fa-user-circle"></i>`}
+                </div>
+                <h3>${escapeHtml(profesional.nombre)}</h3>
+                <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(profesional.municipio || profesional.zona)}, ${escapeHtml(profesional.provincia || '')}</p>
+                <p><i class="fab fa-whatsapp"></i> ${escapeHtml(profesional.telefono)}</p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-primary" id="panelEditarPerfil" style="flex:1;"><i class="fas fa-edit"></i> Editar Perfil</button>
+                <button class="btn btn-outline" id="panelVerEstadisticas" style="flex:1;"><i class="fas fa-chart-line"></i> Estadísticas</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('panelEditarPerfil').onclick = () => {
+        modal.remove();
+        abrirEditarPerfil(profesional.id);
+    };
+    document.getElementById('panelVerEstadisticas').onclick = () => {
+        mostrarToast('Función en desarrollo', 'info');
+    };
+}
+
 // ==================== AUTENTICACIÓN ====================
 let loginMode = 'login';
 async function manejarAuth() {
@@ -771,6 +1023,7 @@ async function manejarAuth() {
             currentUser = data.user;
             mostrarToast('✅ Sesión iniciada', 'success');
             document.getElementById('modalLogin').style.display = 'none';
+            await verificarTipoUsuario();
             actualizarUI();
             await cargarProfesionales();
         } else {
@@ -791,6 +1044,7 @@ async function manejarAuth() {
 async function logout() { 
     await supabase.auth.signOut(); 
     currentUser = null; 
+    currentUserTipo = null;
     adminAuthenticated = false; 
     sessionStorage.removeItem('adminAutenticado'); 
     actualizarUI(); 
@@ -816,6 +1070,21 @@ function actualizarUI() {
         btnCompartir.style.display = 'inline-block';
         btnLogout.style.display = 'inline-block';
         btnAdmin.style.display = currentUser.email === ADMIN_EMAIL ? 'inline-block' : 'none';
+        
+        // Botón para panel profesional (si es profesional)
+        if (currentUserTipo === 'profesional') {
+            if (!document.getElementById('btnPanelProfesional')) {
+                const btnPanel = document.createElement('button');
+                btnPanel.id = 'btnPanelProfesional';
+                btnPanel.className = 'btn btn-outline';
+                btnPanel.innerHTML = '<i class="fas fa-user-cog"></i> Mi Panel';
+                btnPanel.onclick = abrirPanelProfesional;
+                btnPublicar.parentNode.insertBefore(btnPanel, btnPublicar);
+            }
+        } else {
+            const btnPanel = document.getElementById('btnPanelProfesional');
+            if (btnPanel) btnPanel.remove();
+        }
     } else {
         userInfo.style.display = 'none';
         btnLogin.style.display = 'inline-block';
@@ -823,6 +1092,8 @@ function actualizarUI() {
         btnCompartir.style.display = 'none';
         btnAdmin.style.display = 'none';
         btnLogout.style.display = 'none';
+        const btnPanel = document.getElementById('btnPanelProfesional');
+        if (btnPanel) btnPanel.remove();
     }
 }
 
@@ -857,17 +1128,20 @@ async function cargarAdminPanel() {
     const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
     const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
     const aprobadosCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
+    const cambiosCount = await supabase.from('cambios_pendientes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
     
     let html = `
         <div class="admin-stats">
             <div class="admin-stat"><div class="stat-number">${total.count || 0}</div><div>Total</div></div>
             <div class="admin-stat"><div class="stat-number" style="color:#f59e0b;">${pendientesCount.count || 0}</div><div>Pendientes</div></div>
             <div class="admin-stat"><div class="stat-number" style="color:#10b981;">${aprobadosCount.count || 0}</div><div>Aprobados</div></div>
+            <div class="admin-stat"><div class="stat-number" style="color:#3b82f6;">${cambiosCount.count || 0}</div><div>Cambios Pendientes</div></div>
         </div>
         <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-            <button class="btn btn-outline" id="adminTabPendientes" style="background:#f59e0b; color:white;">⏳ Pendientes</button>
+            <button class="btn btn-outline" id="adminTabPendientes" style="background:#f59e0b; color:white;">⏳ Servicios Pendientes</button>
             <button class="btn btn-outline" id="adminTabAprobados">✅ Aprobados</button>
             <button class="btn btn-outline" id="adminTabTodos">📋 Todos</button>
+            <button class="btn btn-outline" id="adminTabCambios">🔄 Cambios Pendientes</button>
         </div>
         <div id="adminLista"></div>
     `;
@@ -878,11 +1152,49 @@ async function cargarAdminPanel() {
     document.getElementById('adminTabPendientes').onclick = () => cargarAdminLista('pendiente');
     document.getElementById('adminTabAprobados').onclick = () => cargarAdminLista('aprobado');
     document.getElementById('adminTabTodos').onclick = () => cargarAdminLista('todos');
+    document.getElementById('adminTabCambios').onclick = () => cargarAdminLista('cambios');
 }
 
 async function cargarAdminLista(tipo) {
     const listaDiv = document.getElementById('adminLista');
     if (!listaDiv) return;
+    
+    if (tipo === 'cambios') {
+        const { data: cambios } = await supabase.from('cambios_pendientes').select('*, oferentes!servicio_id(nombre, telefono, zona)').eq('estado', 'pendiente').order('created_at', { ascending: false });
+        
+        if (!cambios || cambios.length === 0) {
+            listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay cambios pendientes</div>';
+            return;
+        }
+        
+        const cambiosPorServicio = {};
+        cambios.forEach(c => {
+            if (!cambiosPorServicio[c.servicio_id]) cambiosPorServicio[c.servicio_id] = [];
+            cambiosPorServicio[c.servicio_id].push(c);
+        });
+        
+        let html = '';
+        for (const [servicioId, cambiosServicio] of Object.entries(cambiosPorServicio)) {
+            const servicio = cambiosServicio[0]?.oferentes;
+            html += `
+                <div class="service-item service-pendiente">
+                    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;">
+                        <div><strong>${escapeHtml(servicio?.nombre || 'Servicio')}</strong><br><small>ID: ${servicioId}</small></div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn btn-success btn-sm" onclick="aprobarCambios('${servicioId}')">✅ Aprobar todos</button>
+                            <button class="btn btn-danger btn-sm" onclick="rechazarCambios('${servicioId}')">❌ Rechazar todos</button>
+                        </div>
+                    </div>
+                    <div><strong>Cambios solicitados:</strong></div>
+                    <ul style="margin-left:20px; margin-top:8px;">
+                        ${cambiosServicio.map(c => `<li><strong>${c.campo}:</strong> "${escapeHtml(c.valor_viejo || 'Vacío')}" → "${escapeHtml(c.valor_nuevo || 'Vacío')}"</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        listaDiv.innerHTML = html;
+        return;
+    }
     
     let query = supabase.from('oferentes').select('*');
     if (tipo === 'pendiente') query = query.eq('estado', 'pendiente');
@@ -917,8 +1229,6 @@ window.aprobarServicio = async function(id) {
     mostrarToast('✅ Servicio aprobado', 'success'); 
     cargarAdminLista('pendiente');
     await cargarProfesionales();
-    const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
-    document.getElementById('totalPendientes').textContent = pendientesCount.count || 0;
 };
 
 window.rechazarServicio = async function(id) { 
@@ -927,8 +1237,6 @@ window.rechazarServicio = async function(id) {
     mostrarToast('❌ Servicio rechazado', 'warning'); 
     cargarAdminLista('pendiente');
     await cargarProfesionales();
-    const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
-    document.getElementById('totalPendientes').textContent = pendientesCount.count || 0;
 };
 
 window.eliminarServicio = async function(id) { 
@@ -937,8 +1245,30 @@ window.eliminarServicio = async function(id) {
     mostrarToast('🗑️ Servicio eliminado', 'success'); 
     cargarAdminLista('pendiente');
     await cargarProfesionales();
-    const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
-    document.getElementById('totalPendientes').textContent = pendientesCount.count || 0;
+};
+
+window.aprobarCambios = async function(servicioId) { 
+    if (!confirm('¿Aprobar todos los cambios para este servicio?')) return; 
+    
+    const { data: cambios } = await supabase.from('cambios_pendientes').select('*').eq('servicio_id', servicioId).eq('estado', 'pendiente');
+    if (!cambios || cambios.length === 0) return;
+    
+    const updates = {};
+    cambios.forEach(c => { updates[c.campo] = c.valor_nuevo; });
+    
+    await supabase.from('oferentes').update(updates).eq('id', servicioId);
+    await supabase.from('cambios_pendientes').update({ estado: 'aprobado' }).eq('servicio_id', servicioId).eq('estado', 'pendiente');
+    
+    mostrarToast('✅ Cambios aprobados y aplicados', 'success');
+    cargarAdminLista('cambios');
+    await cargarProfesionales();
+};
+
+window.rechazarCambios = async function(servicioId) { 
+    if (!confirm('¿Rechazar todos los cambios para este servicio?')) return; 
+    await supabase.from('cambios_pendientes').update({ estado: 'rechazado' }).eq('servicio_id', servicioId).eq('estado', 'pendiente');
+    mostrarToast('❌ Cambios rechazados', 'warning');
+    cargarAdminLista('cambios');
 };
 
 // ==================== REGISTRO ====================
@@ -972,6 +1302,7 @@ document.getElementById('btnPublicar').onclick = () => {
     document.getElementById('pubMunicipio').disabled = true;
 };
 document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
+document.getElementById('editProvincia').onchange = function() { actualizarMunicipios('editProvincia', 'editMunicipio'); };
 document.getElementById('provinciaFilter').onchange = function() { actualizarMunicipios('provinciaFilter', 'municipioFilter'); cargarProfesionales(); };
 document.getElementById('municipioFilter').onchange = cargarProfesionales;
 document.getElementById('btnGuardarServicio').onclick = publicarServicio;
@@ -979,6 +1310,7 @@ document.getElementById('btnClosePublicar').onclick = () => document.getElementB
 document.getElementById('btnCloseLogin').onclick = () => document.getElementById('modalLogin').style.display = 'none';
 document.getElementById('btnCloseRegistro').onclick = () => document.getElementById('modalRegistro').style.display = 'none';
 document.getElementById('btnCloseAdmin').onclick = () => document.getElementById('modalAdmin').style.display = 'none';
+document.getElementById('btnCloseEditarPerfil').onclick = () => document.getElementById('modalEditarPerfil').style.display = 'none';
 document.getElementById('btnLoginSubmit').onclick = manejarAuth;
 document.getElementById('btnBuscar').onclick = cargarProfesionales;
 document.getElementById('searchInput').onkeyup = (e) => { if(e.key === 'Enter') cargarProfesionales(); };
@@ -993,9 +1325,11 @@ window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.sty
 async function init() { 
     cargarProvincias();
     document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
+    document.getElementById('editProvincia').onchange = function() { actualizarMunicipios('editProvincia', 'editMunicipio'); };
     document.getElementById('provinciaFilter').onchange = function() { actualizarMunicipios('provinciaFilter', 'municipioFilter'); cargarProfesionales(); };
     const { data: { session } } = await supabase.auth.getSession(); 
     currentUser = session?.user || null; 
+    if (currentUser) await verificarTipoUsuario();
     actualizarUI(); 
     await cargarProfesionales(); 
 }
