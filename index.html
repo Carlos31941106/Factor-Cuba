@@ -192,6 +192,46 @@
         .rating-value { font-size: 14px; font-weight: 600; color: var(--primary); }
         .rating-count { font-size: 12px; color: var(--text-muted); }
         
+        /* Servicios card */
+        .servicios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .servicio-card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .servicio-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+        .servicio-nombre {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        .servicio-descripcion {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .servicio-precio {
+            font-size: 12px;
+            color: var(--success);
+            margin-bottom: 12px;
+        }
+        .servicio-card .btn-sm {
+            padding: 4px 12px;
+            font-size: 11px;
+        }
+        
         .popular-tabs { display: flex; gap: 16px; margin: 40px 0 24px; border-bottom: 2px solid var(--border); padding-bottom: 12px; flex-wrap: wrap; }
         .popular-tab { padding: 10px 24px; background: none; border: none; font-size: 15px; font-weight: 600; color: var(--text-secondary); cursor: pointer; border-radius: var(--radius-md); }
         .popular-tab.active { background: var(--primary); color: white; }
@@ -356,6 +396,7 @@
             .admin-stats { grid-template-columns: repeat(2, 1fr); }
             .contactos-table { font-size: 12px; }
             .contactos-table th, .contactos-table td { padding: 6px; }
+            .servicios-grid { grid-template-columns: 1fr; }
         }
         
         ::-webkit-scrollbar { width: 8px; }
@@ -459,10 +500,7 @@
     <div class="modal-content">
         <div class="modal-header"><h2><i class="fas fa-key"></i> Recuperar Contraseña</h2><button class="close-modal" id="btnCloseRecuperar">&times;</button></div>
         <div class="form-group"><label><i class="fas fa-envelope"></i> Correo Electrónico</label><input type="email" id="recuperarEmail" placeholder="tu@email.com"></div>
-        <button class="btn btn-primary" id="btnRecuperarSubmit" style="width: 100%;"><i class="fas fa-paper-plane"></i> Enviar enlace de recuperación</button>
-        <p style="margin-top: 16px; text-align: center; font-size: 12px; color: var(--text-muted);">
-            <i class="fas fa-info-circle"></i> Recibirás un correo con un enlace para restablecer tu contraseña.
-        </p>
+        <button class="btn btn-primary" id="btnRecuperarSubmit" style="width: 100%;"><i class="fas fa-paper-plane"></i> Enviar enlace</button>
     </div>
 </div>
 
@@ -522,6 +560,36 @@
                 <i class="fas fa-clock"></i> Los cambios serán revisados por un administrador antes de ser publicados.
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-paper-plane"></i> Enviar cambios para revisión</button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL GESTIÓN DE SERVICIOS (para profesionales) -->
+<div id="modalGestionServicios" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header"><h2><i class="fas fa-list-ul"></i> Mis Servicios</h2><button class="close-modal" id="btnCloseGestionServicios">&times;</button></div>
+        <div id="gestionServiciosContent"></div>
+        <div style="margin-top: 20px;">
+            <button class="btn btn-primary" id="btnAgregarServicio" style="width: 100%;"><i class="fas fa-plus-circle"></i> Agregar nuevo servicio</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL AGREGAR/EDITAR SERVICIO -->
+<div id="modalFormServicio" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h2 id="formServicioTitle"><i class="fas fa-plus-circle"></i> Agregar Servicio</h2><button class="close-modal" id="btnCloseFormServicio">&times;</button></div>
+        <form id="formServicio">
+            <input type="hidden" id="servicioId">
+            <div class="form-group"><label><i class="fas fa-tag"></i> Nombre del Servicio *</label><input type="text" id="servicioNombre" required placeholder="Ej: Muebles a medida"></div>
+            <div class="form-group"><label><i class="fas fa-info-circle"></i> Descripción</label><textarea id="servicioDescripcion" rows="3" placeholder="Describe el servicio..."></textarea></div>
+            <div class="form-group"><label><i class="fas fa-dollar-sign"></i> Precio estimado (opcional)</label><input type="text" id="servicioPrecio" placeholder="Ej: Desde 1000 CUP o A consultar"></div>
+            <div class="form-group"><label><i class="fas fa-image"></i> Imagen del servicio</label>
+                <label for="servicioImagen" class="file-input-label"><i class="fas fa-cloud-upload-alt"></i> Seleccionar imagen</label>
+                <input type="file" id="servicioImagen" accept="image/*" style="display: none;">
+                <div id="servicioImagenPreview" class="foto-preview"></div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-save"></i> Guardar Servicio</button>
         </form>
     </div>
 </div>
@@ -629,11 +697,11 @@ function renderStars(promedio, total) {
     return `<div class="rating"><div class="stars">${starsHtml}</div><span class="rating-value">${promedio.toFixed(1)}</span><span class="rating-count">(${total} ${total === 1 ? 'reseña' : 'reseñas'})</span></div>`;
 }
 
-async function subirImagen(file, userId) {
+async function subirImagen(file, userId, folder = 'avatars') {
     if (!file) return null;
     const ext = file.name.split('.').pop();
     const fileName = `${userId}_${Date.now()}.${ext}`;
-    const filePath = `avatars/${fileName}`;
+    const filePath = `${folder}/${fileName}`;
     try {
         const { error } = await supabase.storage.from('fotos-perfil').upload(filePath, file);
         if (error) throw error;
@@ -645,8 +713,141 @@ async function subirImagen(file, userId) {
     }
 }
 
-// ==================== REGISTRAR CONTACTO (CLIC A WHATSAPP) ====================
-async function registrarContacto(profesionalId, profesionalNombre) {
+// ==================== GESTIÓN DE SERVICIOS ====================
+async function abrirGestionServicios() {
+    if (!currentUser || currentUserTipo !== 'profesional') return;
+    
+    const { data: profesional } = await supabase.from('oferentes').select('id').eq('user_id', currentUser.id).single();
+    if (!profesional) return;
+    
+    const { data: servicios } = await supabase
+        .from('servicios')
+        .select('*')
+        .eq('profesional_id', profesional.id)
+        .order('created_at', { ascending: false });
+    
+    const modal = document.getElementById('modalGestionServicios');
+    const content = document.getElementById('gestionServiciosContent');
+    
+    if (!servicios || servicios.length === 0) {
+        content.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-store-slash" style="font-size:48px;color:#cbd5e1;"></i><p>No tienes servicios adicionales aún</p><p style="font-size:12px;">Agrega servicios específicos que ofreces para que los clientes te contacten directamente.</p></div>';
+    } else {
+        content.innerHTML = `
+            <div class="servicios-grid">
+                ${servicios.map(s => `
+                    <div class="servicio-card">
+                        ${s.imagen ? `<img src="${s.imagen}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;">` : `<div style="width:100%;height:120px;background:var(--primary-light);border-radius:8px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image" style="font-size:32px;color:var(--primary);"></i></div>`}
+                        <div class="servicio-nombre">${escapeHtml(s.nombre)}</div>
+                        ${s.descripcion ? `<div class="servicio-descripcion">${escapeHtml(s.descripcion)}</div>` : ''}
+                        ${s.precio_estimado ? `<div class="servicio-precio"><i class="fas fa-dollar-sign"></i> ${escapeHtml(s.precio_estimado)}</div>` : ''}
+                        <div style="display:flex; gap:8px; justify-content:center;">
+                            <button class="btn btn-outline btn-sm" onclick="editarServicio('${s.id}')"><i class="fas fa-edit"></i> Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarServicio('${s.id}')"><i class="fas fa-trash"></i> Eliminar</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    modal.style.display = 'flex';
+}
+
+window.editarServicio = async function(servicioId) {
+    const { data: servicio } = await supabase.from('servicios').select('*').eq('id', servicioId).single();
+    if (!servicio) return;
+    
+    document.getElementById('servicioId').value = servicio.id;
+    document.getElementById('servicioNombre').value = servicio.nombre || '';
+    document.getElementById('servicioDescripcion').value = servicio.descripcion || '';
+    document.getElementById('servicioPrecio').value = servicio.precio_estimado || '';
+    document.getElementById('servicioImagenPreview').innerHTML = servicio.imagen ? `<img src="${servicio.imagen}" style="width:70px;height:70px;border-radius:8px;object-fit:cover;">` : '';
+    document.getElementById('formServicioTitle').innerHTML = '<i class="fas fa-edit"></i> Editar Servicio';
+    document.getElementById('modalFormServicio').style.display = 'flex';
+};
+
+window.eliminarServicio = async function(servicioId) {
+    if (!confirm('¿Eliminar este servicio permanentemente?')) return;
+    const { error } = await supabase.from('servicios').delete().eq('id', servicioId);
+    if (error) {
+        mostrarToast('Error: ' + error.message, 'error');
+    } else {
+        mostrarToast('✅ Servicio eliminado', 'success');
+        abrirGestionServicios();
+    }
+};
+
+document.getElementById('btnAgregarServicio').onclick = () => {
+    document.getElementById('servicioId').value = '';
+    document.getElementById('servicioNombre').value = '';
+    document.getElementById('servicioDescripcion').value = '';
+    document.getElementById('servicioPrecio').value = '';
+    document.getElementById('servicioImagenPreview').innerHTML = '';
+    document.getElementById('formServicioTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Agregar Servicio';
+    document.getElementById('modalFormServicio').style.display = 'flex';
+};
+
+document.getElementById('formServicio').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const id = document.getElementById('servicioId').value;
+    const nombre = document.getElementById('servicioNombre').value.trim();
+    const descripcion = document.getElementById('servicioDescripcion').value.trim();
+    const precio = document.getElementById('servicioPrecio').value.trim();
+    const imagenFile = document.getElementById('servicioImagen').files[0];
+    
+    if (!nombre) {
+        mostrarToast('El nombre del servicio es obligatorio', 'error');
+        return;
+    }
+    
+    const { data: profesional } = await supabase.from('oferentes').select('id').eq('user_id', currentUser.id).single();
+    if (!profesional) return;
+    
+    let imagenUrl = null;
+    if (imagenFile) {
+        mostrarToast('Subiendo imagen...', 'info');
+        imagenUrl = await subirImagen(imagenFile, currentUser.id, 'servicios');
+    }
+    
+    if (id) {
+        // Editar
+        const updates = { nombre, descripcion, precio_estimado: precio };
+        if (imagenUrl) updates.imagen = imagenUrl;
+        const { error } = await supabase.from('servicios').update(updates).eq('id', id);
+        if (error) throw error;
+        mostrarToast('✅ Servicio actualizado', 'success');
+    } else {
+        // Crear
+        const { error } = await supabase.from('servicios').insert([{
+            profesional_id: profesional.id,
+            nombre,
+            descripcion,
+            precio_estimado: precio,
+            imagen: imagenUrl,
+            estado: 'activo'
+        }]);
+        if (error) throw error;
+        mostrarToast('✅ Servicio agregado', 'success');
+    }
+    
+    document.getElementById('modalFormServicio').style.display = 'none';
+    abrirGestionServicios();
+});
+
+document.getElementById('servicioImagen')?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            document.getElementById('servicioImagenPreview').innerHTML = `<img src="${ev.target.result}" style="width:70px;height:70px;border-radius:8px;object-fit:cover;">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// ==================== REGISTRAR CONTACTO ====================
+async function registrarContacto(profesionalId, profesionalNombre, servicioNombre = null) {
     if (!currentUser) {
         mostrarToast('Debes iniciar sesión para contactar al profesional', 'info');
         document.getElementById('modalLogin').style.display = 'flex';
@@ -654,60 +855,52 @@ async function registrarContacto(profesionalId, profesionalNombre) {
     }
     
     try {
-        const { error } = await supabase.from('contactos').insert([{
+        await supabase.from('contactos').insert([{
             profesional_id: profesionalId,
             cliente_id: currentUser.id,
             fecha_contacto: new Date().toISOString(),
             estado: 'pendiente'
         }]);
-        
-        if (error) throw error;
-        
         console.log('✅ Contacto registrado para:', profesionalNombre);
-        mostrarToast('✅ Mensaje enviado. El profesional ha sido notificado.', 'success');
         return true;
-        
     } catch (err) {
         console.error('Error registrando contacto:', err);
         return true;
     }
 }
 
-// ==================== FUNCIÓN WHATSAPP CON REGISTRO ====================
-async function abrirWhatsAppConRegistro(telefono, nombre, profesionalId) {
-    await registrarContacto(profesionalId, nombre);
+async function abrirWhatsAppConRegistro(telefono, nombre, profesionalId, servicioNombre = null) {
+    await registrarContacto(profesionalId, nombre, servicioNombre);
     
     let numeroLimpio = telefono.replace(/[^0-9]/g, '');
     if (!numeroLimpio.startsWith('53')) {
         numeroLimpio = '53' + numeroLimpio;
     }
     const numeroFormateado = '+' + numeroLimpio;
-    const mensaje = encodeURIComponent(`Hola, vi tu perfil "${nombre}" en Factor Cuba y me interesa tu servicio.`);
+    let mensaje = `Hola, vi tu perfil "${nombre}" en Factor Cuba y me interesa tu servicio.`;
+    if (servicioNombre) {
+        mensaje = `Hola, vi tu perfil "${nombre}" en Factor Cuba y me interesa tu servicio de "${servicioNombre}".`;
+    }
+    const mensajeEncoded = encodeURIComponent(mensaje);
     
     const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (esMovil) {
-        window.location.href = `whatsapp://send?phone=${numeroFormateado}&text=${mensaje}`;
+        window.location.href = `whatsapp://send?phone=${numeroFormateado}&text=${mensajeEncoded}`;
     } else {
-        window.open(`https://web.whatsapp.com/send?phone=${numeroFormateado}&text=${mensaje}`);
+        window.open(`https://web.whatsapp.com/send?phone=${numeroFormateado}&text=${mensajeEncoded}`);
     }
 }
 
 // ==================== RECUPERAR CONTRASEÑA ====================
 async function enviarRecuperacion() {
     const email = document.getElementById('recuperarEmail').value.trim();
-    if (!email) {
-        mostrarToast('Ingresa tu correo electrónico', 'error');
-        return;
-    }
+    if (!email) { mostrarToast('Ingresa tu correo', 'error'); return; }
     try {
         const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
         if (error) throw error;
-        mostrarToast('📧 Se ha enviado un enlace de recuperación a tu correo', 'success');
+        mostrarToast('📧 Revisa tu correo', 'success');
         document.getElementById('modalRecuperar').style.display = 'none';
-        document.getElementById('recuperarEmail').value = '';
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
+    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 }
 
 async function verificarRecuperacion() {
@@ -718,15 +911,9 @@ async function verificarRecuperacion() {
         const nuevaPassword = prompt('Ingresa tu nueva contraseña (mínimo 6 caracteres):');
         if (nuevaPassword && nuevaPassword.length >= 6) {
             const { error } = await supabase.auth.updateUser({ password: nuevaPassword });
-            if (error) {
-                mostrarToast('Error: ' + error.message, 'error');
-            } else {
-                mostrarToast('✅ Contraseña actualizada correctamente.', 'success');
-                window.location.hash = '';
-            }
-        } else if (nuevaPassword) {
-            mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error');
-        }
+            if (error) { mostrarToast('Error: ' + error.message, 'error'); } 
+            else { mostrarToast('✅ Contraseña actualizada', 'success'); window.location.hash = ''; }
+        } else if (nuevaPassword) { mostrarToast('Mínimo 6 caracteres', 'error'); }
     }
 }
 
@@ -790,7 +977,7 @@ async function verificarTipoUsuario() {
     return null;
 }
 
-// ==================== MAPA DE UBICACIÓN ====================
+// ==================== MAPAS ====================
 function iniciarMapaUbicacion() {
     if (mapaUbicacionInstance) mapaUbicacionInstance.remove();
     mapaUbicacionInstance = L.map('ubicacionMapa').setView([23.1, -82.4], 12);
@@ -831,7 +1018,6 @@ function iniciarEditMapa(lat, lng) {
     });
 }
 
-// ==================== MAPA PRINCIPAL ====================
 function actualizarMapa() {
     if (!mapaInstance) {
         mapaInstance = L.map('mapa').setView([23.1, -82.4], 11);
@@ -870,9 +1056,7 @@ function actualizarMapa() {
 async function cargarProfesionales() {
     try {
         let query = supabase.from('oferentes').select('*');
-        if (!adminAuthenticated) {
-            query = query.eq('estado', 'aprobado');
-        }
+        if (!adminAuthenticated) { query = query.eq('estado', 'aprobado'); }
         const { data, error } = await query.order('created_at', { ascending: false });
         if (error) throw error;
         
@@ -929,10 +1113,18 @@ async function cargarProfesionales() {
     } catch (err) { mostrarToast('Error al cargar profesionales', 'error'); }
 }
 
-// ==================== VER PERFIL ====================
+// ==================== VER PERFIL CON SERVICIOS ====================
 window.verPerfil = async function(servicioId) {
     const servicio = todosLosServicios.find(s => s.id === servicioId);
     if (!servicio) return;
+    
+    // Cargar servicios adicionales del profesional
+    const { data: serviciosAdicionales } = await supabase
+        .from('servicios')
+        .select('*')
+        .eq('profesional_id', servicioId)
+        .eq('estado', 'activo')
+        .order('created_at', { ascending: false });
     
     let calificaciones = '';
     const { data: reseñas } = await supabase.from('calificaciones').select('*').eq('servicio_id', servicioId);
@@ -940,6 +1132,26 @@ window.verPerfil = async function(servicioId) {
         calificaciones = '<div style="margin-top:15px;"><h4>Reseñas:</h4>' + reseñas.map(r => `<div style="background:#f8fafc;padding:10px;margin-bottom:8px;border-radius:8px;">⭐ ${r.puntuacion} estrellas<br>${r.comentario ? `"${escapeHtml(r.comentario)}"` : ''}<br><small>${new Date(r.created_at).toLocaleDateString()}</small></div>`).join('') + '</div>';
     } else {
         calificaciones = '<p style="margin-top:15px;">📝 Aún no hay reseñas</p>';
+    }
+    
+    let serviciosHtml = '';
+    if (serviciosAdicionales && serviciosAdicionales.length > 0) {
+        serviciosHtml = `
+            <div style="margin-top:20px;">
+                <h4><i class="fas fa-list-ul"></i> Servicios que ofrezco</h4>
+                <div class="servicios-grid" style="margin-top:10px;">
+                    ${serviciosAdicionales.map(s => `
+                        <div class="servicio-card" style="cursor:pointer;" onclick="abrirWhatsAppConRegistro('${servicio.telefono}', '${escapeHtml(servicio.nombre)}', '${servicio.id}', '${escapeHtml(s.nombre)}')">
+                            ${s.imagen ? `<img src="${s.imagen}" style="width:100%;height:100px;object-fit:cover;border-radius:8px;margin-bottom:8px;">` : `<div style="width:100%;height:100px;background:var(--primary-light);border-radius:8px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-concierge-bell" style="font-size:32px;color:var(--primary);"></i></div>`}
+                            <div class="servicio-nombre">${escapeHtml(s.nombre)}</div>
+                            ${s.descripcion ? `<div class="servicio-descripcion">${escapeHtml(s.descripcion)}</div>` : ''}
+                            ${s.precio_estimado ? `<div class="servicio-precio">💰 ${escapeHtml(s.precio_estimado)}</div>` : ''}
+                            <button class="btn btn-primary btn-sm" style="margin-top:8px;width:100%;" onclick="event.stopPropagation(); abrirWhatsAppConRegistro('${servicio.telefono}', '${escapeHtml(servicio.nombre)}', '${servicio.id}', '${escapeHtml(s.nombre)}')">📩 Solicitar</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
     }
     
     const contenido = `
@@ -954,7 +1166,9 @@ window.verPerfil = async function(servicioId) {
             <div style="margin-top:15px;">
                 <button class="btn btn-primary" onclick="abrirWhatsAppConRegistro('${servicio.telefono}', '${escapeHtml(servicio.nombre)}', '${servicio.id}')" style="background:#25D366;">💬 Contactar por WhatsApp</button>
                 ${currentUser && currentUser.id === servicio.user_id ? `<button class="btn btn-outline" id="btnEditarPerfilDesdeVista" style="margin-top:10px;"><i class="fas fa-edit"></i> Editar Perfil</button>` : ''}
+                ${currentUser && currentUser.id === servicio.user_id ? `<button class="btn btn-outline" id="btnGestionServiciosDesdeVista" style="margin-top:10px;"><i class="fas fa-list-ul"></i> Gestionar Servicios</button>` : ''}
             </div>
+            ${serviciosHtml}
             ${calificaciones}
         </div>
     `;
@@ -962,12 +1176,16 @@ window.verPerfil = async function(servicioId) {
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.style.display = 'flex';
-    modal.innerHTML = `<div class="modal-content" style="max-width:500px;"><div class="modal-header"><h2>Perfil Profesional</h2><button class="close-modal" onclick="this.closest('.modal').remove()">&times;</button></div>${contenido}</div>`;
+    modal.innerHTML = `<div class="modal-content" style="max-width:700px;"><div class="modal-header"><h2>Perfil Profesional</h2><button class="close-modal" onclick="this.closest('.modal').remove()">&times;</button></div>${contenido}</div>`;
     document.body.appendChild(modal);
     
     document.getElementById('btnEditarPerfilDesdeVista')?.addEventListener('click', () => {
         modal.remove();
         abrirEditarPerfil(servicio.id);
+    });
+    document.getElementById('btnGestionServiciosDesdeVista')?.addEventListener('click', () => {
+        modal.remove();
+        abrirGestionServicios();
     });
 };
 
@@ -1151,14 +1369,20 @@ async function abrirPanelProfesional() {
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
                 <button class="btn btn-primary" id="panelEditarPerfil" style="flex:1;"><i class="fas fa-edit"></i> Editar Perfil</button>
+                <button class="btn btn-primary" id="panelGestionServicios" style="flex:1;"><i class="fas fa-list-ul"></i> Mis Servicios</button>
                 <button class="btn btn-outline" id="panelVerEstadisticas" style="flex:1;"><i class="fas fa-chart-line"></i> Estadísticas</button>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
+    
     document.getElementById('panelEditarPerfil').onclick = () => {
         modal.remove();
         abrirEditarPerfil(profesional.id);
+    };
+    document.getElementById('panelGestionServicios').onclick = () => {
+        modal.remove();
+        abrirGestionServicios();
     };
     document.getElementById('panelVerEstadisticas').onclick = () => {
         mostrarToast('Función en desarrollo', 'info');
@@ -1314,177 +1538,94 @@ async function cargarAdminLista(tipo) {
     const listaDiv = document.getElementById('adminLista');
     if (!listaDiv) return;
     
-    // CONTACTOS - Versión simplificada y corregida
     if (tipo === 'contactos') {
-        console.log('Cargando contactos...');
-        
-        // Obtener todos los contactos
-        const { data: contactos, error: contactosError } = await supabase
-            .from('contactos')
-            .select('*')
-            .order('fecha_contacto', { ascending: false });
-        
-        if (contactosError) {
-            console.error('Error en contactos:', contactosError);
-            listaDiv.innerHTML = `<div style="text-align:center;padding:40px;color:red;">❌ Error: ${contactosError.message}</div>`;
-            return;
-        }
-        
-        console.log('Contactos encontrados:', contactos?.length || 0);
-        
+        const { data: contactos, error } = await supabase.from('contactos').select('*').order('fecha_contacto', { ascending: false });
+        if (error) { console.error(error); return; }
         if (!contactos || contactos.length === 0) {
-            listaDiv.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-phone-slash" style="font-size:48px;color:#cbd5e1;"></i><p>No hay contactos registrados aún</p><p style="font-size:12px;">Cuando un cliente haga clic en WhatsApp, aparecerá aquí.</p></div>';
+            listaDiv.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-phone-slash" style="font-size:48px;color:#cbd5e1;"></i><p>No hay contactos registrados aún</p></div>';
             return;
         }
         
-        // Obtener información de profesionales
         const profesionalIds = [...new Set(contactos.map(c => c.profesional_id).filter(id => id))];
         let profesionalesMap = {};
-        
         if (profesionalIds.length > 0) {
-            const { data: profesionales } = await supabase
-                .from('oferentes')
-                .select('id, nombre, especialidad, telefono')
-                .in('id', profesionalIds);
-            if (profesionales) {
-                profesionales.forEach(p => { profesionalesMap[p.id] = p; });
-            }
+            const { data: profesionales } = await supabase.from('oferentes').select('id, nombre, especialidad, telefono').in('id', profesionalIds);
+            if (profesionales) profesionales.forEach(p => { profesionalesMap[p.id] = p; });
         }
         
-        // Obtener información de clientes
         const clienteIds = [...new Set(contactos.map(c => c.cliente_id).filter(id => id))];
         let clientesMap = {};
-        
         if (clienteIds.length > 0) {
-            const { data: clientes } = await supabase
-                .from('clientes')
-                .select('user_id, email')
-                .in('user_id', clienteIds);
-            if (clientes) {
-                clientes.forEach(c => { clientesMap[c.user_id] = c; });
-            }
+            const { data: clientes } = await supabase.from('clientes').select('user_id, email').in('user_id', clienteIds);
+            if (clientes) clientes.forEach(c => { clientesMap[c.user_id] = c; });
         }
         
-        const totalContactos = contactos.length;
+        const total = contactos.length;
         const pendientes = contactos.filter(c => c.estado === 'pendiente').length;
         const pagados = contactos.filter(c => c.estado === 'pagado').length;
-        const ingresoPotencial = pendientes * 3;
         
         listaDiv.innerHTML = `
             <div style="background:var(--primary-light); padding:16px; border-radius:var(--radius-lg); margin-bottom:20px;">
                 <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; text-align:center;">
-                    <div><strong style="font-size:24px;">${totalContactos}</strong><br>Total</div>
+                    <div><strong style="font-size:24px;">${total}</strong><br>Total</div>
                     <div><strong style="font-size:24px; color:#f59e0b;">${pendientes}</strong><br>Pendientes</div>
                     <div><strong style="font-size:24px; color:#10b981;">${pagados}</strong><br>Pagados</div>
-                    <div><strong style="font-size:24px; color:#8b5cf6;">$${ingresoPotencial}</strong><br>Ingreso potencial</div>
+                    <div><strong style="font-size:24px; color:#8b5cf6;">$${pendientes * 3}</strong><br>Ingreso potencial</div>
                 </div>
             </div>
             <div style="overflow-x:auto;">
                 <table class="contactos-table">
-                    <thead>
-                        <tr><th>Fecha</th><th>Cliente</th><th>Profesional</th><th>Teléfono</th><th>Estado</th><th>Acción</th></tr>
-                    </thead>
+                    <thead><tr><th>Fecha</th><th>Cliente</th><th>Profesional</th><th>Teléfono</th><th>Estado</th><th>Acción</th></tr></thead>
                     <tbody>
                         ${contactos.map(c => {
                             const profesional = profesionalesMap[c.profesional_id];
-                            return `
-                            <tr>
+                            return `<tr>
                                 <td>${new Date(c.fecha_contacto).toLocaleString()}</td>
                                 <td>${escapeHtml(clientesMap[c.cliente_id]?.email?.split('@')[0] || c.cliente_id?.substring(0,8) || 'N/A')}</td>
                                 <td><strong>${escapeHtml(profesional?.nombre || 'N/A')}</strong><br><small>${escapeHtml(profesional?.especialidad || 'N/A')}</small></td>
                                 <td>${escapeHtml(profesional?.telefono || 'N/A')}</td>
                                 <td><span class="estado-${c.estado === 'pendiente' ? 'pendiente' : 'pagado'}">${c.estado === 'pendiente' ? '⏳ Pendiente' : '✅ Pagado'}</span></td>
-                                <td>
-                                    ${c.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="marcarContactoPagado('${c.id}')">💰 Marcar pagado</button>` : '—'}
-                                </td>
-                            </tr>
-                        `}).join('')}
+                                <td>${c.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="marcarContactoPagado('${c.id}')">💰 Pagar</button>` : '—'}</td>
+                            </tr>`;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>
-            <div style="margin-top:20px;">
-                <button class="btn btn-primary" id="btnExportarContactos" style="background:#10b981;"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
-            </div>
+            <div style="margin-top:20px;"><button class="btn btn-primary" id="btnExportarContactos" style="background:#10b981;"><i class="fas fa-file-excel"></i> Exportar a Excel</button></div>
         `;
-        
         document.getElementById('btnExportarContactos')?.addEventListener('click', exportarContactosExcel);
         return;
     }
     
-    // CAMBIOS
     if (tipo === 'cambios') {
         const { data: cambios } = await supabase.from('cambios_pendientes').select('*, oferentes!servicio_id(nombre, telefono, zona)').eq('estado', 'pendiente').order('created_at', { ascending: false });
-        if (!cambios || cambios.length === 0) {
-            listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay cambios pendientes</div>';
-            return;
-        }
+        if (!cambios || cambios.length === 0) { listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay cambios pendientes</div>'; return; }
         const cambiosPorServicio = {};
-        cambios.forEach(c => {
-            if (!cambiosPorServicio[c.servicio_id]) cambiosPorServicio[c.servicio_id] = [];
-            cambiosPorServicio[c.servicio_id].push(c);
-        });
+        cambios.forEach(c => { if (!cambiosPorServicio[c.servicio_id]) cambiosPorServicio[c.servicio_id] = []; cambiosPorServicio[c.servicio_id].push(c); });
         let html = '';
         for (const [servicioId, cambiosServicio] of Object.entries(cambiosPorServicio)) {
             const servicio = cambiosServicio[0]?.oferentes;
-            html += `
-                <div class="service-item service-pendiente">
-                    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;">
-                        <div><strong>${escapeHtml(servicio?.nombre || 'Servicio')}</strong><br><small>ID: ${servicioId}</small></div>
-                        <div style="display:flex; gap:10px;">
-                            <button class="btn btn-success btn-sm" onclick="aprobarCambios('${servicioId}')">✅ Aprobar todos</button>
-                            <button class="btn btn-danger btn-sm" onclick="rechazarCambios('${servicioId}')">❌ Rechazar todos</button>
-                        </div>
-                    </div>
-                    <div><strong>Cambios solicitados:</strong></div>
-                    <ul style="margin-left:20px; margin-top:8px;">
-                        ${cambiosServicio.map(c => `<li><strong>${c.campo}:</strong> "${escapeHtml(c.valor_viejo || 'Vacío')}" → "${escapeHtml(c.valor_nuevo || 'Vacío')}"</li>`).join('')}
-                    </ul>
-                </div>
-            `;
+            html += `<div class="service-item service-pendiente"><div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;"><div><strong>${escapeHtml(servicio?.nombre || 'Servicio')}</strong><br><small>ID: ${servicioId}</small></div><div style="display:flex; gap:10px;"><button class="btn btn-success btn-sm" onclick="aprobarCambios('${servicioId}')">✅ Aprobar todos</button><button class="btn btn-danger btn-sm" onclick="rechazarCambios('${servicioId}')">❌ Rechazar todos</button></div></div><div><strong>Cambios solicitados:</strong></div><ul style="margin-left:20px; margin-top:8px;">${cambiosServicio.map(c => `<li><strong>${c.campo}:</strong> "${escapeHtml(c.valor_viejo || 'Vacío')}" → "${escapeHtml(c.valor_nuevo || 'Vacío')}"</li>`).join('')}</ul></div>`;
         }
         listaDiv.innerHTML = html;
         return;
     }
     
-    // SERVICIOS (pendiente, aprobado, todos)
     let query = supabase.from('oferentes').select('*');
     if (tipo === 'pendiente') query = query.eq('estado', 'pendiente');
     else if (tipo === 'aprobado') query = query.eq('estado', 'aprobado');
-    
     const { data } = await query.order('created_at', { ascending: false });
-    
-    if (!data || data.length === 0) {
-        listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios</div>';
-        return;
-    }
-    
-    listaDiv.innerHTML = data.map(s => `
-        <div class="service-item ${s.estado === 'pendiente' ? 'service-pendiente' : 'service-aprobado'}">
-            <div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;">
-                <div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small><br><small>📍 ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</small></div>
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    ${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button>` : ''}
-                    ${s.estado === 'pendiente' ? `<button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button>` : ''}
-                    <button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button>
-                </div>
-            </div>
-            <div>📞 ${escapeHtml(s.telefono)}</div>
-            ${s.descripcion ? `<div style="margin-top:8px;">📝 ${escapeHtml(s.descripcion)}</div>` : ''}
-        </div>
-    `).join('');
+    if (!data || data.length === 0) { listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios</div>'; return; }
+    listaDiv.innerHTML = data.map(s => `<div class="service-item ${s.estado === 'pendiente' ? 'service-pendiente' : 'service-aprobado'}"><div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small><br><small>📍 ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</small></div><div style="display:flex; gap:10px; flex-wrap:wrap;">${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button>` : ''}<button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar</button></div></div><div>📞 ${escapeHtml(s.telefono)}</div>${s.descripcion ? `<div style="margin-top:8px;">📝 ${escapeHtml(s.descripcion)}</div>` : ''}</div>`).join('');
 }
 
 window.marcarContactoPagado = async function(contactoId) {
-    if (!confirm('¿Marcar este contacto como pagado? Esto registrará un ingreso de $3 USD para este contacto.')) return;
+    if (!confirm('¿Marcar este contacto como pagado?')) return;
     try {
-        const { error } = await supabase.from('contactos').update({ estado: 'pagado' }).eq('id', contactoId);
-        if (error) throw error;
+        await supabase.from('contactos').update({ estado: 'pagado' }).eq('id', contactoId);
         mostrarToast('✅ Contacto marcado como pagado', 'success');
         cargarAdminLista('contactos');
-        actualizarStatsAdmin();
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
+    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 };
 
 window.aprobarServicio = async function(id) { 
@@ -1533,14 +1674,9 @@ window.rechazarCambios = async function(servicioId) {
 
 async function exportarContactosExcel() {
     const { data: contactos } = await supabase.from('contactos').select('*').order('fecha_contacto', { ascending: false });
-    if (!contactos || contactos.length === 0) {
-        mostrarToast('No hay contactos para exportar', 'error');
-        return;
-    }
+    if (!contactos || contactos.length === 0) { mostrarToast('No hay contactos para exportar', 'error'); return; }
     let csv = "Fecha,Cliente ID,Profesional ID,Estado\n";
-    contactos.forEach(c => {
-        csv += `"${new Date(c.fecha_contacto).toLocaleString()}","${c.cliente_id || 'N/A'}","${c.profesional_id || 'N/A'}","${c.estado}"\n`;
-    });
+    contactos.forEach(c => { csv += `"${new Date(c.fecha_contacto).toLocaleString()}","${c.cliente_id || 'N/A'}","${c.profesional_id || 'N/A'}","${c.estado}"\n`; });
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
@@ -1551,19 +1687,6 @@ async function exportarContactosExcel() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     mostrarToast('✅ Contactos exportados', 'success');
-}
-
-async function actualizarStatsAdmin() {
-    const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
-    const pendientes = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
-    const aprobados = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
-    const cambios = await supabase.from('cambios_pendientes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
-    const contactos = await supabase.from('contactos').select('*', { count: 'exact', head: true });
-    document.getElementById('adminTotal').textContent = total.count || 0;
-    document.getElementById('adminPendientes').textContent = pendientes.count || 0;
-    document.getElementById('adminAprobados').textContent = aprobados.count || 0;
-    document.getElementById('adminCambiosPendientes').textContent = cambios.count || 0;
-    document.getElementById('adminVisitasPendientes').textContent = contactos.count || 0;
 }
 
 // ==================== REGISTRO ====================
@@ -1588,6 +1711,8 @@ document.getElementById('btnLogin').onclick = () => document.getElementById('mod
 document.getElementById('btnLogout').onclick = logout;
 document.getElementById('btnCompartir').onclick = abrirCompartir;
 document.getElementById('btnCloseCompartirModal').onclick = () => document.getElementById('modalCompartir').style.display = 'none';
+document.getElementById('btnCloseGestionServicios').onclick = () => document.getElementById('modalGestionServicios').style.display = 'none';
+document.getElementById('btnCloseFormServicio').onclick = () => document.getElementById('modalFormServicio').style.display = 'none';
 document.getElementById('btnPublicar').onclick = () => { 
     if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); document.getElementById('modalLogin').style.display = 'flex'; return; }
     document.getElementById('modalPublicar').style.display = 'flex';
@@ -1602,23 +1727,10 @@ document.getElementById('forgotPasswordLink').onclick = (e) => { e.preventDefaul
 document.getElementById('btnRecuperarSubmit').onclick = enviarRecuperacion;
 document.getElementById('btnCloseRecuperar').onclick = () => document.getElementById('modalRecuperar').style.display = 'none';
 
-document.getElementById('shareWhatsApp').onclick = () => {
-    const url = window.location.href;
-    window.open(`https://wa.me/?text=${encodeURIComponent('¡Conoce Factor Cuba! Encuentra profesionales de confianza en: ' + url)}`, '_blank');
-};
-document.getElementById('shareTelegram').onclick = () => {
-    const url = window.location.href;
-    window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('¡Conoce Factor Cuba!')}`, '_blank');
-};
-document.getElementById('shareFacebook').onclick = () => {
-    const url = window.location.href;
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-};
-document.getElementById('copyLinkBtn').onclick = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
-    mostrarToast('✅ Enlace copiado', 'success');
-};
+document.getElementById('shareWhatsApp').onclick = () => { const url = window.location.href; window.open(`https://wa.me/?text=${encodeURIComponent('¡Conoce Factor Cuba! ' + url)}`, '_blank'); };
+document.getElementById('shareTelegram').onclick = () => { const url = window.location.href; window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('¡Conoce Factor Cuba!')}`, '_blank'); };
+document.getElementById('shareFacebook').onclick = () => { const url = window.location.href; window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank'); };
+document.getElementById('copyLinkBtn').onclick = () => { navigator.clipboard.writeText(window.location.href); mostrarToast('✅ Enlace copiado', 'success'); };
 
 document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
 document.getElementById('editProvincia').onchange = function() { actualizarMunicipios('editProvincia', 'editMunicipio'); };
