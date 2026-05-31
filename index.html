@@ -206,7 +206,7 @@
         
         .map-container { margin: 32px 0; border-radius: var(--radius-xl); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow-md); }
         #mapa { height: 400px; width: 100%; background: #e2e8f0; }
-        .map-small { height: 250px; width: 100%; border-radius: var(--radius-md); margin-top: 8px; border: 1px solid var(--border); }
+        .map-small { height: 250px; width: 100%; border-radius: var(--radius-md); margin-top: 8px; border: 1px solid var(--border); background: #e2e8f0; }
         .location-info { background: var(--info); color: white; padding: 8px; border-radius: var(--radius-md); font-size: 12px; text-align: center; margin-top: 8px; }
         
         .filters { display: flex; gap: 16px; flex-wrap: wrap; margin: 32px 0; background: var(--bg-primary); padding: 20px 24px; border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
@@ -253,6 +253,26 @@
         .file-input-label:hover { background: var(--primary-light); }
         .foto-preview { margin-top: 12px; }
         .foto-preview img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); }
+        
+        /* QR Code */
+        .qr-container {
+            text-align: center;
+            padding: 20px;
+        }
+        .qr-container img {
+            margin: 0 auto;
+            border-radius: var(--radius-lg);
+            background: white;
+            padding: 12px;
+            box-shadow: var(--shadow-md);
+        }
+        .share-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
         
         .admin-stats {
             display: grid;
@@ -319,7 +339,7 @@
             </div>
             <button class="btn btn-outline" id="btnLogin"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
             <button class="btn btn-primary" id="btnPublicar" style="display: none;"><i class="fas fa-plus-circle"></i> Publicar Servicio</button>
-            <button class="btn btn-outline" id="btnCompartir" style="display: none;"><i class="fas fa-qrcode"></i> Compartir</button>
+            <button class="btn btn-outline" id="btnCompartir"><i class="fas fa-qrcode"></i> Compartir</button>
             <button class="btn btn-admin" id="btnAdmin" style="display: none;"><i class="fas fa-crown"></i> <span id="adminBadge">Admin</span></button>
             <button class="btn btn-danger" id="btnLogout" style="display: none;"><i class="fas fa-sign-out-alt"></i> Salir</button>
         </div>
@@ -452,6 +472,26 @@
     </div>
 </div>
 
+<!-- MODAL COMPARTIR QR -->
+<div id="modalCompartir" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h2><i class="fas fa-qrcode"></i> Compartir Factor Cuba</h2><button class="close-modal" id="btnCloseCompartirModal">&times;</button></div>
+        <div class="qr-container" id="qrContainer">
+            <div style="text-align: center;"><i class="fas fa-spinner fa-pulse"></i><p>Generando código QR...</p></div>
+        </div>
+        <div class="share-buttons">
+            <button class="btn btn-primary" id="shareWhatsApp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+            <button class="btn btn-primary" id="shareTelegram"><i class="fab fa-telegram"></i> Telegram</button>
+            <button class="btn btn-primary" id="shareFacebook"><i class="fab fa-facebook"></i> Facebook</button>
+            <button class="btn btn-outline" id="copyLinkBtn"><i class="fas fa-copy"></i> Copiar enlace</button>
+        </div>
+        <div class="form-group" style="margin-top: 16px;">
+            <label><i class="fas fa-link"></i> Enlace directo</label>
+            <input type="text" id="shareUrl" readonly style="text-align: center; background: var(--bg-secondary);">
+        </div>
+    </div>
+</div>
+
 <div id="modalAdmin" class="modal">
     <div class="modal-content" style="max-width: 900px;">
         <div class="modal-header"><h2>Panel de Administrador</h2><button class="close-modal" id="btnCloseAdmin">&times;</button></div>
@@ -549,6 +589,21 @@ async function subirImagen(file, userId) {
         console.error('Error subiendo imagen:', err);
         return null;
     }
+}
+
+// ==================== COMPARTIR QR ====================
+function generarQR() {
+    const url = window.location.href;
+    const qrContainer = document.getElementById('qrContainer');
+    const shareUrlInput = document.getElementById('shareUrl');
+    
+    shareUrlInput.value = url;
+    qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}" alt="Código QR">`;
+}
+
+function abrirCompartir() {
+    generarQR();
+    document.getElementById('modalCompartir').style.display = 'flex';
 }
 
 // ==================== CARGAR PROVINCIAS Y MUNICIPIOS ====================
@@ -810,7 +865,6 @@ window.abrirEditarPerfil = async function(servicioId) {
     document.getElementById('editLatitud').value = servicio.latitud || '';
     document.getElementById('editLongitud').value = servicio.longitud || '';
     
-    // Foto actual
     const fotoActualDiv = document.getElementById('editFotoActual');
     if (servicio.foto) {
         fotoActualDiv.innerHTML = `<img src="${servicio.foto}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;margin-bottom:10px;"><br><small>Foto actual</small>`;
@@ -820,7 +874,6 @@ window.abrirEditarPerfil = async function(servicioId) {
     document.getElementById('editPreviewFoto').innerHTML = '';
     document.getElementById('editFotoFile').value = '';
     
-    // Provincias y municipios
     cargarProvincias();
     if (servicio.provincia) {
         document.getElementById('editProvincia').value = servicio.provincia;
@@ -832,7 +885,6 @@ window.abrirEditarPerfil = async function(servicioId) {
         }, 100);
     }
     
-    // Mapa
     setTimeout(() => {
         iniciarEditMapa(servicio.latitud, servicio.longitud);
     }, 200);
@@ -860,24 +912,12 @@ document.getElementById('editarPerfilForm').addEventListener('submit', async (e)
     
     const cambios = [];
     
-    if (nuevoNombre !== servicioOriginal.nombre) {
-        cambios.push({ campo: 'nombre', valor_viejo: servicioOriginal.nombre, valor_nuevo: nuevoNombre });
-    }
-    if (nuevaCategoria !== servicioOriginal.categoria) {
-        cambios.push({ campo: 'categoria', valor_viejo: servicioOriginal.categoria, valor_nuevo: nuevaCategoria });
-    }
-    if (nuevaProvincia !== servicioOriginal.provincia) {
-        cambios.push({ campo: 'provincia', valor_viejo: servicioOriginal.provincia, valor_nuevo: nuevaProvincia });
-    }
-    if (nuevoMunicipio !== servicioOriginal.municipio) {
-        cambios.push({ campo: 'municipio', valor_viejo: servicioOriginal.municipio, valor_nuevo: nuevoMunicipio });
-    }
-    if (nuevoTelefono !== servicioOriginal.telefono) {
-        cambios.push({ campo: 'telefono', valor_viejo: servicioOriginal.telefono, valor_nuevo: nuevoTelefono });
-    }
-    if (nuevaDescripcion !== servicioOriginal.descripcion) {
-        cambios.push({ campo: 'descripcion', valor_viejo: servicioOriginal.descripcion, valor_nuevo: nuevaDescripcion });
-    }
+    if (nuevoNombre !== servicioOriginal.nombre) cambios.push({ campo: 'nombre', valor_viejo: servicioOriginal.nombre, valor_nuevo: nuevoNombre });
+    if (nuevaCategoria !== servicioOriginal.categoria) cambios.push({ campo: 'categoria', valor_viejo: servicioOriginal.categoria, valor_nuevo: nuevaCategoria });
+    if (nuevaProvincia !== servicioOriginal.provincia) cambios.push({ campo: 'provincia', valor_viejo: servicioOriginal.provincia, valor_nuevo: nuevaProvincia });
+    if (nuevoMunicipio !== servicioOriginal.municipio) cambios.push({ campo: 'municipio', valor_viejo: servicioOriginal.municipio, valor_nuevo: nuevoMunicipio });
+    if (nuevoTelefono !== servicioOriginal.telefono) cambios.push({ campo: 'telefono', valor_viejo: servicioOriginal.telefono, valor_nuevo: nuevoTelefono });
+    if (nuevaDescripcion !== servicioOriginal.descripcion) cambios.push({ campo: 'descripcion', valor_viejo: servicioOriginal.descripcion, valor_nuevo: nuevaDescripcion });
     if (nuevaLatitud && nuevaLongitud && (parseFloat(nuevaLatitud) !== servicioOriginal.latitud || parseFloat(nuevaLongitud) !== servicioOriginal.longitud)) {
         cambios.push({ campo: 'latitud', valor_viejo: servicioOriginal.latitud, valor_nuevo: nuevaLatitud });
         cambios.push({ campo: 'longitud', valor_viejo: servicioOriginal.longitud, valor_nuevo: nuevaLongitud });
@@ -890,7 +930,6 @@ document.getElementById('editarPerfilForm').addEventListener('submit', async (e)
     }
     
     try {
-        // Subir nueva foto si hay
         let nuevaFotoUrl = null;
         if (fotoFile) {
             mostrarToast('Subiendo nueva imagen...', 'info');
@@ -898,7 +937,6 @@ document.getElementById('editarPerfilForm').addEventListener('submit', async (e)
             cambios.push({ campo: 'foto', valor_viejo: servicioOriginal.foto, valor_nuevo: nuevaFotoUrl });
         }
         
-        // Guardar cambios pendientes
         for (const cambio of cambios) {
             await supabase.from('cambios_pendientes').insert([{
                 servicio_id: id,
@@ -1057,7 +1095,6 @@ function actualizarUI() {
     const userName = document.getElementById('userName');
     const btnLogin = document.getElementById('btnLogin');
     const btnPublicar = document.getElementById('btnPublicar');
-    const btnCompartir = document.getElementById('btnCompartir');
     const btnAdmin = document.getElementById('btnAdmin');
     const btnLogout = document.getElementById('btnLogout');
     const ADMIN_EMAIL = 'ch361892@gmail.com';
@@ -1067,11 +1104,9 @@ function actualizarUI() {
         userName.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email.split('@')[0]}`;
         btnLogin.style.display = 'none';
         btnPublicar.style.display = 'inline-block';
-        btnCompartir.style.display = 'inline-block';
         btnLogout.style.display = 'inline-block';
         btnAdmin.style.display = currentUser.email === ADMIN_EMAIL ? 'inline-block' : 'none';
         
-        // Botón para panel profesional (si es profesional)
         if (currentUserTipo === 'profesional') {
             if (!document.getElementById('btnPanelProfesional')) {
                 const btnPanel = document.createElement('button');
@@ -1089,7 +1124,6 @@ function actualizarUI() {
         userInfo.style.display = 'none';
         btnLogin.style.display = 'inline-block';
         btnPublicar.style.display = 'none';
-        btnCompartir.style.display = 'none';
         btnAdmin.style.display = 'none';
         btnLogout.style.display = 'none';
         const btnPanel = document.getElementById('btnPanelProfesional');
@@ -1291,7 +1325,8 @@ document.getElementById('registroForm').addEventListener('submit', async (e) => 
 // ==================== EVENTOS ====================
 document.getElementById('btnLogin').onclick = () => document.getElementById('modalLogin').style.display = 'flex';
 document.getElementById('btnLogout').onclick = logout;
-document.getElementById('btnCompartir').onclick = () => { alert('Función en desarrollo'); };
+document.getElementById('btnCompartir').onclick = abrirCompartir;
+document.getElementById('btnCloseCompartirModal').onclick = () => document.getElementById('modalCompartir').style.display = 'none';
 document.getElementById('btnPublicar').onclick = () => { 
     if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); document.getElementById('modalLogin').style.display = 'flex'; return; }
     document.getElementById('modalPublicar').style.display = 'flex';
@@ -1301,6 +1336,24 @@ document.getElementById('btnPublicar').onclick = () => {
     document.getElementById('pubMunicipio').innerHTML = '<option value="">Primero selecciona provincia</option>';
     document.getElementById('pubMunicipio').disabled = true;
 };
+document.getElementById('shareWhatsApp').onclick = () => {
+    const url = window.location.href;
+    window.open(`https://wa.me/?text=${encodeURIComponent('¡Conoce Factor Cuba! Encuentra profesionales de confianza en: ' + url)}`, '_blank');
+};
+document.getElementById('shareTelegram').onclick = () => {
+    const url = window.location.href;
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('¡Conoce Factor Cuba!')}`, '_blank');
+};
+document.getElementById('shareFacebook').onclick = () => {
+    const url = window.location.href;
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+};
+document.getElementById('copyLinkBtn').onclick = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+    mostrarToast('✅ Enlace copiado al portapapeles', 'success');
+};
+
 document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
 document.getElementById('editProvincia').onchange = function() { actualizarMunicipios('editProvincia', 'editMunicipio'); };
 document.getElementById('provinciaFilter').onchange = function() { actualizarMunicipios('provinciaFilter', 'municipioFilter'); cargarProfesionales(); };
