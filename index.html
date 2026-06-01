@@ -2207,6 +2207,11 @@ async function init() {
     await cargarProfesionales(); 
 }
 init();
+    // ==================== VERIFICAR ADMIN POR EMAIL ====================
+async function esAdmin() {
+    if (!currentUser) return false;
+    return currentUser.email === 'ch361@gmail.com';
+}
 </script>
 
 <!-- Modal de Estadísticas (se crea dinámicamente pero necesitamos el div) -->
