@@ -1794,32 +1794,57 @@ let loginMode = 'login';
 async function manejarAuth() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    if (!email || !password) { mostrarToast('Completa email y contraseña', 'error'); return; }
+    
+    if (!email || !password) {
+        mostrarToast('Completa email y contraseña', 'error');
+        return;
+    }
+    
     try {
         if (loginMode === 'login') {
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) throw error;
+            
             currentUser = data.user;
             mostrarToast('✅ Sesión iniciada', 'success');
-            document.getElementById('modalLogin').style.display = 'none';
+            
+            // CERRAR MODAL - Esta es la línea importante
+            const modal = document.getElementById('modalLogin');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            
+            // Limpiar campos
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            // Actualizar todo
             await verificarTipoUsuario();
             actualizarUI();
             await cargarProfesionales();
+            
         } else {
             const { data, error } = await supabase.auth.signUp({ email, password });
             if (error) throw error;
+            
             mostrarToast('✅ Registro exitoso. Ahora inicia sesión.', 'success');
             loginMode = 'login';
             document.getElementById('modalLoginTitle').innerHTML = 'Iniciar Sesión';
             document.getElementById('btnLoginSubmit').innerHTML = 'Ingresar';
             document.getElementById('switchAuthMode').innerHTML = '¿No tienes cuenta? Regístrate';
-            document.getElementById('regEmail').value = '';
-            document.getElementById('regPassword').value = '';
-            document.getElementById('regPasswordConfirm').value = '';
+            
+            document.getElementById('modalRegistro').style.display = 'none';
+            document.getElementById('modalLogin').style.display = 'flex';
         }
-    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
+    } catch (err) {
+        console.error('Error en manejarAuth:', err);
+        let mensaje = err.message;
+        if (mensaje.includes('Invalid login credentials')) {
+            mensaje = '❌ Email o contraseña incorrectos';
+        }
+        mostrarToast(mensaje, 'error');
+    }
 }
-
 function actualizarUI() {
     const userInfo = document.getElementById('userInfo');
     const userName = document.getElementById('userName');
