@@ -199,7 +199,6 @@
         .rating-value { font-size: 14px; font-weight: 600; color: var(--primary); }
         .rating-count { font-size: 12px; color: var(--text-muted); }
         
-        /* Servicios card */
         .servicios-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -306,7 +305,6 @@
         .foto-preview { margin-top: 12px; }
         .foto-preview img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); }
         
-        /* QR Code */
         .qr-container {
             text-align: center;
             padding: 20px;
@@ -326,7 +324,6 @@
             margin-top: 20px;
         }
         
-        /* Tabla de contactos */
         .contactos-table {
             width: 100%;
             border-collapse: collapse;
@@ -393,7 +390,6 @@
         
         .footer { text-align: center; padding: 40px; border-top: 1px solid var(--border); margin-top: 48px; color: var(--text-muted); font-size: 13px; }
         
-        /* Gráficos */
         .stats-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -658,13 +654,19 @@
     </div>
 </div>
 
+<div id="modalEstadisticas" class="modal">
+    <div class="modal-content modal-content-large">
+        <div class="modal-header"><h2><i class="fas fa-chart-line"></i> Mis Estadísticas</h2><button class="close-modal" id="btnCloseEstadisticas">&times;</button></div>
+        <div id="estadisticasContent"></div>
+    </div>
+</div>
+
 <script>
 // ==================== CONFIGURACIÓN ====================
 const SUPABASE_URL = 'https://fuppvnrayedcevafzwjg.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_FkeG4_g-P6g3Nqi1YYgFBQ_7nrnIW-P';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const ADMIN_PASSWORD = "FactorCuba2025";
 let adminAuthenticated = false;
 let currentUser = null;
 let currentUserTipo = null;
@@ -676,7 +678,26 @@ let editMapaInstance = null;
 let editMarcador = null;
 let profesionalSeleccionadoParaResena = null;
 
-// ==================== PROVINCIAS Y MUNICIPIOS ====================
+// ==================== VERIFICAR ADMIN ====================
+async function esAdmin() {
+    if (!currentUser) return false;
+    try {
+        const { data, error } = await supabase
+            .from('admins')
+            .select('user_id')
+            .eq('user_id', currentUser.id)
+            .maybeSingle();
+        
+        if (error) {
+            console.error('Error verificando admin:', error);
+            return false;
+        }
+        return !!data;
+    } catch (err) {
+        console.error('Error en esAdmin:', err);
+        return false;
+    }
+}// ==================== PROVINCIAS Y MUNICIPIOS ====================
 const provinciasYMunicipios = {
     'Pinar del Río': ['Pinar del Río', 'Sandino', 'San Juan y Martínez', 'Viñales', 'Consolación del Sur', 'Mantua', 'Minas de Matahambre', 'Los Palacios', 'Guane', 'La Palma', 'Bahía Honda', 'Candelaria', 'San Cristóbal'],
     'Artemisa': ['Artemisa', 'Guanajay', 'Güira de Melena', 'Alquízar', 'Bahía Honda', 'Bauta', 'Caimito', 'Mariel', 'San Antonio de los Baños', 'San Cristóbal'],
@@ -816,12 +837,16 @@ async function enviarResena(profesionalId, puntuacion, comentario) {
         return false;
     }
     
-    const { data: existing } = await supabase
+    const { data: existing, error: checkError } = await supabase
         .from('calificaciones')
         .select('id')
         .eq('servicio_id', profesionalId)
         .eq('cliente_id', currentUser.id)
         .maybeSingle();
+    
+    if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error al verificar:', checkError);
+    }
     
     if (existing) {
         mostrarToast('Ya calificaste a este profesional anteriormente', 'error');
@@ -830,15 +855,16 @@ async function enviarResena(profesionalId, puntuacion, comentario) {
     
     const { error: insertError } = await supabase
         .from('calificaciones')
-        .insert([{
+        .insert({
             servicio_id: profesionalId,
             cliente_id: currentUser.id,
             puntuacion: puntuacion,
             comentario: comentario || null,
             created_at: new Date().toISOString()
-        }]);
+        });
     
     if (insertError) {
+        console.error('Error al insertar:', insertError);
         mostrarToast('Error al guardar: ' + insertError.message, 'error');
         return false;
     }
@@ -1586,6 +1612,7 @@ async function publicarServicio() {
         const { error } = await supabase.from('oferentes').insert([{ 
             nombre, categoria, provincia, municipio, telefono, descripcion, foto: fotoUrl, 
             especialidad: categoriaTexto, estado: 'pendiente', 
+            zona: municipio,
             latitud: latitud ? parseFloat(latitud) : null, 
             longitud: longitud ? parseFloat(longitud) : null,
             user_id: currentUser?.id, 
@@ -1811,7 +1838,6 @@ function actualizarUI() {
     const btnPublicar = document.getElementById('btnPublicar');
     const btnAdmin = document.getElementById('btnAdmin');
     const btnLogout = document.getElementById('btnLogout');
-    const ADMIN_EMAIL = 'ch361892@gmail.com';
     
     if (currentUser) {
         userInfo.style.display = 'flex';
@@ -1819,7 +1845,10 @@ function actualizarUI() {
         btnLogin.style.display = 'none';
         btnPublicar.style.display = 'inline-block';
         btnLogout.style.display = 'inline-block';
-        btnAdmin.style.display = currentUser.email === ADMIN_EMAIL ? 'inline-block' : 'none';
+        
+        esAdmin().then(isAdmin => {
+            btnAdmin.style.display = isAdmin ? 'inline-block' : 'none';
+        });
         
         if (currentUserTipo === 'profesional') {
             if (!document.getElementById('btnPanelProfesional')) {
@@ -1846,27 +1875,31 @@ function actualizarUI() {
 }
 
 // ==================== ADMIN ====================
-document.getElementById('btnAdmin').onclick = () => {
+document.getElementById('btnAdmin').onclick = async () => {
     if (!currentUser) {
         mostrarToast('Debes iniciar sesión primero', 'error');
         return;
     }
-    if (currentUser.email !== 'ch361892@gmail.com') {
+    
+    const admin = await esAdmin();
+    if (!admin) {
         mostrarToast('No tienes permisos de administrador', 'error');
         return;
     }
-    const password = prompt('🔒 Ingresa la contraseña de administrador:');
-    if (password === ADMIN_PASSWORD) {
-        adminAuthenticated = true;
-        sessionStorage.setItem('adminAutenticado', 'true');
-        mostrarToast('✅ Acceso de administrador concedido', 'success');
-        cargarAdminPanel();
-    } else if (password !== null) {
-        mostrarToast('❌ Contraseña incorrecta', 'error');
-    }
+    
+    adminAuthenticated = true;
+    sessionStorage.setItem('adminAutenticado', 'true');
+    mostrarToast('✅ Acceso de administrador concedido', 'success');
+    cargarAdminPanel();
 };
 
 async function cargarAdminPanel() {
+    const admin = await esAdmin();
+    if (!admin) {
+        mostrarToast('No tienes permisos de administrador', 'error');
+        return;
+    }
+    
     const modal = document.getElementById('modalAdmin');
     const content = document.getElementById('adminContent');
     
@@ -2208,14 +2241,5 @@ async function init() {
 }
 init();
 </script>
-
-<!-- Modal de Estadísticas (se crea dinámicamente pero necesitamos el div) -->
-<div id="modalEstadisticas" class="modal">
-    <div class="modal-content modal-content-large">
-        <div class="modal-header"><h2><i class="fas fa-chart-line"></i> Mis Estadísticas</h2><button class="close-modal" id="btnCloseEstadisticas">&times;</button></div>
-        <div id="estadisticasContent"></div>
-    </div>
-</div>
-
 </body>
 </html>
