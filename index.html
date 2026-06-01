@@ -682,21 +682,29 @@ let profesionalSeleccionadoParaResena = null;
 async function esAdmin() {
     if (!currentUser) return false;
     try {
+        // Hacer la consulta de forma más simple
         const { data, error } = await supabase
             .from('admins')
             .select('user_id')
-            .eq('user_id', currentUser.id)
-            .maybeSingle();
+            .eq('user_id', currentUser.id);
         
         if (error) {
-            console.error('Error verificando admin:', error);
+            console.error('Error en esAdmin:', error);
             return false;
         }
-        return !!data;
+        
+        // Si hay datos y el user_id coincide
+        if (data && data.length > 0) {
+            console.log('✅ Admin detectado:', currentUser.email);
+            return true;
+        }
+        
+        return false;
     } catch (err) {
         console.error('Error en esAdmin:', err);
         return false;
     }
+}
 }// ==================== PROVINCIAS Y MUNICIPIOS ====================
 const provinciasYMunicipios = {
     'Pinar del Río': ['Pinar del Río', 'Sandino', 'San Juan y Martínez', 'Viñales', 'Consolación del Sur', 'Mantua', 'Minas de Matahambre', 'Los Palacios', 'Guane', 'La Palma', 'Bahía Honda', 'Candelaria', 'San Cristóbal'],
