@@ -1277,12 +1277,18 @@ window.verPerfil = async function(servicioId) {
         `;
     }
     
-    // CORREGIDO: Verifica si el usuario actual NO es el dueño del perfil
-    // Si currentUser es null, no muestra botón
-    // Si currentUser es el dueño, tampoco muestra botón
-    const puedeCalificar = currentUser && currentUser.id !== (servicio.user_id || servicio.userId);
+    // === VERSIÓN SIMPLIFICADA: CUALQUIER USUARIO LOGUEADO PUEDE CALIFICAR ===
+    // (excepto el dueño del perfil si podemos identificarlo)
     
-    const esSuPropioPerfil = currentUser && currentUser.id === (servicio.user_id || servicio.userId);
+    // Determinar si el usuario actual es el dueño del perfil
+    let esDueno = false;
+    if (currentUser && servicio.user_id) {
+        esDueno = (currentUser.id === servicio.user_id);
+    }
+    
+    // Si no podemos identificar al dueño, permitimos que todos califiquen
+    const puedeCalificar = currentUser !== null && !esDueno;
+    const esSuPropioPerfil = esDueno;
     
     const contenido = `
         <div style="text-align:center;">
