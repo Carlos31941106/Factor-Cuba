@@ -1820,17 +1820,6 @@ async function manejarAuth() {
     } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 }
 
-async function logout() { 
-    await supabase.auth.signOut(); 
-    currentUser = null; 
-    currentUserTipo = null;
-    adminAuthenticated = false; 
-    sessionStorage.removeItem('adminAutenticado'); 
-    actualizarUI(); 
-    await cargarProfesionales(); 
-    mostrarToast('Sesión cerrada', 'info'); 
-}
-
 function actualizarUI() {
     const userInfo = document.getElementById('userInfo');
     const userName = document.getElementById('userName');
@@ -1839,6 +1828,8 @@ function actualizarUI() {
     const btnAdmin = document.getElementById('btnAdmin');
     const btnLogout = document.getElementById('btnLogout');
     
+    console.log('actualizarUI - currentUser:', currentUser); // Diagnóstico
+    
     if (currentUser) {
         userInfo.style.display = 'flex';
         userName.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email.split('@')[0]}`;
@@ -1846,8 +1837,13 @@ function actualizarUI() {
         btnPublicar.style.display = 'inline-block';
         btnLogout.style.display = 'inline-block';
         
+        // Mostrar botón admin si es admin
         esAdmin().then(isAdmin => {
+            console.log('¿Es admin?', isAdmin); // Diagnóstico
             btnAdmin.style.display = isAdmin ? 'inline-block' : 'none';
+        }).catch(err => {
+            console.error('Error en esAdmin:', err);
+            btnAdmin.style.display = 'none';
         });
         
         if (currentUserTipo === 'profesional') {
