@@ -1277,8 +1277,12 @@ window.verPerfil = async function(servicioId) {
         `;
     }
     
-    const puedeCalificar = currentUser && currentUser.id !== servicio.user_id;
-    const esSuPropioPerfil = currentUser && currentUser.id === servicio.user_id;
+    // CORREGIDO: Verifica si el usuario actual NO es el dueño del perfil
+    // Si currentUser es null, no muestra botón
+    // Si currentUser es el dueño, tampoco muestra botón
+    const puedeCalificar = currentUser && currentUser.id !== (servicio.user_id || servicio.userId);
+    
+    const esSuPropioPerfil = currentUser && currentUser.id === (servicio.user_id || servicio.userId);
     
     const contenido = `
         <div style="text-align:center;">
