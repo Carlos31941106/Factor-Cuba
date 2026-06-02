@@ -2135,29 +2135,17 @@ async function eliminarPerfilProfesional(profesionalId, nombreProfesional) {
     try {
         mostrarToast('Eliminando perfil...', 'info');
         
-        // 1. Eliminar servicios adicionales
         await supabase.from('servicios').delete().eq('profesional_id', profesionalId);
-        
-        // 2. Eliminar reseñas
         await supabase.from('calificaciones').delete().eq('servicio_id', profesionalId);
-        
-        // 3. Eliminar contactos
         await supabase.from('contactos').delete().eq('profesional_id', profesionalId);
-        
-        // 4. Eliminar estadísticas
         await supabase.from('estadisticas_profesional').delete().eq('profesional_id', profesionalId);
-        
-        // 5. Eliminar cambios pendientes
         await supabase.from('cambios_pendientes').delete().eq('servicio_id', profesionalId);
         
-        // 6. Eliminar el perfil principal
         const { error } = await supabase.from('oferentes').delete().eq('id', profesionalId);
-        
         if (error) throw error;
         
         mostrarToast(`✅ Perfil "${nombreProfesional}" eliminado correctamente`, 'success');
         
-        // Recargar las listas
         await cargarProfesionales();
         if (adminAuthenticated) {
             cargarAdminLista('pendiente');
@@ -2169,17 +2157,16 @@ async function eliminarPerfilProfesional(profesionalId, nombreProfesional) {
         console.error('Error al eliminar:', err);
         mostrarToast('Error al eliminar el perfil: ' + err.message, 'error');
     }
-// Aprobar un cambio individual
+}
+
+// ==================== APROBAR CAMBIO INDIVIDUAL ====================
 window.aprobarCambioIndividual = async function(cambioId, servicioId, campo, nuevoValor) {
     if (!confirm('¿Aprobar este cambio?')) return;
     
     try {
-        // Aplicar el cambio al profesional
         const updates = {};
         updates[campo] = nuevoValor;
         await supabase.from('oferentes').update(updates).eq('id', servicioId);
-        
-        // Marcar cambio como aprobado
         await supabase.from('cambios_pendientes').update({ estado: 'aprobado' }).eq('id', cambioId);
         
         mostrarToast('✅ Cambio aprobado y aplicado', 'success');
@@ -2190,7 +2177,7 @@ window.aprobarCambioIndividual = async function(cambioId, servicioId, campo, nue
     }
 };
 
-// Rechazar un cambio individual
+// ==================== RECHAZAR CAMBIO INDIVIDUAL ====================
 window.rechazarCambioIndividual = async function(cambioId) {
     if (!confirm('¿Rechazar este cambio?')) return;
     
@@ -2202,11 +2189,14 @@ window.rechazarCambioIndividual = async function(cambioId) {
         mostrarToast('Error: ' + err.message, 'error');
     }
 };
+
+// ==================== INICIO ====================
 async function init() { 
     cargarProvincias();
     document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
     document.getElementById('editProvincia').onchange = function() { actualizarMunicipios('editProvincia', 'editMunicipio'); };
     document.getElementById('provinciaFilter').onchange = function() { actualizarMunicipios('provinciaFilter', 'municipioFilter'); cargarProfesionales(); };
+    
     const { data: { session } } = await supabase.auth.getSession(); 
     currentUser = session?.user || null; 
     if (currentUser) await verificarTipoUsuario();
