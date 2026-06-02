@@ -1645,7 +1645,7 @@ async function cargarAdminLista(tipo) {
         return;
     }
     
-   if (tipo === 'cambios') {
+  if (tipo === 'cambios') {
     console.log('Cargando cambios pendientes...');
     
     // Obtener cambios
@@ -1668,7 +1668,7 @@ async function cargarAdminLista(tipo) {
         return;
     }
     
-    // Obtener los profesionales (una sola consulta con los IDs)
+    // Obtener los profesionales
     const profesionalIds = [...new Set(cambios.map(c => c.servicio_id))];
     let profesionalesMap = {};
     
@@ -1683,7 +1683,7 @@ async function cargarAdminLista(tipo) {
         }
     }
     
-    // Mostrar cada cambio individualmente (no agrupado)
+    // Mostrar cada cambio individualmente
     let html = '<div style="display:flex; flex-direction:column; gap:15px;">';
     
     for (const cambio of cambios) {
@@ -1714,7 +1714,6 @@ async function cargarAdminLista(tipo) {
     listaDiv.innerHTML = html;
     return;
 }
-    }
     
         let query = supabase.from('oferentes').select('*');
     if (tipo === 'pendiente') query = query.eq('estado', 'pendiente');
@@ -2170,7 +2169,39 @@ async function eliminarPerfilProfesional(profesionalId, nombreProfesional) {
         console.error('Error al eliminar:', err);
         mostrarToast('Error al eliminar el perfil: ' + err.message, 'error');
     }
-}
+// Aprobar un cambio individual
+window.aprobarCambioIndividual = async function(cambioId, servicioId, campo, nuevoValor) {
+    if (!confirm('¿Aprobar este cambio?')) return;
+    
+    try {
+        // Aplicar el cambio al profesional
+        const updates = {};
+        updates[campo] = nuevoValor;
+        await supabase.from('oferentes').update(updates).eq('id', servicioId);
+        
+        // Marcar cambio como aprobado
+        await supabase.from('cambios_pendientes').update({ estado: 'aprobado' }).eq('id', cambioId);
+        
+        mostrarToast('✅ Cambio aprobado y aplicado', 'success');
+        cargarAdminLista('cambios');
+        await cargarProfesionales();
+    } catch (err) {
+        mostrarToast('Error: ' + err.message, 'error');
+    }
+};
+
+// Rechazar un cambio individual
+window.rechazarCambioIndividual = async function(cambioId) {
+    if (!confirm('¿Rechazar este cambio?')) return;
+    
+    try {
+        await supabase.from('cambios_pendientes').update({ estado: 'rechazado' }).eq('id', cambioId);
+        mostrarToast('❌ Cambio rechazado', 'warning');
+        cargarAdminLista('cambios');
+    } catch (err) {
+        mostrarToast('Error: ' + err.message, 'error');
+    }
+};
 async function init() { 
     cargarProvincias();
     document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
