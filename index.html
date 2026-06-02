@@ -1094,9 +1094,22 @@ async function cargarProfesionales() {
         
         todosLosServicios = data || [];
         const aprobados = todosLosServicios.filter(s => s.estado === 'aprobado').length;
-        const pendientes = todosLosServicios.filter(s => s.estado === 'pendiente').length;
-        document.getElementById('totalProfesionales').textContent = aprobados;
-        document.getElementById('totalPendientes').textContent = pendientes;
+const pendientes = todosLosServicios.filter(s => s.estado === 'pendiente').length;
+
+// Mostrar profesionales activos siempre
+document.getElementById('totalProfesionales').textContent = aprobados;
+
+// Solo mostrar pendientes si es administrador
+const esAdminUser = adminAuthenticated || (currentUser && currentUser.email === 'ch361892@gmail.com');
+const tarjetaPendientes = document.querySelector('.stat-card:nth-child(2)');
+
+if (esAdminUser) {
+    document.getElementById('totalPendientes').textContent = pendientes;
+    if (tarjetaPendientes) tarjetaPendientes.style.display = 'flex';
+} else {
+    document.getElementById('totalPendientes').textContent = '0';
+    if (tarjetaPendientes) tarjetaPendientes.style.display = 'none';
+}
         
         const categoriasCount = {};
         todosLosServicios.forEach(s => { if (s.estado === 'aprobado') categoriasCount[s.categoria] = (categoriasCount[s.categoria] || 0) + 1; });
