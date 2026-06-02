@@ -1645,18 +1645,75 @@ async function cargarAdminLista(tipo) {
         return;
     }
     
-    if (tipo === 'cambios') {
-        const { data: cambios } = await supabase.from('cambios_pendientes').select('*, oferentes!servicio_id(nombre, telefono, zona)').eq('estado', 'pendiente').order('created_at', { ascending: false });
-        if (!cambios || cambios.length === 0) { listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay cambios pendientes</div>'; return; }
-        const cambiosPorServicio = {};
-        cambios.forEach(c => { if (!cambiosPorServicio[c.servicio_id]) cambiosPorServicio[c.servicio_id] = []; cambiosPorServicio[c.servicio_id].push(c); });
-        let html = '';
-        for (const [servicioId, cambiosServicio] of Object.entries(cambiosPorServicio)) {
-            const servicio = cambiosServicio[0]?.oferentes;
-            html += `<div class="service-item service-pendiente"><div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;"><div><strong>${escapeHtml(servicio?.nombre || 'Servicio')}</strong><br><small>ID: ${servicioId}</small></div><div style="display:flex; gap:10px;"><button class="btn btn-success btn-sm" onclick="aprobarCambios('${servicioId}')">✅ Aprobar todos</button><button class="btn btn-danger btn-sm" onclick="rechazarCambios('${servicioId}')">❌ Rechazar todos</button></div></div><div><strong>Cambios solicitados:</strong></div><ul style="margin-left:20px; margin-top:8px;">${cambiosServicio.map(c => `<li><strong>${c.campo}:</strong> "${escapeHtml(c.valor_viejo || 'Vacío')}" → "${escapeHtml(c.valor_nuevo || 'Vacío')}"</li>`).join('')}</ul></div>`;
-        }
-        listaDiv.innerHTML = html;
+   if (tipo === 'cambios') {
+    console.log('Cargando cambios pendientes...');
+    
+    // Obtener cambios
+    const { data: cambios, error } = await supabase
+        .from('cambios_pendientes')
+        .select('*')
+        .eq('estado', 'pendiente')
+        .order('created_at', { ascending: false });
+    
+    if (error) {
+        console.error('Error:', error);
+        listaDiv.innerHTML = `<div style="text-align:center;padding:40px;color:red;">❌ Error: ${error.message}</div>`;
         return;
+    }
+    
+    console.log('Cambios encontrados:', cambios?.length);
+    
+    if (!cambios || cambios.length === 0) {
+        listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay cambios pendientes</div>';
+        return;
+    }
+    
+    // Obtener los profesionales (una sola consulta con los IDs)
+    const profesionalIds = [...new Set(cambios.map(c => c.servicio_id))];
+    let profesionalesMap = {};
+    
+    if (profesionalIds.length > 0) {
+        const { data: profesionales } = await supabase
+            .from('oferentes')
+            .select('id, nombre, telefono')
+            .in('id', profesionalIds);
+        
+        if (profesionales) {
+            profesionales.forEach(p => { profesionalesMap[p.id] = p; });
+        }
+    }
+    
+    // Mostrar cada cambio individualmente (no agrupado)
+    let html = '<div style="display:flex; flex-direction:column; gap:15px;">';
+    
+    for (const cambio of cambios) {
+        const profesional = profesionalesMap[cambio.servicio_id];
+        html += `
+            <div class="service-item service-pendiente" style="padding:15px; border-left:4px solid #f59e0b; background:#fef3c7; border-radius:12px;">
+                <div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:10px;">
+                    <div>
+                        <strong>${escapeHtml(profesional?.nombre || 'Profesional desconocido')}</strong>
+                        <br><small>📞 ${escapeHtml(profesional?.telefono || 'Sin teléfono')}</small>
+                        <br><small>📅 ${new Date(cambio.created_at).toLocaleString()}</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-success btn-sm" onclick="aprobarCambioIndividual('${cambio.id}', '${cambio.servicio_id}', '${cambio.campo}', '${escapeHtml(cambio.valor_nuevo)}')">✅ Aprobar</button>
+                        <button class="btn btn-danger btn-sm" onclick="rechazarCambioIndividual('${cambio.id}')">❌ Rechazar</button>
+                    </div>
+                </div>
+                <div><strong>📝 Cambio solicitado:</strong></div>
+                <div style="margin-top:5px;">
+                    <strong>Campo:</strong> ${cambio.campo}<br>
+                    <strong>Valor actual:</strong> "${escapeHtml(cambio.valor_viejo || 'Vacío')}"<br>
+                    <strong>Nuevo valor:</strong> "${escapeHtml(cambio.valor_nuevo || 'Vacío')}"
+                </div>
+            </div>
+        `;
+    }
+    html += '</div>';
+    listaDiv.innerHTML = html;
+    return;
+}
     }
     
         let query = supabase.from('oferentes').select('*');
