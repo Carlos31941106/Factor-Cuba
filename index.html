@@ -705,9 +705,34 @@ function renderStars(promedio, total) {
 
 async function subirImagen(file, userId, folder = 'avatars') {
     if (!file) return null;
-    const ext = file.name.split('.').pop();
+    
+    // ===== VALIDACIONES DE SEGURIDAD =====
+    // 1. Validar tipo de archivo (solo imágenes)
+    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    if (!tiposPermitidos.includes(file.type)) {
+        mostrarToast('❌ Solo se permiten imágenes JPG, PNG o WEBP', 'error');
+        return null;
+    }
+    
+    // 2. Validar extensión del archivo
+    const ext = file.name.split('.').pop().toLowerCase();
+    const extensionesPermitidas = ['jpg', 'jpeg', 'png', 'webp'];
+    if (!extensionesPermitidas.includes(ext)) {
+        mostrarToast('❌ Extensión de archivo no permitida', 'error');
+        return null;
+    }
+    
+    // 3. Validar tamaño máximo (2MB)
+    const maxSize = 2 * 1024 * 1024; // 2MB en bytes
+    if (file.size > maxSize) {
+        mostrarToast('❌ La imagen no debe superar los 2MB', 'error');
+        return null;
+    }
+    // ===== FIN VALIDACIONES =====
+    
     const fileName = `${userId}_${Date.now()}.${ext}`;
     const filePath = `${folder}/${fileName}`;
+    
     try {
         const { error } = await supabase.storage.from('fotos-perfil').upload(filePath, file);
         if (error) throw error;
@@ -715,6 +740,7 @@ async function subirImagen(file, userId, folder = 'avatars') {
         return data.publicUrl;
     } catch (err) {
         console.error('Error subiendo imagen:', err);
+        mostrarToast('Error al subir la imagen', 'error');
         return null;
     }
 }
