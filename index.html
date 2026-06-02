@@ -2033,7 +2033,50 @@ async function abrirEstadisticas() {
         }
     }, 100);
 }
-
+// ==================== ELIMINAR PERFIL PROFESIONAL COMPLETO ====================
+async function eliminarPerfilProfesional(profesionalId, nombreProfesional) {
+    if (!confirm(`⚠️ ¿Estás SEGURO de que quieres eliminar el perfil de "${nombreProfesional}"?\n\nEsta acción también eliminará:\n- Todos sus servicios adicionales\n- Todas sus reseñas\n- Todos sus contactos registrados\n- Todas sus estadísticas\n\n¡Esta acción NO se puede deshacer!`)) {
+        return;
+    }
+    
+    try {
+        mostrarToast('Eliminando perfil...', 'info');
+        
+        // 1. Eliminar servicios adicionales
+        await supabase.from('servicios').delete().eq('profesional_id', profesionalId);
+        
+        // 2. Eliminar reseñas
+        await supabase.from('calificaciones').delete().eq('servicio_id', profesionalId);
+        
+        // 3. Eliminar contactos
+        await supabase.from('contactos').delete().eq('profesional_id', profesionalId);
+        
+        // 4. Eliminar estadísticas
+        await supabase.from('estadisticas_profesional').delete().eq('profesional_id', profesionalId);
+        
+        // 5. Eliminar cambios pendientes
+        await supabase.from('cambios_pendientes').delete().eq('servicio_id', profesionalId);
+        
+        // 6. Eliminar el perfil principal
+        const { error } = await supabase.from('oferentes').delete().eq('id', profesionalId);
+        
+        if (error) throw error;
+        
+        mostrarToast(`✅ Perfil "${nombreProfesional}" eliminado correctamente`, 'success');
+        
+        // Recargar las listas
+        await cargarProfesionales();
+        if (adminAuthenticated) {
+            cargarAdminLista('pendiente');
+            cargarAdminLista('aprobado');
+            cargarAdminLista('todos');
+        }
+        
+    } catch (err) {
+        console.error('Error al eliminar:', err);
+        mostrarToast('Error al eliminar el perfil: ' + err.message, 'error');
+    }
+}
 async function init() { 
     cargarProvincias();
     document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
