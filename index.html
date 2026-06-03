@@ -1500,16 +1500,26 @@ function actualizarUI() {
 // Función para verificar si el usuario es administrador (con verificación en BD)
 async function esAdmin() {
     if (!currentUser) return false;
+    
+    // Verificación por email como fallback seguro
+    if (currentUser.email === 'ch361892@gmail.com') return true;
+    
     try {
-        // Verificar en la tabla admins
-        const { data } = await supabase
+        // Consulta directa a la tabla admins
+        const { data, error } = await supabase
             .from('admins')
             .select('user_id')
             .eq('user_id', currentUser.id)
             .maybeSingle();
+        
+        if (error) {
+            console.error('Error en esAdmin:', error);
+            return false;
+        }
+        
         return !!data;
     } catch (err) {
-        console.error('Error verificando admin:', err);
+        console.error('Error en esAdmin:', err);
         return false;
     }
 }
