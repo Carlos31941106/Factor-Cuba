@@ -1646,12 +1646,13 @@ async function cargarAdminPanel() {
                 <div class="admin-stat"><div class="stat-number" style="color:#8b5cf6;">${totalContactosPendientes || 0}</div><div>Contactos</div></div>
             </div>
             <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-                <button class="btn btn-outline" id="adminTabPendientes" style="background:#f59e0b; color:white;">⏳ Servicios Pendientes</button>
-                <button class="btn btn-outline" id="adminTabAprobados">✅ Aprobados</button>
-                <button class="btn btn-outline" id="adminTabTodos">📋 Todos</button>
-                <button class="btn btn-outline" id="adminTabCambios">🔄 Cambios</button>
-                <button class="btn btn-outline" id="adminTabContactos" style="background:#8b5cf6; color:white;">📞 Contactos</button>
-            </div>
+    <button class="btn btn-outline" id="adminTabPendientes" style="background:#f59e0b; color:white;">⏳ Servicios Pendientes</button>
+    <button class="btn btn-outline" id="adminTabAprobados">✅ Aprobados</button>
+    <button class="btn btn-outline" id="adminTabTodos">📋 Todos</button>
+    <button class="btn btn-outline" id="adminTabCambios">🔄 Cambios</button>
+    <button class="btn btn-outline" id="adminTabContactos" style="background:#8b5cf6; color:white;">📞 Contactos</button>
+    <button class="btn btn-outline" id="adminTabEstadisticas" style="background:#10b981; color:white;">📊 Estadísticas por Profesional</button>
+</div>
             <div id="adminLista"></div>
         `;
         content.innerHTML = html;
