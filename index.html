@@ -382,6 +382,70 @@
         
         .footer { text-align: center; padding: 40px; border-top: 1px solid var(--border); margin-top: 48px; color: var(--text-muted); font-size: 13px; }
         
+        /* Estilos para el Dashboard de Administrador */
+        .dashboard-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .kpi-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s;
+        }
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .kpi-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+        .kpi-sub {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+        .dashboard-charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .chart-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .chart-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            border-left: 3px solid var(--primary);
+            padding-left: 0.5rem;
+        }
+        canvas { max-height: 220px; width: 100% !important; }
+        
+        @media (max-width: 1024px) {
+            .dashboard-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .dashboard-charts-grid { grid-template-columns: 1fr; }
+        }
+        
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(20px); }
             to { opacity: 1; transform: translateX(0); }
@@ -400,6 +464,8 @@
             .contactos-table { font-size: 12px; }
             .contactos-table th, .contactos-table td { padding: 6px; }
             .servicios-grid { grid-template-columns: 1fr; }
+            .dashboard-kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+            .kpi-value { font-size: 1.5rem; }
         }
         
         ::-webkit-scrollbar { width: 8px; }
@@ -412,9 +478,9 @@
 <header class="header">
     <div class="container header-content">
         <div class="logo">
-    <img src="https://raw.githubusercontent.com/Carlos31941106/Factor-Cuba/main/logo.png" alt="Factor Cuba" style="height: 40px; width: auto; margin-right: 10px;">
-    <span>Factor <span style="color:var(--primary);">Cuba</span></span>
-</div>
+            <img src="https://raw.githubusercontent.com/Carlos31941106/Factor-Cuba/main/logo.png" alt="Factor Cuba" style="height: 40px; width: auto; margin-right: 10px;">
+            <span>Factor <span style="color:var(--primary);">Cuba</span></span>
+        </div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
             <div id="userInfo" style="display: none; align-items: center; gap: 16px;">
                 <span id="userName" style="color: var(--primary); font-weight: 500;"></span>
@@ -428,6 +494,7 @@
     </div>
 </header>
 
+<!-- El resto del HTML (hero, mapa, filtros, footer, modales) se mantiene exactamente igual -->
 <section class="hero">
     <div class="container">
         <div class="hero-badge"><i class="fas fa-star"></i> Plataforma líder en Cuba</div>
@@ -483,7 +550,7 @@
 
 <footer class="footer"><div class="container"><p>Factor Cuba - Conectando la economía cubana</p><p style="margin-top: 10px;">© 2025 - Todos los derechos reservados</p></div></footer>
 
-<!-- MODALES -->
+<!-- MODALES (se mantienen exactamente igual que en tu código original) -->
 <div id="modalLogin" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h2 id="modalLoginTitle">Iniciar Sesión</h2><button class="close-modal" id="btnCloseLogin">&times;</button></div>
@@ -499,6 +566,7 @@
     </div>
 </div>
 
+<!-- El resto de modales (Recuperar, Registro, Publicar, EditarPerfil, GestionServicios, FormServicio, Compartir, Admin) se mantienen igual -->
 <div id="modalRecuperar" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h2><i class="fas fa-key"></i> Recuperar Contraseña</h2><button class="close-modal" id="btnCloseRecuperar">&times;</button></div>
@@ -640,7 +708,7 @@ let marcadorUbicacion = null;
 let editMapaInstance = null;
 let editMarcador = null;
 
-// ==================== PROVINCIAS Y MUNICIPIOS DE CUBA ====================
+// ==================== PROVINCIAS Y MUNICIPIOS ====================
 const provinciasYMunicipios = {
     'Pinar del Río': ['Pinar del Río', 'Sandino', 'San Juan y Martínez', 'Viñales', 'Consolación del Sur', 'Mantua', 'Minas de Matahambre', 'Los Palacios', 'Guane', 'La Palma', 'Bahía Honda', 'Candelaria', 'San Cristóbal'],
     'Artemisa': ['Artemisa', 'Guanajay', 'Güira de Melena', 'Alquízar', 'Bahía Honda', 'Bauta', 'Caimito', 'Mariel', 'San Antonio de los Baños', 'San Cristóbal'],
@@ -669,6 +737,7 @@ const ZONAS_COORDS = {
     'Holguín': [20.8882, -76.2631], 'Santa Clara': [22.4067, -79.9648]
 };
 
+// ==================== FUNCIONES BASE (mostrarToast, escapeHtml, renderStars, subirImagen, etc.) ====================
 function mostrarToast(mensaje, tipo = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${tipo}`;
@@ -701,28 +770,23 @@ function renderStars(promedio, total) {
 
 async function subirImagen(file, userId, folder = 'avatars') {
     if (!file) return null;
-    
     const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
     if (!tiposPermitidos.includes(file.type)) {
         mostrarToast('❌ Solo se permiten imágenes JPG, PNG o WEBP', 'error');
         return null;
     }
-    
     const ext = file.name.split('.').pop().toLowerCase();
     const extensionesPermitidas = ['jpg', 'jpeg', 'png', 'webp'];
     if (!extensionesPermitidas.includes(ext)) {
         mostrarToast('❌ Extensión de archivo no permitida', 'error');
         return null;
     }
-    
     if (file.size > 2 * 1024 * 1024) {
         mostrarToast('❌ La imagen no debe superar los 2MB', 'error');
         return null;
     }
-    
     const fileName = `${userId}_${Date.now()}.${ext}`;
     const filePath = `${folder}/${fileName}`;
-    
     try {
         const { error } = await supabase.storage.from('fotos-perfil').upload(filePath, file);
         if (error) throw error;
@@ -738,19 +802,11 @@ async function subirImagen(file, userId, folder = 'avatars') {
 // ==================== GESTIÓN DE SERVICIOS ====================
 async function abrirGestionServicios() {
     if (!currentUser || currentUserTipo !== 'profesional') return;
-    
     const { data: profesional } = await supabase.from('oferentes').select('id').eq('user_id', currentUser.id).single();
     if (!profesional) return;
-    
-    const { data: servicios } = await supabase
-        .from('servicios')
-        .select('*')
-        .eq('profesional_id', profesional.id)
-        .order('created_at', { ascending: false });
-    
+    const { data: servicios } = await supabase.from('servicios').select('*').eq('profesional_id', profesional.id).order('created_at', { ascending: false });
     const modal = document.getElementById('modalGestionServicios');
     const content = document.getElementById('gestionServiciosContent');
-    
     if (!servicios || servicios.length === 0) {
         content.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-store-slash" style="font-size:48px;color:#cbd5e1;"></i><p>No tienes servicios adicionales aún</p><p style="font-size:12px;">Agrega servicios específicos que ofreces para que los clientes te contacten directamente.</p></div>';
     } else {
@@ -771,14 +827,12 @@ async function abrirGestionServicios() {
             </div>
         `;
     }
-    
     modal.style.display = 'flex';
 }
 
 window.editarServicio = async function(servicioId) {
     const { data: servicio } = await supabase.from('servicios').select('*').eq('id', servicioId).single();
     if (!servicio) return;
-    
     document.getElementById('servicioId').value = servicio.id;
     document.getElementById('servicioNombre').value = servicio.nombre || '';
     document.getElementById('servicioDescripcion').value = servicio.descripcion || '';
@@ -788,7 +842,6 @@ window.editarServicio = async function(servicioId) {
     document.getElementById('modalFormServicio').style.display = 'flex';
 };
 
-// Función para profesionales (eliminar servicio adicional)
 window.eliminarServicio = async function(servicioId) {
     if (!confirm('¿Eliminar este servicio permanentemente?')) return;
     const { error } = await supabase.from('servicios').delete().eq('id', servicioId);
@@ -812,27 +865,22 @@ document.getElementById('btnAgregarServicio').onclick = () => {
 
 document.getElementById('formServicio').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
     const id = document.getElementById('servicioId').value;
     const nombre = document.getElementById('servicioNombre').value.trim();
     const descripcion = document.getElementById('servicioDescripcion').value.trim();
     const precio = document.getElementById('servicioPrecio').value.trim();
     const imagenFile = document.getElementById('servicioImagen').files[0];
-    
     if (!nombre) {
         mostrarToast('El nombre del servicio es obligatorio', 'error');
         return;
     }
-    
     const { data: profesional } = await supabase.from('oferentes').select('id').eq('user_id', currentUser.id).single();
     if (!profesional) return;
-    
     let imagenUrl = null;
     if (imagenFile) {
         mostrarToast('Subiendo imagen...', 'info');
         imagenUrl = await subirImagen(imagenFile, currentUser.id, 'servicios');
     }
-    
     if (id) {
         const updates = { nombre, descripcion, precio_estimado: precio };
         if (imagenUrl) updates.imagen = imagenUrl;
@@ -851,7 +899,6 @@ document.getElementById('formServicio').addEventListener('submit', async (e) => 
         if (error) throw error;
         mostrarToast('✅ Servicio agregado', 'success');
     }
-    
     document.getElementById('modalFormServicio').style.display = 'none';
     abrirGestionServicios();
 });
@@ -874,7 +921,6 @@ async function registrarContacto(profesionalId, profesionalNombre, servicioNombr
         document.getElementById('modalLogin').style.display = 'flex';
         return false;
     }
-    
     try {
         await supabase.from('contactos').insert([{
             profesional_id: profesionalId,
@@ -892,7 +938,6 @@ async function registrarContacto(profesionalId, profesionalNombre, servicioNombr
 
 async function abrirWhatsAppConRegistro(telefono, nombre, profesionalId, servicioNombre = null) {
     await registrarContacto(profesionalId, nombre, servicioNombre);
-    
     let numeroLimpio = telefono.replace(/[^0-9]/g, '');
     if (!numeroLimpio.startsWith('53')) {
         numeroLimpio = '53' + numeroLimpio;
@@ -903,7 +948,6 @@ async function abrirWhatsAppConRegistro(telefono, nombre, profesionalId, servici
         mensaje = `Hola, vi tu perfil "${nombre}" en Factor Cuba y me interesa tu servicio de "${servicioNombre}".`;
     }
     const mensajeEncoded = encodeURIComponent(mensaje);
-    
     const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (esMovil) {
         window.location.href = `whatsapp://send?phone=${numeroFormateado}&text=${mensajeEncoded}`;
@@ -1134,16 +1178,16 @@ async function cargarProfesionales() {
     } catch (err) { mostrarToast('Error al cargar profesionales', 'error'); }
 }
 
-// ==================== VER PERFIL CON SERVICIOS ====================
+// ==================== VER PERFIL ====================
 window.verPerfil = async function(servicioId) {
     const servicio = todosLosServicios.find(s => s.id === servicioId);
     if (!servicio) return;
     
     const { data: serviciosAdicionales } = await supabase
-    .from('servicios')
-    .select('*')
-    .eq('profesional_id', servicioId)
-    .order('created_at', { ascending: false });
+        .from('servicios')
+        .select('*')
+        .eq('profesional_id', servicioId)
+        .order('created_at', { ascending: false });
     
     let calificaciones = '';
     const { data: reseñas } = await supabase.from('calificaciones').select('*').eq('servicio_id', servicioId);
@@ -1251,10 +1295,8 @@ window.abrirEditarPerfil = async function(servicioId) {
     document.getElementById('modalEditarPerfil').style.display = 'flex';
 };
 
-// ==================== GUARDAR EDICIÓN DE PERFIL ====================
 document.getElementById('editarPerfilForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
     const id = document.getElementById('editId').value;
     const servicioOriginal = todosLosServicios.find(s => s.id === id);
     if (!servicioOriginal) return;
@@ -1270,7 +1312,6 @@ document.getElementById('editarPerfilForm').addEventListener('submit', async (e)
     const fotoFile = document.getElementById('editFotoFile').files[0];
     
     const cambios = [];
-    
     if (nuevoNombre !== servicioOriginal.nombre) cambios.push({ campo: 'nombre', valor_viejo: servicioOriginal.nombre, valor_nuevo: nuevoNombre });
     if (nuevaCategoria !== servicioOriginal.categoria) cambios.push({ campo: 'categoria', valor_viejo: servicioOriginal.categoria, valor_nuevo: nuevaCategoria });
     if (nuevaProvincia !== servicioOriginal.provincia) cambios.push({ campo: 'provincia', valor_viejo: servicioOriginal.provincia, valor_nuevo: nuevaProvincia });
@@ -1295,7 +1336,6 @@ document.getElementById('editarPerfilForm').addEventListener('submit', async (e)
             nuevaFotoUrl = await subirImagen(fotoFile, currentUser.id);
             cambios.push({ campo: 'foto', valor_viejo: servicioOriginal.foto, valor_nuevo: nuevaFotoUrl });
         }
-        
         for (const cambio of cambios) {
             await supabase.from('cambios_pendientes').insert([{
                 servicio_id: id,
@@ -1306,10 +1346,8 @@ document.getElementById('editarPerfilForm').addEventListener('submit', async (e)
                 estado: 'pendiente'
             }]);
         }
-        
         mostrarToast('✅ Cambios enviados para revisión. Un administrador los aprobará.', 'success');
         document.getElementById('modalEditarPerfil').style.display = 'none';
-        
     } catch (err) {
         mostrarToast('Error: ' + err.message, 'error');
     }
@@ -1470,14 +1508,12 @@ function actualizarUI() {
         btnLogout.style.display = 'inline-block';
         btnAdmin.style.display = currentUser.email === ADMIN_EMAIL ? 'inline-block' : 'none';
         
-        // 🔧 CORRECCIÓN: Solo profesionales ven botón "Publicar"
         if (currentUserTipo === 'profesional') {
             btnPublicar.style.display = 'inline-block';
         } else {
             btnPublicar.style.display = 'none';
         }
         
-        // Botón "Mi Panel" para profesionales
         if (currentUserTipo === 'profesional') {
             if (!document.getElementById('btnPanelProfesional')) {
                 const btnPanel = document.createElement('button');
@@ -1503,31 +1539,14 @@ function actualizarUI() {
 }
 
 // ==================== ADMIN ====================
-// Función para verificar si el usuario es administrador (con verificación en BD)
 async function esAdmin() {
     if (!currentUser) return false;
-    
-    // Verificación por email como fallback seguro
     if (currentUser.email === 'ch361892@gmail.com') return true;
-    
     try {
-        // Consulta directa a la tabla admins
-        const { data, error } = await supabase
-            .from('admins')
-            .select('user_id')
-            .eq('user_id', currentUser.id)
-            .maybeSingle();
-        
-        if (error) {
-            console.error('Error en esAdmin:', error);
-            return false;
-        }
-        
+        const { data, error } = await supabase.from('admins').select('user_id').eq('user_id', currentUser.id).maybeSingle();
+        if (error) return false;
         return !!data;
-    } catch (err) {
-        console.error('Error en esAdmin:', err);
-        return false;
-    }
+    } catch (err) { return false; }
 }
 
 document.getElementById('btnAdmin').onclick = async () => {
@@ -1535,14 +1554,11 @@ document.getElementById('btnAdmin').onclick = async () => {
         mostrarToast('Debes iniciar sesión primero', 'error');
         return;
     }
-    
-    // Verificación segura en base de datos
     const admin = await esAdmin();
     if (!admin) {
         mostrarToast('No tienes permisos de administrador', 'error');
         return;
     }
-    
     adminAuthenticated = true;
     sessionStorage.setItem('adminAutenticado', 'true');
     mostrarToast('✅ Acceso de administrador concedido', 'success');
@@ -1552,44 +1568,122 @@ document.getElementById('btnAdmin').onclick = async () => {
 async function cargarAdminPanel() {
     const modal = document.getElementById('modalAdmin');
     const content = document.getElementById('adminContent');
-    
     modal.style.display = 'flex';
-    content.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>';
+    content.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-pulse"></i> Cargando estadísticas...</div>';
     
-    const total = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
-    const pendientesCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
-    const aprobadosCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
-    const cambiosCount = await supabase.from('cambios_pendientes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
-    const contactosCount = await supabase.from('contactos').select('*', { count: 'exact', head: true });
-    
-    let html = `
-        <div class="admin-stats">
-            <div class="admin-stat"><div class="stat-number">${total.count || 0}</div><div>Total Servicios</div></div>
-            <div class="admin-stat"><div class="stat-number" style="color:#f59e0b;">${pendientesCount.count || 0}</div><div>Pendientes</div></div>
-            <div class="admin-stat"><div class="stat-number" style="color:#10b981;">${aprobadosCount.count || 0}</div><div>Aprobados</div></div>
-            <div class="admin-stat"><div class="stat-number" style="color:#3b82f6;">${cambiosCount.count || 0}</div><div>Cambios</div></div>
-            <div class="admin-stat"><div class="stat-number" style="color:#8b5cf6;">${contactosCount.count || 0}</div><div>Contactos</div></div>
-        </div>
-        <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-            <button class="btn btn-outline" id="adminTabPendientes" style="background:#f59e0b; color:white;">⏳ Servicios Pendientes</button>
-            <button class="btn btn-outline" id="adminTabAprobados">✅ Aprobados</button>
-            <button class="btn btn-outline" id="adminTabTodos">📋 Todos</button>
-            <button class="btn btn-outline" id="adminTabCambios">🔄 Cambios</button>
-            <button class="btn btn-outline" id="adminTabContactos" style="background:#8b5cf6; color:white;">📞 Contactos</button>
-        </div>
-        <div id="adminLista"></div>
-    `;
-    content.innerHTML = html;
-    
-    cargarAdminLista('pendiente');
-    
-    document.getElementById('adminTabPendientes').onclick = () => cargarAdminLista('pendiente');
-    document.getElementById('adminTabAprobados').onclick = () => cargarAdminLista('aprobado');
-    document.getElementById('adminTabTodos').onclick = () => cargarAdminLista('todos');
-    document.getElementById('adminTabCambios').onclick = () => cargarAdminLista('cambios');
-    document.getElementById('adminTabContactos').onclick = () => cargarAdminLista('contactos');
+    try {
+        // === 1. OBTENER DATOS PARA KPIs ===
+        const { count: totalUsuarios } = await supabase.from('clientes').select('*', { count: 'exact', head: true });
+        const { count: totalProfesionales } = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
+        const { count: totalPendientesProf } = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+        const { data: contactosPendientes } = await supabase.from('contactos').select('*').eq('estado', 'pendiente');
+        const totalContactosPendientes = contactosPendientes?.length || 0;
+        const ingresoPotencial = totalContactosPendientes * 3;
+        
+        const { data: estadisticasVisitas } = await supabase.from('estadisticas_profesional').select('visitas, contactos');
+        let totalVisitas = 0, totalContactosStats = 0;
+        if (estadisticasVisitas) {
+            estadisticasVisitas.forEach(stat => {
+                totalVisitas += stat.visitas || 0;
+                totalContactosStats += stat.contactos || 0;
+            });
+        }
+        const tasaConversion = totalVisitas > 0 ? ((totalContactosStats / totalVisitas) * 100).toFixed(1) : 0;
+        
+        // === 2. DATOS PARA GRÁFICO DE INGRESOS ===
+        const ingresosPorDia = {};
+        const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        for (let i = 6; i >= 0; i--) {
+            const fecha = new Date();
+            fecha.setDate(fecha.getDate() - i);
+            const key = fecha.toISOString().split('T')[0];
+            ingresosPorDia[key] = 0;
+        }
+        if (contactosPendientes) {
+            contactosPendientes.forEach(c => {
+                const diaKey = new Date(c.fecha_contacto).toISOString().split('T')[0];
+                if (ingresosPorDia[diaKey] !== undefined) ingresosPorDia[diaKey] += 3;
+            });
+        }
+        const labelsIngresos = Object.keys(ingresosPorDia).map(d => {
+            const fecha = new Date(d);
+            return `${diasSemana[fecha.getDay()]} ${fecha.getDate()}/${fecha.getMonth()+1}`;
+        });
+        const dataIngresos = Object.values(ingresosPorDia);
+        
+        // === 3. DATOS PARA TOP PROFESIONALES ===
+        const { data: topProfesionales } = await supabase
+            .from('oferentes')
+            .select('nombre, promedio_puntuacion')
+            .eq('estado', 'aprobado')
+            .not('promedio_puntuacion', 'is', null)
+            .order('promedio_puntuacion', { ascending: false })
+            .limit(5);
+        const labelsProfesionales = (topProfesionales || []).map(p => p.nombre.length > 15 ? p.nombre.substring(0,12)+'...' : p.nombre);
+        const dataPuntuaciones = (topProfesionales || []).map(p => p.promedio_puntuacion.toFixed(1));
+        
+        // === 4. OTRAS ESTADÍSTICAS PARA GESTIÓN ===
+        const totalServiciosCount = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
+        const cambiosCount = await supabase.from('cambios_pendientes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+        
+        // === 5. CONSTRUIR HTML ===
+        let html = `
+            <div class="dashboard-kpi-grid">
+                <div class="kpi-card"><div class="kpi-title">Total Usuarios</div><div class="kpi-value">${totalUsuarios || 0}</div><div class="kpi-sub">${totalProfesionales || 0} profesionales</div></div>
+                <div class="kpi-card"><div class="kpi-title">Ingreso Potencial</div><div class="kpi-value">$${ingresoPotencial}</div><div class="kpi-sub">${totalContactosPendientes} contactos pendientes</div></div>
+                <div class="kpi-card"><div class="kpi-title">Profesionales Activos</div><div class="kpi-value">${totalProfesionales || 0}</div><div class="kpi-sub">+${totalPendientesProf || 0} pendientes</div></div>
+                <div class="kpi-card"><div class="kpi-title">Tasa de Conversión</div><div class="kpi-value">${tasaConversion}%</div><div class="kpi-sub">${totalContactosStats} contactos / ${totalVisitas} visitas</div></div>
+            </div>
+            <div class="dashboard-charts-grid">
+                <div class="chart-card"><div class="chart-title"><i class="fas fa-chart-line"></i> Ingreso Proyectado (últimos 7 días)</div><canvas id="revenueChart"></canvas></div>
+                <div class="chart-card"><div class="chart-title"><i class="fas fa-star"></i> Top 5 Profesionales mejor valorados</div><canvas id="topProfessionalsChart"></canvas></div>
+            </div>
+            <div class="admin-stats">
+                <div class="admin-stat"><div class="stat-number">${totalServiciosCount.count || 0}</div><div>Total Servicios</div></div>
+                <div class="admin-stat"><div class="stat-number" style="color:#f59e0b;">${totalPendientesProf || 0}</div><div>Pendientes</div></div>
+                <div class="admin-stat"><div class="stat-number" style="color:#10b981;">${totalProfesionales || 0}</div><div>Aprobados</div></div>
+                <div class="admin-stat"><div class="stat-number" style="color:#3b82f6;">${cambiosCount.count || 0}</div><div>Cambios</div></div>
+                <div class="admin-stat"><div class="stat-number" style="color:#8b5cf6;">${totalContactosPendientes || 0}</div><div>Contactos</div></div>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+                <button class="btn btn-outline" id="adminTabPendientes" style="background:#f59e0b; color:white;">⏳ Servicios Pendientes</button>
+                <button class="btn btn-outline" id="adminTabAprobados">✅ Aprobados</button>
+                <button class="btn btn-outline" id="adminTabTodos">📋 Todos</button>
+                <button class="btn btn-outline" id="adminTabCambios">🔄 Cambios</button>
+                <button class="btn btn-outline" id="adminTabContactos" style="background:#8b5cf6; color:white;">📞 Contactos</button>
+            </div>
+            <div id="adminLista"></div>
+        `;
+        content.innerHTML = html;
+        
+        // Renderizar gráficos
+        const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctxRevenue, {
+            type: 'line',
+            data: { labels: labelsIngresos, datasets: [{ label: 'Ingreso Potencial (USD)', data: dataIngresos, borderColor: '#2c5f8a', backgroundColor: 'rgba(44,95,138,0.05)', borderWidth: 2, fill: true, tension: 0.3 }] },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { tooltip: { callbacks: { label: (ctx) => `$${ctx.raw} USD` } } } }
+        });
+        const ctxTop = document.getElementById('topProfessionalsChart').getContext('2d');
+        new Chart(ctxTop, {
+            type: 'bar',
+            data: { labels: labelsProfesionales, datasets: [{ label: 'Promedio de Calificación (⭐)', data: dataPuntuaciones, backgroundColor: '#f59e0b', borderRadius: 8 }] },
+            options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, max: 5, title: { display: true, text: 'Puntuación' } } } }
+        });
+        
+        cargarAdminLista('pendiente');
+        document.getElementById('adminTabPendientes').onclick = () => cargarAdminLista('pendiente');
+        document.getElementById('adminTabAprobados').onclick = () => cargarAdminLista('aprobado');
+        document.getElementById('adminTabTodos').onclick = () => cargarAdminLista('todos');
+        document.getElementById('adminTabCambios').onclick = () => cargarAdminLista('cambios');
+        document.getElementById('adminTabContactos').onclick = () => cargarAdminLista('contactos');
+        
+    } catch (error) {
+        console.error("Error cargando dashboard:", error);
+        content.innerHTML = '<div style="text-align:center;padding:40px;color:red;">❌ Error al cargar el panel de control.</div>';
+    }
 }
 
+// ==================== FUNCIONES DE GESTIÓN (cargarAdminLista, etc.) ====================
 async function cargarAdminLista(tipo) {
     const listaDiv = document.getElementById('adminLista');
     if (!listaDiv) return;
@@ -1601,25 +1695,21 @@ async function cargarAdminLista(tipo) {
             listaDiv.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-phone-slash" style="font-size:48px;color:#cbd5e1;"></i><p>No hay contactos registrados aún</p></div>';
             return;
         }
-        
         const profesionalIds = [...new Set(contactos.map(c => c.profesional_id).filter(id => id))];
         let profesionalesMap = {};
         if (profesionalIds.length > 0) {
             const { data: profesionales } = await supabase.from('oferentes').select('id, nombre, especialidad, telefono').in('id', profesionalIds);
             if (profesionales) profesionales.forEach(p => { profesionalesMap[p.id] = p; });
         }
-        
         const clienteIds = [...new Set(contactos.map(c => c.cliente_id).filter(id => id))];
         let clientesMap = {};
         if (clienteIds.length > 0) {
             const { data: clientes } = await supabase.from('clientes').select('user_id, email').in('user_id', clienteIds);
             if (clientes) clientes.forEach(c => { clientesMap[c.user_id] = c; });
         }
-        
         const total = contactos.length;
         const pendientes = contactos.filter(c => c.estado === 'pendiente').length;
         const pagados = contactos.filter(c => c.estado === 'pagado').length;
-        
         listaDiv.innerHTML = `
             <div style="background:var(--primary-light); padding:16px; border-radius:var(--radius-lg); margin-bottom:20px;">
                 <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; text-align:center;">
@@ -1635,7 +1725,7 @@ async function cargarAdminLista(tipo) {
                     <tbody>
                         ${contactos.map(c => {
                             const profesional = profesionalesMap[c.profesional_id];
-                            return `</tr>
+                            return `<tr>
                                 <td>${new Date(c.fecha_contacto).toLocaleString()}</td>
                                 <td>${escapeHtml(clientesMap[c.cliente_id]?.email?.split('@')[0] || c.cliente_id?.substring(0,8) || 'N/A')}</td>
                                 <td><strong>${escapeHtml(profesional?.nombre || 'N/A')}</strong><br><small>${escapeHtml(profesional?.especialidad || 'N/A')}</small></td>
@@ -1654,37 +1744,15 @@ async function cargarAdminLista(tipo) {
     }
     
     if (tipo === 'cambios') {
-        const { data: cambios, error } = await supabase
-            .from('cambios_pendientes')
-            .select('*')
-            .eq('estado', 'pendiente')
-            .order('created_at', { ascending: false });
-        
-        if (error) {
-            console.error('Error cargando cambios:', error);
-            listaDiv.innerHTML = '<div style="text-align:center;padding:40px;color:red;">❌ Error al cargar cambios</div>';
-            return;
-        }
-        
-        if (!cambios || cambios.length === 0) {
-            listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay cambios pendientes</div>';
-            return;
-        }
-        
+        const { data: cambios, error } = await supabase.from('cambios_pendientes').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
+        if (error) { listaDiv.innerHTML = '<div style="text-align:center;padding:40px;color:red;">❌ Error al cargar cambios</div>'; return; }
+        if (!cambios || cambios.length === 0) { listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay cambios pendientes</div>'; return; }
         const profesionalIds = [...new Set(cambios.map(c => c.servicio_id))];
         let profesionalesMap = {};
-        
         if (profesionalIds.length > 0) {
-            const { data: profesionales } = await supabase
-                .from('oferentes')
-                .select('id, nombre, telefono, foto')
-                .in('id', profesionalIds);
-            
-            if (profesionales) {
-                profesionales.forEach(p => { profesionalesMap[p.id] = p; });
-            }
+            const { data: profesionales } = await supabase.from('oferentes').select('id, nombre, telefono, foto').in('id', profesionalIds);
+            if (profesionales) profesionales.forEach(p => { profesionalesMap[p.id] = p; });
         }
-        
         let html = '<div style="display:flex; flex-direction:column; gap:15px;">';
         for (const cambio of cambios) {
             const profesional = profesionalesMap[cambio.servicio_id];
@@ -1697,17 +1765,10 @@ async function cargarAdminLista(tipo) {
                             <br><small>📅 ${new Date(cambio.created_at).toLocaleString()}</small>
                             ${profesional?.foto ? `<div style="margin-top:10px;"><img src="${profesional.foto}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid #ddd;"></div>` : '<div style="margin-top:10px; color:#94a3b8;">📷 Sin foto de perfil</div>'}
                         </div>
-                        <div>
-                            <button class="btn btn-success btn-sm" onclick="aprobarCambioIndividual('${cambio.id}', '${cambio.servicio_id}', '${cambio.campo}', '${escapeHtml(cambio.valor_nuevo)}')">✅ Aprobar</button>
-                            <button class="btn btn-danger btn-sm" onclick="rechazarCambioIndividual('${cambio.id}')">❌ Rechazar</button>
-                        </div>
+                        <div><button class="btn btn-success btn-sm" onclick="aprobarCambioIndividual('${cambio.id}', '${cambio.servicio_id}', '${cambio.campo}', '${escapeHtml(cambio.valor_nuevo)}')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarCambioIndividual('${cambio.id}')">❌ Rechazar</button></div>
                     </div>
                     <div><strong>📝 Cambio solicitado:</strong></div>
-                    <div style="margin-top:5px;">
-                        <strong>Campo:</strong> ${cambio.campo}<br>
-                        <strong>Valor actual:</strong> "${escapeHtml(cambio.valor_viejo || 'Vacío')}"<br>
-                        <strong>Nuevo valor:</strong> "${escapeHtml(cambio.valor_nuevo || 'Vacío')}"
-                    </div>
+                    <div style="margin-top:5px;"><strong>Campo:</strong> ${cambio.campo}<br><strong>Valor actual:</strong> "${escapeHtml(cambio.valor_viejo || 'Vacío')}"<br><strong>Nuevo valor:</strong> "${escapeHtml(cambio.valor_nuevo || 'Vacío')}"</div>
                 </div>
             `;
         }
@@ -1721,140 +1782,38 @@ async function cargarAdminLista(tipo) {
     else if (tipo === 'aprobado') query = query.eq('estado', 'aprobado');
     const { data } = await query.order('created_at', { ascending: false });
     if (!data || data.length === 0) { listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios</div>'; return; }
-    listaDiv.innerHTML = data.map(s => `<div class="service-item ${s.estado === 'pendiente' ? 'service-pendiente' : 'service-aprobado'}"><div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small><br><small>📍 ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</small></div><div style="display:flex; gap:10px; flex-wrap:wrap;">${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button>` : ''}<button class="btn btn-outline btn-sm" onclick="eliminarServicio('${s.id}')">🗑️ Eliminar Servicio</button><button class="btn btn-danger btn-sm" onclick="eliminarPerfilProfesional('${s.id}', '${escapeHtml(s.nombre)}')" style="background:#b91c1c; color:white;">🗑️ Eliminar Perfil</button></div></div><div>📞 ${escapeHtml(s.telefono)}</div>${s.foto ? `<div style="margin-top:10px; padding:10px; background:#f8fafc; border-radius:8px;"><strong>📷 Foto de perfil:</strong><br><img src="${s.foto}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #ddd; margin-top:5px;"></div>` : '<div style="margin-top:10px; color:#94a3b8;">📷 Sin foto de perfil</div>'}${s.descripcion ? `<div style="margin-top:8px;">📝 ${escapeHtml(s.descripcion)}</div>` : ''}</div>`).join('');
+    listaDiv.innerHTML = data.map(s => `<div class="service-item ${s.estado === 'pendiente' ? 'service-pendiente' : 'service-aprobado'}"><div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;"><div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small><br><small>📍 ${escapeHtml(s.municipio || s.zona)}, ${escapeHtml(s.provincia || '')}</small></div><div style="display:flex; gap:10px; flex-wrap:wrap;">${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="aprobarServicio('${s.id}')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="rechazarServicio('${s.id}')">❌ Rechazar</button>` : ''}<button class="btn btn-outline btn-sm" onclick="eliminarServicioAdmin('${s.id}')">🗑️ Eliminar Servicio</button><button class="btn btn-danger btn-sm" onclick="eliminarPerfilProfesional('${s.id}', '${escapeHtml(s.nombre)}')" style="background:#b91c1c; color:white;">🗑️ Eliminar Perfil</button></div></div><div>📞 ${escapeHtml(s.telefono)}</div>${s.foto ? `<div style="margin-top:10px; padding:10px; background:#f8fafc; border-radius:8px;"><strong>📷 Foto de perfil:</strong><br><img src="${s.foto}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #ddd; margin-top:5px;"></div>` : '<div style="margin-top:10px; color:#94a3b8;">📷 Sin foto de perfil</div>'}${s.descripcion ? `<div style="margin-top:8px;">📝 ${escapeHtml(s.descripcion)}</div>` : ''}</div>`).join('');
 }
 
+// Funciones auxiliares de admin (aprobar, rechazar, eliminar, etc.)
 window.marcarContactoPagado = async function(contactoId) {
     if (!confirm('¿Marcar este contacto como pagado?')) return;
-    try {
-        await supabase.from('contactos').update({ estado: 'pagado' }).eq('id', contactoId);
-        mostrarToast('✅ Contacto marcado como pagado', 'success');
-        cargarAdminLista('contactos');
-    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
+    try { await supabase.from('contactos').update({ estado: 'pagado' }).eq('id', contactoId); mostrarToast('✅ Contacto marcado como pagado', 'success'); cargarAdminLista('contactos'); } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 };
-
-// Función para eliminar un servicio completo (admin)
 window.eliminarServicioAdmin = async function(id) {
     if (!confirm('⚠️ ¿Eliminar permanentemente este servicio?')) return;
-    try {
-        await supabase.from('oferentes').delete().eq('id', id);
-        mostrarToast('✅ Servicio eliminado', 'success');
-        cargarAdminLista('pendiente');
-        await cargarProfesionales();
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
+    try { await supabase.from('oferentes').delete().eq('id', id); mostrarToast('✅ Servicio eliminado', 'success'); cargarAdminLista('pendiente'); await cargarProfesionales(); } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 };
-
-window.aprobarServicio = async function(id) { 
-    if (!confirm('¿Aprobar este servicio?')) return; 
-    await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id); 
-    mostrarToast('✅ Servicio aprobado', 'success'); 
-    cargarAdminLista('pendiente');
-    await cargarProfesionales();
-};
-
-window.rechazarServicio = async function(id) { 
-    if (!confirm('¿Rechazar este servicio?')) return; 
-    await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id); 
-    mostrarToast('❌ Servicio rechazado', 'warning'); 
-    cargarAdminLista('pendiente');
-    await cargarProfesionales();
-};
-
-window.aprobarCambios = async function(servicioId) { 
-    if (!confirm('¿Aprobar todos los cambios para este servicio?')) return; 
-    const { data: cambios } = await supabase.from('cambios_pendientes').select('*').eq('servicio_id', servicioId).eq('estado', 'pendiente');
-    if (!cambios || cambios.length === 0) return;
-    const updates = {};
-    cambios.forEach(c => { updates[c.campo] = c.valor_nuevo; });
-    await supabase.from('oferentes').update(updates).eq('id', servicioId);
-    await supabase.from('cambios_pendientes').update({ estado: 'aprobado' }).eq('servicio_id', servicioId).eq('estado', 'pendiente');
-    mostrarToast('✅ Cambios aprobados y aplicados', 'success');
-    cargarAdminLista('cambios');
-    await cargarProfesionales();
-};
-
-window.rechazarCambios = async function(servicioId) { 
-    if (!confirm('¿Rechazar todos los cambios para este servicio?')) return; 
-    await supabase.from('cambios_pendientes').update({ estado: 'rechazado' }).eq('servicio_id', servicioId).eq('estado', 'pendiente');
-    mostrarToast('❌ Cambios rechazados', 'warning');
-    cargarAdminLista('cambios');
-};
-
+window.aprobarServicio = async function(id) { if (!confirm('¿Aprobar este servicio?')) return; await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id); mostrarToast('✅ Servicio aprobado', 'success'); cargarAdminLista('pendiente'); await cargarProfesionales(); };
+window.rechazarServicio = async function(id) { if (!confirm('¿Rechazar este servicio?')) return; await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id); mostrarToast('❌ Servicio rechazado', 'warning'); cargarAdminLista('pendiente'); await cargarProfesionales(); };
 window.aprobarCambioIndividual = async function(cambioId, servicioId, campo, nuevoValor) {
     if (!confirm('¿Aprobar este cambio?')) return;
-    try {
-        const updates = {};
-        updates[campo] = nuevoValor;
-        await supabase.from('oferentes').update(updates).eq('id', servicioId);
-        await supabase.from('cambios_pendientes').update({ estado: 'aprobado' }).eq('id', cambioId);
-        mostrarToast('✅ Cambio aprobado y aplicado', 'success');
-        cargarAdminLista('cambios');
-        await cargarProfesionales();
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
+    try { const updates = {}; updates[campo] = nuevoValor; await supabase.from('oferentes').update(updates).eq('id', servicioId); await supabase.from('cambios_pendientes').update({ estado: 'aprobado' }).eq('id', cambioId); mostrarToast('✅ Cambio aprobado y aplicado', 'success'); cargarAdminLista('cambios'); await cargarProfesionales(); } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 };
-
 window.rechazarCambioIndividual = async function(cambioId) {
     if (!confirm('¿Rechazar este cambio?')) return;
-    try {
-        await supabase.from('cambios_pendientes').update({ estado: 'rechazado' }).eq('id', cambioId);
-        mostrarToast('❌ Cambio rechazado', 'warning');
-        cargarAdminLista('cambios');
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
+    try { await supabase.from('cambios_pendientes').update({ estado: 'rechazado' }).eq('id', cambioId); mostrarToast('❌ Cambio rechazado', 'warning'); cargarAdminLista('cambios'); } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 };
-
 window.eliminarPerfilProfesional = async function(profesionalId, nombreProfesional) {
-    if (!confirm(`⚠️ ¿Estás SEGURO de que quieres eliminar el perfil de "${nombreProfesional}"?\n\nEsta acción también eliminará:\n- Todos sus servicios adicionales\n- Todas sus reseñas\n- Todos sus contactos registrados\n- Todas sus estadísticas\n\n¡Esta acción NO se puede deshacer!`)) {
-        return;
-    }
-    
-    try {
-        mostrarToast('Eliminando perfil...', 'info');
-        
-        await supabase.from('servicios').delete().eq('profesional_id', profesionalId);
-        await supabase.from('calificaciones').delete().eq('servicio_id', profesionalId);
-        await supabase.from('contactos').delete().eq('profesional_id', profesionalId);
-        await supabase.from('estadisticas_profesional').delete().eq('profesional_id', profesionalId);
-        await supabase.from('cambios_pendientes').delete().eq('servicio_id', profesionalId);
-        
-        const { error } = await supabase.from('oferentes').delete().eq('id', profesionalId);
-        if (error) throw error;
-        
-        mostrarToast(`✅ Perfil "${nombreProfesional}" eliminado correctamente`, 'success');
-        
-        await cargarProfesionales();
-        if (adminAuthenticated) {
-            cargarAdminLista('pendiente');
-            cargarAdminLista('aprobado');
-            cargarAdminLista('todos');
-        }
-        
-    } catch (err) {
-        console.error('Error al eliminar:', err);
-        mostrarToast('Error al eliminar el perfil: ' + err.message, 'error');
-    }
+    if (!confirm(`⚠️ ¿Eliminar el perfil de "${nombreProfesional}"? Esta acción NO se puede deshacer.`)) return;
+    try { mostrarToast('Eliminando perfil...', 'info'); await supabase.from('servicios').delete().eq('profesional_id', profesionalId); await supabase.from('calificaciones').delete().eq('servicio_id', profesionalId); await supabase.from('contactos').delete().eq('profesional_id', profesionalId); await supabase.from('estadisticas_profesional').delete().eq('profesional_id', profesionalId); await supabase.from('cambios_pendientes').delete().eq('servicio_id', profesionalId); const { error } = await supabase.from('oferentes').delete().eq('id', profesionalId); if (error) throw error; mostrarToast(`✅ Perfil "${nombreProfesional}" eliminado`, 'success'); await cargarProfesionales(); if (adminAuthenticated) cargarAdminLista('pendiente'); } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
 };
-
 async function exportarContactosExcel() {
     const { data: contactos } = await supabase.from('contactos').select('*').order('fecha_contacto', { ascending: false });
-    if (!contactos || contactos.length === 0) { mostrarToast('No hay contactos para exportar', 'error'); return; }
+    if (!contactos || contactos.length === 0) { mostrarToast('No hay contactos', 'error'); return; }
     let csv = "Fecha,Cliente ID,Profesional ID,Estado\n";
     contactos.forEach(c => { csv += `"${new Date(c.fecha_contacto).toLocaleString()}","${c.cliente_id || 'N/A'}","${c.profesional_id || 'N/A'}","${c.estado}"\n`; });
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.setAttribute("download", `contactos_factor_cuba_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    mostrarToast('✅ Contactos exportados', 'success');
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `contactos_${new Date().toISOString().split('T')[0]}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); mostrarToast('✅ Exportado', 'success');
 }
 
 // ==================== REGISTRO ====================
@@ -1876,266 +1835,67 @@ document.getElementById('registroForm').addEventListener('submit', async (e) => 
 
 // ==================== ESTADÍSTICAS PROFESIONALES ====================
 async function abrirEstadisticas() {
-    if (!currentUser || currentUserTipo !== 'profesional') {
-        mostrarToast('Solo profesionales pueden ver estadísticas', 'error');
-        return;
-    }
-    
+    if (!currentUser || currentUserTipo !== 'profesional') { mostrarToast('Solo profesionales pueden ver estadísticas', 'error'); return; }
     const { data: profesional } = await supabase.from('oferentes').select('id, nombre').eq('user_id', currentUser.id).single();
     if (!profesional) return;
-    
-    // Verificar si la tabla estadisticas_profesional existe
     let stats = null;
     try {
-        const { data, error } = await supabase
-            .from('estadisticas_profesional')
-            .select('*')
-            .eq('profesional_id', profesional.id)
-            .maybeSingle();
-        
-        if (error && error.message.includes('relation')) {
-            mostrarToast('Las estadísticas no están disponibles aún', 'info');
-            return;
-        }
+        const { data, error } = await supabase.from('estadisticas_profesional').select('*').eq('profesional_id', profesional.id).maybeSingle();
+        if (error && error.message.includes('relation')) { mostrarToast('Las estadísticas no están disponibles aún', 'info'); return; }
         stats = data;
-    } catch (err) {
-        mostrarToast('Error al cargar estadísticas', 'error');
-        return;
-    }
-    
-    const { data: contactos } = await supabase
-        .from('contactos')
-        .select('fecha_contacto')
-        .eq('profesional_id', profesional.id)
-        .gte('fecha_contacto', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
-    
-    const contactosPorDia = {};
-    const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-    for (let i = 6; i >= 0; i--) {
-        const fecha = new Date();
-        fecha.setDate(fecha.getDate() - i);
-        const key = fecha.toISOString().split('T')[0];
-        contactosPorDia[key] = 0;
-    }
-    
-    if (contactos) {
-        contactos.forEach(c => {
-            const dia = new Date(c.fecha_contacto).toISOString().split('T')[0];
-            if (contactosPorDia[dia] !== undefined) contactosPorDia[dia]++;
-        });
-    }
-    
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.style.display = 'flex';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h2><i class="fas fa-chart-line"></i> Mis Estadísticas</h2>
-                <button class="close-modal" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            <div style="text-align:center; margin-bottom:20px;">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
-                    <div style="background:var(--primary-light); padding:20px; border-radius:16px;">
-                        <div style="font-size:42px; font-weight:800; color:var(--primary);">${stats?.visitas || 0}</div>
-                        <div>Visitas a tu perfil</div>
-                    </div>
-                    <div style="background:var(--primary-light); padding:20px; border-radius:16px;">
-                        <div style="font-size:42px; font-weight:800; color:var(--success);">${stats?.contactos || 0}</div>
-                        <div>Contactos recibidos</div>
-                    </div>
-                </div>
-                <div style="margin-top:20px;">
-                    <h4>Contactos (últimos 7 días)</h4>
-                    <canvas id="estadisticasChart" style="max-height:200px; width:100%;"></canvas>
-                </div>
-            </div>
-        </div>
-    `;
+    } catch (err) { mostrarToast('Error al cargar estadísticas', 'error'); return; }
+    const { data: contactos } = await supabase.from('contactos').select('fecha_contacto').eq('profesional_id', profesional.id).gte('fecha_contacto', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+    const contactosPorDia = {}; const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    for (let i = 6; i >= 0; i--) { const fecha = new Date(); fecha.setDate(fecha.getDate() - i); const key = fecha.toISOString().split('T')[0]; contactosPorDia[key] = 0; }
+    if (contactos) { contactos.forEach(c => { const dia = new Date(c.fecha_contacto).toISOString().split('T')[0]; if (contactosPorDia[dia] !== undefined) contactosPorDia[dia]++; }); }
+    const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'flex';
+    modal.innerHTML = `<div class="modal-content" style="max-width: 700px;"><div class="modal-header"><h2><i class="fas fa-chart-line"></i> Mis Estadísticas</h2><button class="close-modal" onclick="this.closest('.modal').remove()">&times;</button></div><div style="text-align:center; margin-bottom:20px;"><div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;"><div style="background:var(--primary-light); padding:20px; border-radius:16px;"><div style="font-size:42px; font-weight:800; color:var(--primary);">${stats?.visitas || 0}</div><div>Visitas a tu perfil</div></div><div style="background:var(--primary-light); padding:20px; border-radius:16px;"><div style="font-size:42px; font-weight:800; color:var(--success);">${stats?.contactos || 0}</div><div>Contactos recibidos</div></div></div><div style="margin-top:20px;"><h4>Contactos (últimos 7 días)</h4><canvas id="estadisticasChart" style="max-height:200px; width:100%;"></canvas></div></div></div>`;
     document.body.appendChild(modal);
-    
     setTimeout(() => {
         const ctx = document.getElementById('estadisticasChart')?.getContext('2d');
         if (ctx && typeof Chart !== 'undefined') {
-            const labels = Object.keys(contactosPorDia).map(d => {
-                const fecha = new Date(d);
-                return `${dias[fecha.getDay()]} ${fecha.getDate()}/${fecha.getMonth()+1}`;
-            });
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Contactos',
-                        data: Object.values(contactosPorDia),
-                        borderColor: '#2c5f8a',
-                        backgroundColor: 'rgba(44, 95, 138, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: { legend: { position: 'top' } }
-                }
-            });
+            const labels = Object.keys(contactosPorDia).map(d => { const fecha = new Date(d); return `${dias[fecha.getDay()]} ${fecha.getDate()}/${fecha.getMonth()+1}`; });
+            new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Contactos', data: Object.values(contactosPorDia), borderColor: '#2c5f8a', backgroundColor: 'rgba(44, 95, 138, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: true } });
         }
     }, 100);
 }
 
 // ==================== RESEÑAS ====================
 async function actualizarPromedioProfesional(profesionalId) {
-    const { data: calificaciones } = await supabase
-        .from('calificaciones')
-        .select('puntuacion')
-        .eq('servicio_id', profesionalId);
-    
+    const { data: calificaciones } = await supabase.from('calificaciones').select('puntuacion').eq('servicio_id', profesionalId);
     if (calificaciones && calificaciones.length > 0) {
-        const total = calificaciones.length;
-        const promedio = calificaciones.reduce((sum, c) => sum + c.puntuacion, 0) / total;
-        
-        await supabase
-            .from('oferentes')
-            .update({
-                total_calificaciones: total,
-                promedio_puntuacion: promedio
-            })
-            .eq('id', profesionalId);
-        
+        const total = calificaciones.length; const promedio = calificaciones.reduce((sum, c) => sum + c.puntuacion, 0) / total;
+        await supabase.from('oferentes').update({ total_calificaciones: total, promedio_puntuacion: promedio }).eq('id', profesionalId);
         return true;
     }
     return false;
 }
-
 async function enviarResena(profesionalId, puntuacion, comentario) {
-    if (!currentUser) {
-        mostrarToast('Debes iniciar sesión para calificar', 'error');
-        return false;
-    }
-    
-    const { data: existing } = await supabase
-        .from('calificaciones')
-        .select('id')
-        .eq('servicio_id', profesionalId)
-        .eq('cliente_id', currentUser.id)
-        .maybeSingle();
-    
-    if (existing) {
-        mostrarToast('Ya calificaste a este profesional anteriormente', 'error');
-        return false;
-    }
-    
-    const { error: insertError } = await supabase
-        .from('calificaciones')
-        .insert([{
-            servicio_id: profesionalId,
-            cliente_id: currentUser.id,
-            puntuacion: puntuacion,
-            comentario: comentario || null,
-            created_at: new Date().toISOString()
-        }]);
-    
-    if (insertError) {
-        mostrarToast('Error al guardar: ' + insertError.message, 'error');
-        return false;
-    }
-    
+    if (!currentUser) { mostrarToast('Debes iniciar sesión para calificar', 'error'); return false; }
+    const { data: existing } = await supabase.from('calificaciones').select('id').eq('servicio_id', profesionalId).eq('cliente_id', currentUser.id).maybeSingle();
+    if (existing) { mostrarToast('Ya calificaste a este profesional anteriormente', 'error'); return false; }
+    const { error: insertError } = await supabase.from('calificaciones').insert([{ servicio_id: profesionalId, cliente_id: currentUser.id, puntuacion: puntuacion, comentario: comentario || null, created_at: new Date().toISOString() }]);
+    if (insertError) { mostrarToast('Error al guardar: ' + insertError.message, 'error'); return false; }
     await actualizarPromedioProfesional(profesionalId);
     mostrarToast('✅ ¡Gracias por tu calificación!', 'success');
     return true;
 }
-
 window.mostrarModalResena = function(profesionalId, profesionalNombre) {
-    if (!currentUser) {
-        mostrarToast('Debes iniciar sesión para calificar', 'info');
-        document.getElementById('modalLogin').style.display = 'flex';
-        return;
-    }
-    
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.style.display = 'flex';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-star"></i> Calificar a ${escapeHtml(profesionalNombre)}</h2>
-                <button class="close-modal" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            <div style="text-align:center; margin-bottom:20px;">
-                <p>¿Cómo fue tu experiencia?</p>
-                <div id="modalStarsSelector" style="display: flex; gap: 8px; justify-content: center; font-size: 40px; margin: 15px 0;">
-                    <i class="far fa-star" data-value="1" style="cursor:pointer; color:#f59e0b;"></i>
-                    <i class="far fa-star" data-value="2" style="cursor:pointer; color:#f59e0b;"></i>
-                    <i class="far fa-star" data-value="3" style="cursor:pointer; color:#f59e0b;"></i>
-                    <i class="far fa-star" data-value="4" style="cursor:pointer; color:#f59e0b;"></i>
-                    <i class="far fa-star" data-value="5" style="cursor:pointer; color:#f59e0b;"></i>
-                </div>
-                <input type="hidden" id="modalResenaPuntuacion" value="0">
-            </div>
-            <div class="form-group">
-                <label>Comentario (opcional)</label>
-                <textarea id="modalResenaComentario" rows="3" placeholder="Cuéntanos tu experiencia..."></textarea>
-            </div>
-            <button class="btn btn-primary" id="modalBtnEnviarResena" style="width:100%;"><i class="fas fa-paper-plane"></i> Enviar Calificación</button>
-        </div>
-    `;
+    if (!currentUser) { mostrarToast('Debes iniciar sesión para calificar', 'info'); document.getElementById('modalLogin').style.display = 'flex'; return; }
+    const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'flex';
+    modal.innerHTML = `<div class="modal-content"><div class="modal-header"><h2><i class="fas fa-star"></i> Calificar a ${escapeHtml(profesionalNombre)}</h2><button class="close-modal" onclick="this.closest('.modal').remove()">&times;</button></div><div style="text-align:center; margin-bottom:20px;"><p>¿Cómo fue tu experiencia?</p><div id="modalStarsSelector" style="display: flex; gap: 8px; justify-content: center; font-size: 40px; margin: 15px 0;"><i class="far fa-star" data-value="1" style="cursor:pointer; color:#f59e0b;"></i><i class="far fa-star" data-value="2" style="cursor:pointer; color:#f59e0b;"></i><i class="far fa-star" data-value="3" style="cursor:pointer; color:#f59e0b;"></i><i class="far fa-star" data-value="4" style="cursor:pointer; color:#f59e0b;"></i><i class="far fa-star" data-value="5" style="cursor:pointer; color:#f59e0b;"></i></div><input type="hidden" id="modalResenaPuntuacion" value="0"></div><div class="form-group"><label>Comentario (opcional)</label><textarea id="modalResenaComentario" rows="3" placeholder="Cuéntanos tu experiencia..."></textarea></div><button class="btn btn-primary" id="modalBtnEnviarResena" style="width:100%;"><i class="fas fa-paper-plane"></i> Enviar Calificación</button></div>`;
     document.body.appendChild(modal);
-    
-    const stars = modal.querySelectorAll('#modalStarsSelector i');
-    const puntuacionInput = modal.querySelector('#modalResenaPuntuacion');
-    
+    const stars = modal.querySelectorAll('#modalStarsSelector i'); const puntuacionInput = modal.querySelector('#modalResenaPuntuacion');
     stars.forEach(star => {
-        star.addEventListener('mouseover', () => {
-            const value = parseInt(star.dataset.value);
-            stars.forEach((s, i) => {
-                if (i < value) {
-                    s.className = 'fas fa-star';
-                } else {
-                    s.className = 'far fa-star';
-                }
-            });
-        });
-        
-        star.addEventListener('mouseout', () => {
-            const currentValue = parseInt(puntuacionInput.value) || 0;
-            stars.forEach((s, i) => {
-                if (i < currentValue) {
-                    s.className = 'fas fa-star';
-                } else {
-                    s.className = 'far fa-star';
-                }
-            });
-        });
-        
-        star.addEventListener('click', () => {
-            const value = parseInt(star.dataset.value);
-            puntuacionInput.value = value;
-            stars.forEach((s, i) => {
-                if (i < value) {
-                    s.className = 'fas fa-star';
-                } else {
-                    s.className = 'far fa-star';
-                }
-            });
-        });
+        star.addEventListener('mouseover', () => { const value = parseInt(star.dataset.value); stars.forEach((s, i) => { if (i < value) s.className = 'fas fa-star'; else s.className = 'far fa-star'; }); });
+        star.addEventListener('mouseout', () => { const currentValue = parseInt(puntuacionInput.value) || 0; stars.forEach((s, i) => { if (i < currentValue) s.className = 'fas fa-star'; else s.className = 'far fa-star'; }); });
+        star.addEventListener('click', () => { const value = parseInt(star.dataset.value); puntuacionInput.value = value; stars.forEach((s, i) => { if (i < value) s.className = 'fas fa-star'; else s.className = 'far fa-star'; }); });
     });
-    
     modal.querySelector('#modalBtnEnviarResena').onclick = async () => {
-        const puntuacion = parseInt(puntuacionInput.value);
-        const comentario = modal.querySelector('#modalResenaComentario').value.trim();
-        
-        if (!puntuacion || puntuacion < 1 || puntuacion > 5) {
-            mostrarToast('Selecciona una calificación de 1 a 5 estrellas', 'error');
-            return;
-        }
-        
+        const puntuacion = parseInt(puntuacionInput.value); const comentario = modal.querySelector('#modalResenaComentario').value.trim();
+        if (!puntuacion || puntuacion < 1 || puntuacion > 5) { mostrarToast('Selecciona una calificación de 1 a 5 estrellas', 'error'); return; }
         const exito = await enviarResena(profesionalId, puntuacion, comentario);
-        if (exito) {
-            modal.remove();
-            await cargarProfesionales();
-        }
+        if (exito) { modal.remove(); await cargarProfesionales(); }
     };
 };
 
@@ -2146,35 +1906,17 @@ document.getElementById('btnCompartir').onclick = abrirCompartir;
 document.getElementById('btnCloseCompartirModal').onclick = () => document.getElementById('modalCompartir').style.display = 'none';
 document.getElementById('btnCloseGestionServicios').onclick = () => document.getElementById('modalGestionServicios').style.display = 'none';
 document.getElementById('btnCloseFormServicio').onclick = () => document.getElementById('modalFormServicio').style.display = 'none';
-document.getElementById('btnPublicar').onclick = () => { 
-    if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); document.getElementById('modalLogin').style.display = 'flex'; return; }
-    document.getElementById('modalPublicar').style.display = 'flex';
-    setTimeout(() => iniciarMapaUbicacion(), 300);
-    cargarProvincias();
-    document.getElementById('pubProvincia').value = '';
-    document.getElementById('pubMunicipio').innerHTML = '<option value="">Primero selecciona provincia</option>';
-    document.getElementById('pubMunicipio').disabled = true;
-};
-
+document.getElementById('btnPublicar').onclick = () => { if (!currentUser) { mostrarToast('Inicia sesión primero', 'error'); document.getElementById('modalLogin').style.display = 'flex'; return; } document.getElementById('modalPublicar').style.display = 'flex'; setTimeout(() => iniciarMapaUbicacion(), 300); cargarProvincias(); document.getElementById('pubProvincia').value = ''; document.getElementById('pubMunicipio').innerHTML = '<option value="">Primero selecciona provincia</option>'; document.getElementById('pubMunicipio').disabled = true; };
 document.getElementById('forgotPasswordLink').onclick = (e) => { e.preventDefault(); document.getElementById('modalLogin').style.display = 'none'; document.getElementById('modalRecuperar').style.display = 'flex'; };
 document.getElementById('btnRecuperarSubmit').onclick = enviarRecuperacion;
 document.getElementById('btnCloseRecuperar').onclick = () => document.getElementById('modalRecuperar').style.display = 'none';
-
 document.getElementById('shareWhatsApp').onclick = () => { const url = window.location.href; window.open(`https://wa.me/?text=${encodeURIComponent('¡Conoce Factor Cuba! ' + url)}`, '_blank'); };
 document.getElementById('shareTelegram').onclick = () => { const url = window.location.href; window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('¡Conoce Factor Cuba!')}`, '_blank'); };
 document.getElementById('shareFacebook').onclick = () => { const url = window.location.href; window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank'); };
 document.getElementById('copyLinkBtn').onclick = () => { navigator.clipboard.writeText(window.location.href); mostrarToast('✅ Enlace copiado', 'success'); };
-
-document.getElementById('pubProvincia').onchange = function() { 
-    actualizarMunicipios('pubProvincia', 'pubMunicipio'); 
-    document.getElementById('pubMunicipio').innerHTML = '<option value="">Primero selecciona provincia</option>';
-    document.getElementById('pubMunicipio').disabled = true;
-};
+document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); document.getElementById('pubMunicipio').innerHTML = '<option value="">Primero selecciona provincia</option>'; document.getElementById('pubMunicipio').disabled = true; };
 document.getElementById('editProvincia').onchange = function() { actualizarMunicipios('editProvincia', 'editMunicipio'); };
-document.getElementById('provinciaFilter').onchange = function() { 
-    actualizarMunicipios('provinciaFilter', 'municipioFilter'); 
-    cargarProfesionales(); 
-};
+document.getElementById('provinciaFilter').onchange = function() { actualizarMunicipios('provinciaFilter', 'municipioFilter'); cargarProfesionales(); };
 document.getElementById('municipioFilter').onchange = cargarProfesionales;
 document.getElementById('btnGuardarServicio').onclick = publicarServicio;
 document.getElementById('btnClosePublicar').onclick = () => document.getElementById('modalPublicar').style.display = 'none';
@@ -2186,18 +1928,12 @@ document.getElementById('btnLoginSubmit').onclick = manejarAuth;
 document.getElementById('btnBuscar').onclick = cargarProfesionales;
 document.getElementById('searchInput').onkeyup = (e) => { if(e.key === 'Enter') cargarProfesionales(); };
 document.getElementById('categoriaFilter').onchange = cargarProfesionales;
-
 document.querySelectorAll('.popular-tab').forEach(tab => { tab.onclick = () => { document.querySelectorAll('.popular-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const tabName = tab.dataset.tab; document.getElementById('popularServicios').style.display = tabName === 'servicios' ? 'grid' : 'none'; document.getElementById('popularProfesionales').style.display = tabName === 'profesionales' ? 'grid' : 'none'; }; });
-
 document.getElementById('switchAuthMode').onclick = (e) => { e.preventDefault(); if (loginMode === 'login') { loginMode = 'register'; document.getElementById('modalLoginTitle').innerHTML = 'Crear Cuenta'; document.getElementById('btnLoginSubmit').innerHTML = 'Registrarse'; document.getElementById('switchAuthMode').innerHTML = '¿Ya tienes cuenta? Inicia sesión'; document.getElementById('modalLogin').style.display = 'none'; document.getElementById('modalRegistro').style.display = 'flex'; } else { loginMode = 'login'; document.getElementById('modalLoginTitle').innerHTML = 'Iniciar Sesión'; document.getElementById('btnLoginSubmit').innerHTML = 'Ingresar'; document.getElementById('switchAuthMode').innerHTML = '¿No tienes cuenta? Regístrate'; document.getElementById('modalRegistro').style.display = 'none'; document.getElementById('modalLogin').style.display = 'flex'; } };
-
 window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 verificarRecuperacion();
 
-// Restaurar sesión admin al recargar
-if (sessionStorage.getItem('adminAutenticado') === 'true') {
-    adminAuthenticated = true;
-}
+if (sessionStorage.getItem('adminAutenticado') === 'true') { adminAuthenticated = true; }
 
 async function init() { 
     cargarProvincias();
