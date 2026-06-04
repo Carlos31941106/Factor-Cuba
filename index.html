@@ -1436,6 +1436,7 @@ async function publicarServicio() {
         const { error } = await supabase.from('oferentes').insert([{ 
             nombre, categoria, provincia, municipio, telefono, descripcion, foto: fotoUrl, 
             especialidad: categoriaTexto, estado: 'pendiente', 
+             email: currentUser.email,
             latitud: latitud ? parseFloat(latitud) : null, 
             longitud: longitud ? parseFloat(longitud) : null,
             user_id: currentUser?.id, 
