@@ -1467,10 +1467,17 @@ function actualizarUI() {
         userInfo.style.display = 'flex';
         userName.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email.split('@')[0]}`;
         btnLogin.style.display = 'none';
-        btnPublicar.style.display = 'inline-block';
         btnLogout.style.display = 'inline-block';
         btnAdmin.style.display = currentUser.email === ADMIN_EMAIL ? 'inline-block' : 'none';
         
+        // 🔧 CORRECCIÓN: Solo profesionales ven botón "Publicar"
+        if (currentUserTipo === 'profesional') {
+            btnPublicar.style.display = 'inline-block';
+        } else {
+            btnPublicar.style.display = 'none';
+        }
+        
+        // Botón "Mi Panel" para profesionales
         if (currentUserTipo === 'profesional') {
             if (!document.getElementById('btnPanelProfesional')) {
                 const btnPanel = document.createElement('button');
