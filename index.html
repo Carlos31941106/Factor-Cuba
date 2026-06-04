@@ -1882,10 +1882,10 @@ async function cargarAdminLista(tipo) {
     }
     
     // ==================== PESTAÑA: ESTADÍSTICAS POR PROFESIONAL ====================
- if (tipo === 'estadisticas') {
+if (tipo === 'estadisticas') {
     console.log('=== CARGANDO ESTADÍSTICAS ===');
     
-    // 1. Obtener profesionales con email incluido
+    // 1. Obtener profesionales
     const { data: profesionales, error } = await supabase
         .from('oferentes')
         .select('id, nombre, telefono, email, created_at')
@@ -1897,8 +1897,6 @@ async function cargarAdminLista(tipo) {
         return;
     }
     
-    console.log('Profesionales encontrados:', profesionales?.length);
-    
     if (!profesionales || profesionales.length === 0) {
         listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay profesionales registrados</div>';
         return;
@@ -1908,8 +1906,6 @@ async function cargarAdminLista(tipo) {
     const { data: todosContactos } = await supabase
         .from('contactos')
         .select('profesional_id, estado');
-    
-    console.log('Contactos en BD:', todosContactos?.length || 0);
     
     const contactosMap = {};
     if (todosContactos) {
@@ -1923,14 +1919,12 @@ async function cargarAdminLista(tipo) {
         });
     }
     
-    // 3. Obtener estadísticas de visitas
+    // 3. Obtener estadísticas
     const profesionalIds = profesionales.map(p => p.id);
     const { data: estadisticas } = await supabase
         .from('estadisticas_profesional')
         .select('*')
         .in('profesional_id', profesionalIds);
-    
-    console.log('Estadísticas encontradas:', estadisticas?.length || 0);
     
     const statsMap = {};
     if (estadisticas) {
@@ -1939,7 +1933,7 @@ async function cargarAdminLista(tipo) {
         });
     }
     
-    // 4. Calcular totales globales
+    // 4. Calcular totales
     let totalVisitas = 0, totalContactos = 0, totalPendientes = 0, totalPagados = 0;
     profesionales.forEach(p => {
         const stats = statsMap[p.id] || { visitas: 0, contactos: 0 };
@@ -1948,15 +1942,11 @@ async function cargarAdminLista(tipo) {
         totalContactos += contactos.total;
         totalPendientes += contactos.pendientes;
         totalPagados += contactos.pagados;
-        
-        // Diagnóstico
-        console.log(`📊 ${p.nombre}: visitas=${stats.visitas}, contactos=${contactos.total}, pendientes=${contactos.pendientes}, email=${p.email}`);
     });
-    
     const tasaGlobal = totalVisitas > 0 ? ((totalContactos / totalVisitas) * 100).toFixed(1) : 0;
     const ingresoPotencial = totalPendientes * 3;
     
-    // 5. Generar HTML de la tabla
+    // 5. GENERAR HTML - Versión corregida
     let html = `
         <div style="background:var(--primary-light); padding:16px; border-radius:var(--radius-lg); margin-bottom:20px;">
             <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:16px; text-align:center;">
@@ -1974,19 +1964,19 @@ async function cargarAdminLista(tipo) {
             <button class="btn btn-success" id="exportarEstadisticasBtn" style="background:#10b981;"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
         </div>
         <div style="overflow-x: auto; max-width: 100%;">
-            <table class="contactos-table" style="min-width: 1200px; white-space: nowrap;">
+            <table class="contactos-table" style="min-width: 1200px; width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th style="min-width: 180px;">Profesional</th>
-                        <th style="min-width: 200px;">Email</th>
-                        <th style="min-width: 120px;">Teléfono</th>
-                        <th style="min-width: 80px; text-align:center;">Visitas</th>
-                        <th style="min-width: 80px; text-align:center;">Contactos</th>
-                        <th style="min-width: 100px; text-align:center;">Pendientes</th>
-                        <th style="min-width: 90px; text-align:center;">Pagados</th>
-                        <th style="min-width: 80px; text-align:center;">Ingreso</th>
-                        <th style="min-width: 100px; text-align:center;">Tasa Conv.</th>
-                        <th style="min-width: 100px; text-align:center;">Fecha Reg.</th>
+                    <tr style="background: var(--primary-light);">
+                        <th style="padding: 12px; text-align: left; min-width: 180px;">Profesional</th>
+                        <th style="padding: 12px; text-align: left; min-width: 200px;">Email</th>
+                        <th style="padding: 12px; text-align: left; min-width: 120px;">Teléfono</th>
+                        <th style="padding: 12px; text-align: center; min-width: 80px;">Visitas</th>
+                        <th style="padding: 12px; text-align: center; min-width: 80px;">Contactos</th>
+                        <th style="padding: 12px; text-align: center; min-width: 100px;">Pendientes</th>
+                        <th style="padding: 12px; text-align: center; min-width: 90px;">Pagados</th>
+                        <th style="padding: 12px; text-align: center; min-width: 80px;">Ingreso</th>
+                        <th style="padding: 12px; text-align: center; min-width: 100px;">Tasa Conv.</th>
+                        <th style="padding: 12px; text-align: center; min-width: 100px;">Fecha Reg.</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1996,7 +1986,6 @@ async function cargarAdminLista(tipo) {
         const stats = statsMap[p.id] || { visitas: 0, contactos: 0 };
         const contactos = contactosMap[p.id] || { total: 0, pendientes: 0, pagados: 0 };
         
-        // Calcular tasa de conversión individual
         let tasa = "0.0";
         if (stats.visitas > 0) {
             tasa = ((contactos.total / stats.visitas) * 100).toFixed(1);
@@ -2009,26 +1998,26 @@ async function cargarAdminLista(tipo) {
         const emailMostrar = p.email && p.email !== '' ? p.email : 'No registrado';
         
         html += `
-            <tr>
-                <td style="min-width: 180px;"><strong>${escapeHtml(p.nombre)}</strong></td>
-                <td style="min-width: 200px;">${escapeHtml(emailMostrar)}</td
-                <td style="min-width: 120px;">${escapeHtml(p.telefono || 'N/A')}</td
-                <td style="min-width: 80px; text-align:center; font-weight:600;">${stats.visitas || 0}</td
-                <td style="min-width: 80px; text-align:center; font-weight:600;">${contactos.total || 0}</td
-                <td style="min-width: 100px; text-align:center; color:#f59e0b; font-weight:600;">${contactos.pendientes || 0}</td
-                <td style="min-width: 90px; text-align:center; color:#10b981; font-weight:600;">${contactos.pagados || 0}</td
-                <td style="min-width: 80px; text-align:center; font-weight:600;">$${ingreso}</td
-                <td style="min-width: 100px; text-align:center; font-weight:600;">${tasa}%</td
-                <td style="min-width: 100px; text-align:center;">${fechaRegistro}</td
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 12px;"><strong>${escapeHtml(p.nombre)}</strong></td>
+                <td style="padding: 12px;">${escapeHtml(emailMostrar)}</td>
+                <td style="padding: 12px;">${escapeHtml(p.telefono || 'N/A')}</td>
+                <td style="padding: 12px; text-align: center; font-weight: 600;">${stats.visitas || 0}</td>
+                <td style="padding: 12px; text-align: center; font-weight: 600;">${contactos.total || 0}</td>
+                <td style="padding: 12px; text-align: center; color: #f59e0b; font-weight: 600;">${contactos.pendientes || 0}</td>
+                <td style="padding: 12px; text-align: center; color: #10b981; font-weight: 600;">${contactos.pagados || 0}</td>
+                <td style="padding: 12px; text-align: center; font-weight: 600;">$${ingreso}</td>
+                <td style="padding: 12px; text-align: center; font-weight: 600;">${tasa}%</td>
+                <td style="padding: 12px; text-align: center;">${fechaRegistro}</td>
             </tr>
         `;
     }
     
     html += `
-                    </tbody>
-                </table>
-            </div>
-        `;
+                </tbody>
+            </table>
+        </div>
+    `;
     
     listaDiv.innerHTML = html;
     
