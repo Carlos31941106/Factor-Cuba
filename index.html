@@ -2040,7 +2040,31 @@ if (tipo === 'estadisticas') {
 // Funciones auxiliares de admin
 window.marcarContactoPagado = async function(contactoId) {
     if (!confirm('¿Marcar este contacto como pagado?')) return;
-    try { await supabase.from('contactos').update({ estado: 'pagado' }).eq('id', contactoId); mostrarToast('✅ Contacto marcado como pagado', 'success'); cargarAdminLista('contactos'); } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
+    
+    try {
+        // Actualizar el estado en la base de datos
+        const { error } = await supabase
+            .from('contactos')
+            .update({ estado: 'pagado' })
+            .eq('id', contactoId);
+        
+        if (error) throw error;
+        
+        mostrarToast('✅ Contacto marcado como pagado', 'success');
+        
+        // Recargar la lista de contactos (con await para asegurar que termine)
+        await cargarAdminLista('contactos');
+        
+        // Recargar estadísticas por profesional
+        await cargarAdminLista('estadisticas');
+        
+        // Recargar el panel admin para actualizar KPIs
+        await cargarAdminPanel();
+        
+    } catch (err) {
+        console.error('Error:', err);
+        mostrarToast('Error: ' + err.message, 'error');
+    }
 };
 
 window.eliminarServicioAdmin = async function(id) {
