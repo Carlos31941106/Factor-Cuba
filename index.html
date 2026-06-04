@@ -1140,11 +1140,10 @@ window.verPerfil = async function(servicioId) {
     if (!servicio) return;
     
     const { data: serviciosAdicionales } = await supabase
-        .from('servicios')
-        .select('*')
-        .eq('profesional_id', servicioId)
-        .eq('estado', 'activo')
-        .order('created_at', { ascending: false });
+    .from('servicios')
+    .select('*')
+    .eq('profesional_id', servicioId)
+    .order('created_at', { ascending: false });
     
     let calificaciones = '';
     const { data: reseñas } = await supabase.from('calificaciones').select('*').eq('servicio_id', servicioId);
