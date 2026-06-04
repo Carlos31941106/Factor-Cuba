@@ -1881,11 +1881,11 @@ async function cargarAdminLista(tipo) {
         return;
     }
     
-    // ==================== NUEVA PESTAÑA: ESTADÍSTICAS POR PROFESIONAL ====================
+    // ==================== PESTAÑA: ESTADÍSTICAS POR PROFESIONAL ====================
     if (tipo === 'estadisticas') {
         const { data: profesionales, error } = await supabase
             .from('oferentes')
-            .select('id, nombre, telefono, email, created_at')
+            .select('id, nombre, telefono, created_at')
             .eq('estado', 'aprobado')
             .order('nombre', { ascending: true });
         
@@ -1897,6 +1897,22 @@ async function cargarAdminLista(tipo) {
         if (!profesionales || profesionales.length === 0) {
             listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay profesionales registrados</div>';
             return;
+        }
+        
+        const { data: todosContactos } = await supabase
+            .from('contactos')
+            .select('profesional_id, estado');
+        
+        const contactosMap = {};
+        if (todosContactos) {
+            todosContactos.forEach(c => {
+                if (!contactosMap[c.profesional_id]) {
+                    contactosMap[c.profesional_id] = { total: 0, pendientes: 0, pagados: 0 };
+                }
+                contactosMap[c.profesional_id].total++;
+                if (c.estado === 'pendiente') contactosMap[c.profesional_id].pendientes++;
+                if (c.estado === 'pagado') contactosMap[c.profesional_id].pagados++;
+            });
         }
         
         const profesionalIds = profesionales.map(p => p.id);
@@ -1912,20 +1928,26 @@ async function cargarAdminLista(tipo) {
             });
         }
         
-        let totalVisitas = 0, totalContactos = 0;
+        let totalVisitas = 0, totalContactos = 0, totalPendientes = 0, totalPagados = 0;
         profesionales.forEach(p => {
             const stats = statsMap[p.id] || { visitas: 0, contactos: 0 };
+            const contactos = contactosMap[p.id] || { total: 0, pendientes: 0, pagados: 0 };
             totalVisitas += stats.visitas || 0;
-            totalContactos += stats.contactos || 0;
+            totalContactos += contactos.total;
+            totalPendientes += contactos.pendientes;
+            totalPagados += contactos.pagados;
         });
         const tasaGlobal = totalVisitas > 0 ? ((totalContactos / totalVisitas) * 100).toFixed(1) : 0;
+        const ingresoPotencial = totalPendientes * 3;
         
         let html = `
             <div style="background:var(--primary-light); padding:16px; border-radius:var(--radius-lg); margin-bottom:20px;">
-                <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; text-align:center;">
+                <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:16px; text-align:center;">
                     <div><strong style="font-size:24px;">${profesionales.length}</strong><br>Profesionales</div>
                     <div><strong style="font-size:24px; color:#2c5f8a;">${totalVisitas}</strong><br>Total Visitas</div>
                     <div><strong style="font-size:24px; color:#10b981;">${totalContactos}</strong><br>Total Contactos</div>
+                    <div><strong style="font-size:24px; color:#f59e0b;">${totalPendientes}</strong><br>Pendientes</div>
+                    <div><strong style="font-size:24px; color:#8b5cf6;">$${ingresoPotencial}</strong><br>Ingreso Potencial</div>
                 </div>
                 <div style="text-align:center; margin-top:10px;">
                     <strong>Tasa de Conversión Global:</strong> ${tasaGlobal}%
@@ -1940,11 +1962,13 @@ async function cargarAdminLista(tipo) {
                         <tr>
                             <th>Profesional</th>
                             <th>Teléfono</th>
-                            <th>Email</th>
                             <th>Visitas</th>
                             <th>Contactos</th>
+                            <th>Pendientes</th>
+                            <th>Pagados</th>
+                            <th>Ingreso</th>
                             <th>Tasa Conv.</th>
-                            <th>Fecha Registro</th>
+                            <th>Fecha Reg.</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1952,16 +1976,20 @@ async function cargarAdminLista(tipo) {
         
         for (const p of profesionales) {
             const stats = statsMap[p.id] || { visitas: 0, contactos: 0 };
-            const tasa = stats.visitas > 0 ? ((stats.contactos / stats.visitas) * 100).toFixed(1) : 0;
+            const contactos = contactosMap[p.id] || { total: 0, pendientes: 0, pagados: 0 };
+            const tasa = stats.visitas > 0 ? ((contactos.total / stats.visitas) * 100).toFixed(1) : 0;
+            const ingreso = contactos.pendientes * 3;
             const fechaRegistro = p.created_at ? new Date(p.created_at).toLocaleDateString() : 'N/A';
             
             html += `
                 <tr>
                     <td><strong>${escapeHtml(p.nombre)}</strong></td>
                     <td>${escapeHtml(p.telefono || 'N/A')}</td>
-                    <td>${escapeHtml(p.email || 'N/A')}</td>
                     <td style="text-align:center; font-weight:600;">${stats.visitas || 0}</td>
-                    <td style="text-align:center; font-weight:600;">${stats.contactos || 0}</td>
+                    <td style="text-align:center; font-weight:600;">${contactos.total}</td>
+                    <td style="text-align:center; color:#f59e0b; font-weight:600;">${contactos.pendientes}</td>
+                    <td style="text-align:center; color:#10b981; font-weight:600;">${contactos.pagados}</td>
+                    <td style="text-align:center; font-weight:600;">$${ingreso}</td
                     <td style="text-align:center;">${tasa}%</td
                     <td>${fechaRegistro}</td
                 </tr>
@@ -1977,12 +2005,13 @@ async function cargarAdminLista(tipo) {
         listaDiv.innerHTML = html;
         
         document.getElementById('exportarEstadisticasBtn')?.addEventListener('click', () => {
-            exportarEstadisticasExcel(profesionales, statsMap);
+            exportarEstadisticasExcel(profesionales, statsMap, contactosMap);
         });
         
         return;
     }
     
+    // ==================== SERVICIOS PENDIENTES, APROBADOS, TODOS ====================
     let query = supabase.from('oferentes').select('*');
     if (tipo === 'pendiente') query = query.eq('estado', 'pendiente');
     else if (tipo === 'aprobado') query = query.eq('estado', 'aprobado');
