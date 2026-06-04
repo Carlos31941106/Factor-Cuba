@@ -1882,134 +1882,142 @@ async function cargarAdminLista(tipo) {
     }
     
     // ==================== PESTAÑA: ESTADÍSTICAS POR PROFESIONAL ====================
-    if (tipo === 'estadisticas') {
-        const { data: profesionales, error } = await supabase
-            .from('oferentes')
-            .select('id, nombre, telefono, created_at')
-            .eq('estado', 'aprobado')
-            .order('nombre', { ascending: true });
-        
-        if (error) {
-            listaDiv.innerHTML = `<div style="text-align:center;padding:40px;color:red;">❌ Error: ${error.message}</div>`;
-            return;
-        }
-        
-        if (!profesionales || profesionales.length === 0) {
-            listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay profesionales registrados</div>';
-            return;
-        }
-        
-        const { data: todosContactos } = await supabase
-            .from('contactos')
-            .select('profesional_id, estado');
-        
-        const contactosMap = {};
-        if (todosContactos) {
-            todosContactos.forEach(c => {
-                if (!contactosMap[c.profesional_id]) {
-                    contactosMap[c.profesional_id] = { total: 0, pendientes: 0, pagados: 0 };
-                }
-                contactosMap[c.profesional_id].total++;
-                if (c.estado === 'pendiente') contactosMap[c.profesional_id].pendientes++;
-                if (c.estado === 'pagado') contactosMap[c.profesional_id].pagados++;
-            });
-        }
-        
-        const profesionalIds = profesionales.map(p => p.id);
-        const { data: estadisticas } = await supabase
-            .from('estadisticas_profesional')
-            .select('*')
-            .in('profesional_id', profesionalIds);
-        
-        const statsMap = {};
-        if (estadisticas) {
-            estadisticas.forEach(s => {
-                statsMap[s.profesional_id] = s;
-            });
-        }
-        
-        let totalVisitas = 0, totalContactos = 0, totalPendientes = 0, totalPagados = 0;
-        profesionales.forEach(p => {
-            const stats = statsMap[p.id] || { visitas: 0, contactos: 0 };
-            const contactos = contactosMap[p.id] || { total: 0, pendientes: 0, pagados: 0 };
-            totalVisitas += stats.visitas || 0;
-            totalContactos += contactos.total;
-            totalPendientes += contactos.pendientes;
-            totalPagados += contactos.pagados;
+   if (tipo === 'estadisticas') {
+    // 1. Obtener profesionales con email incluido
+    const { data: profesionales, error } = await supabase
+        .from('oferentes')
+        .select('id, nombre, telefono, email, created_at')
+        .eq('estado', 'aprobado')
+        .order('nombre', { ascending: true });
+    
+    if (error) {
+        listaDiv.innerHTML = `<div style="text-align:center;padding:40px;color:red;">❌ Error: ${error.message}</div>`;
+        return;
+    }
+    
+    if (!profesionales || profesionales.length === 0) {
+        listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay profesionales registrados</div>';
+        return;
+    }
+    
+    // 2. Obtener contactos
+    const { data: todosContactos } = await supabase
+        .from('contactos')
+        .select('profesional_id, estado');
+    
+    const contactosMap = {};
+    if (todosContactos) {
+        todosContactos.forEach(c => {
+            if (!contactosMap[c.profesional_id]) {
+                contactosMap[c.profesional_id] = { total: 0, pendientes: 0, pagados: 0 };
+            }
+            contactosMap[c.profesional_id].total++;
+            if (c.estado === 'pendiente') contactosMap[c.profesional_id].pendientes++;
+            if (c.estado === 'pagado') contactosMap[c.profesional_id].pagados++;
         });
-        const tasaGlobal = totalVisitas > 0 ? ((totalContactos / totalVisitas) * 100).toFixed(1) : 0;
-        const ingresoPotencial = totalPendientes * 3;
-        
-        let html = `
-            <div style="background:var(--primary-light); padding:16px; border-radius:var(--radius-lg); margin-bottom:20px;">
-                <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:16px; text-align:center;">
-                    <div><strong style="font-size:24px;">${profesionales.length}</strong><br>Profesionales</div>
-                    <div><strong style="font-size:24px; color:#2c5f8a;">${totalVisitas}</strong><br>Total Visitas</div>
-                    <div><strong style="font-size:24px; color:#10b981;">${totalContactos}</strong><br>Total Contactos</div>
-                    <div><strong style="font-size:24px; color:#f59e0b;">${totalPendientes}</strong><br>Pendientes</div>
-                    <div><strong style="font-size:24px; color:#8b5cf6;">$${ingresoPotencial}</strong><br>Ingreso Potencial</div>
-                </div>
-                <div style="text-align:center; margin-top:10px;">
-                    <strong>Tasa de Conversión Global:</strong> ${tasaGlobal}%
-                </div>
+    }
+    
+    // 3. Obtener estadísticas de visitas
+    const profesionalIds = profesionales.map(p => p.id);
+    const { data: estadisticas } = await supabase
+        .from('estadisticas_profesional')
+        .select('*')
+        .in('profesional_id', profesionalIds);
+    
+    const statsMap = {};
+    if (estadisticas) {
+        estadisticas.forEach(s => {
+            statsMap[s.profesional_id] = s;
+        });
+    }
+    
+    // 4. Calcular totales globales
+    let totalVisitas = 0, totalContactos = 0, totalPendientes = 0, totalPagados = 0;
+    profesionales.forEach(p => {
+        const stats = statsMap[p.id] || { visitas: 0, contactos: 0 };
+        const contactos = contactosMap[p.id] || { total: 0, pendientes: 0, pagados: 0 };
+        totalVisitas += stats.visitas || 0;
+        totalContactos += contactos.total;
+        totalPendientes += contactos.pendientes;
+        totalPagados += contactos.pagados;
+    });
+    const tasaGlobal = totalVisitas > 0 ? ((totalContactos / totalVisitas) * 100).toFixed(1) : 0;
+    const ingresoPotencial = totalPendientes * 3;
+    
+    // 5. Generar HTML
+    let html = `
+        <div style="background:var(--primary-light); padding:16px; border-radius:var(--radius-lg); margin-bottom:20px;">
+            <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:16px; text-align:center;">
+                <div><strong style="font-size:24px;">${profesionales.length}</strong><br>Profesionales</div>
+                <div><strong style="font-size:24px; color:#2c5f8a;">${totalVisitas}</strong><br>Total Visitas</div>
+                <div><strong style="font-size:24px; color:#10b981;">${totalContactos}</strong><br>Total Contactos</div>
+                <div><strong style="font-size:24px; color:#f59e0b;">${totalPendientes}</strong><br>Pendientes</div>
+                <div><strong style="font-size:24px; color:#8b5cf6;">$${ingresoPotencial}</strong><br>Ingreso Potencial</div>
             </div>
-            <div style="margin-bottom:15px; text-align:right;">
-                <button class="btn btn-success" id="exportarEstadisticasBtn" style="background:#10b981;"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
+            <div style="text-align:center; margin-top:10px;">
+                <strong>Tasa de Conversión Global:</strong> ${tasaGlobal}%
             </div>
-            <div style="overflow-x:auto;">
-                <table class="contactos-table">
-                    <thead>
-                        <tr>
-                            <th>Profesional</th>
-                            <th>Teléfono</th>
-                            <th>Visitas</th>
-                            <th>Contactos</th>
-                            <th>Pendientes</th>
-                            <th>Pagados</th>
-                            <th>Ingreso</th>
-                            <th>Tasa Conv.</th>
-                            <th>Fecha Reg.</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-        
-        for (const p of profesionales) {
-            const stats = statsMap[p.id] || { visitas: 0, contactos: 0 };
-            const contactos = contactosMap[p.id] || { total: 0, pendientes: 0, pagados: 0 };
-            const tasa = stats.visitas > 0 ? ((contactos.total / stats.visitas) * 100).toFixed(1) : 0;
-            const ingreso = contactos.pendientes * 3;
-            const fechaRegistro = p.created_at ? new Date(p.created_at).toLocaleDateString() : 'N/A';
-            
-            html += `
-                <tr>
-                    <td><strong>${escapeHtml(p.nombre)}</strong></td>
-                    <td>${escapeHtml(p.telefono || 'N/A')}</td>
-                    <td style="text-align:center; font-weight:600;">${stats.visitas || 0}</td>
-                    <td style="text-align:center; font-weight:600;">${contactos.total}</td>
-                    <td style="text-align:center; color:#f59e0b; font-weight:600;">${contactos.pendientes}</td>
-                    <td style="text-align:center; color:#10b981; font-weight:600;">${contactos.pagados}</td>
-                    <td style="text-align:center; font-weight:600;">$${ingreso}</td
-                    <td style="text-align:center;">${tasa}%</td
-                    <td>${fechaRegistro}</td
-                </tr>
-            `;
-        }
+        </div>
+        <div style="margin-bottom:15px; text-align:right;">
+            <button class="btn btn-success" id="exportarEstadisticasBtn" style="background:#10b981;"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
+        </div>
+        <div style="overflow-x:auto;">
+            <table class="contactos-table">
+                <thead>
+                    <tr>
+                        <th>Profesional</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Visitas</th>
+                        <th>Contactos</th>
+                        <th>Pendientes</th>
+                        <th>Pagados</th>
+                        <th>Ingreso</th>
+                        <th>Tasa Conv.</th>
+                        <th>Fecha Reg.</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    for (const p of profesionales) {
+        const stats = statsMap[p.id] || { visitas: 0, contactos: 0 };
+        const contactos = contactosMap[p.id] || { total: 0, pendientes: 0, pagados: 0 };
+        // TASA DE CONVERSIÓN INDIVIDUAL: (contactos totales ÷ visitas) × 100
+        const tasa = stats.visitas > 0 ? ((contactos.total / stats.visitas) * 100).toFixed(1) : 0;
+        const ingreso = contactos.pendientes * 3;
+        const fechaRegistro = p.created_at ? new Date(p.created_at).toLocaleDateString() : 'N/A';
         
         html += `
+            <tr>
+                <td><strong>${escapeHtml(p.nombre)}</strong></td>
+                <td>${escapeHtml(p.email || 'No registrado')}</td
+                <td>${escapeHtml(p.telefono || 'N/A')}</td
+                <td style="text-align:center; font-weight:600;">${stats.visitas || 0}</td
+                <td style="text-align:center; font-weight:600;">${contactos.total}</td
+                <td style="text-align:center; color:#f59e0b; font-weight:600;">${contactos.pendientes}</td
+                <td style="text-align:center; color:#10b981; font-weight:600;">${contactos.pagados}</td
+                <td style="text-align:center; font-weight:600;">$${ingreso}</td
+                <td style="text-align:center; font-weight:600;">${tasa}%</td
+                <td>${fechaRegistro}</td
+            </tr>
+        `;
+    }
+    
+    html += `
                     </tbody>
                 </table>
             </div>
         `;
-        
-        listaDiv.innerHTML = html;
-        
-        document.getElementById('exportarEstadisticasBtn')?.addEventListener('click', () => {
-            exportarEstadisticasExcel(profesionales, statsMap, contactosMap);
-        });
-        
-        return;
-    }
+    
+    listaDiv.innerHTML = html;
+    
+    document.getElementById('exportarEstadisticasBtn')?.addEventListener('click', () => {
+        exportarEstadisticasExcel(profesionales, statsMap, contactosMap);
+    });
+    
+    return;
+}
     
     // ==================== SERVICIOS PENDIENTES, APROBADOS, TODOS ====================
     let query = supabase.from('oferentes').select('*');
@@ -2197,7 +2205,36 @@ window.onclick = (e) => { if (e.target.classList.contains('modal')) e.target.sty
 verificarRecuperacion();
 
 if (sessionStorage.getItem('adminAutenticado') === 'true') { adminAuthenticated = true; }
+function exportarEstadisticasExcel(profesionales, statsMap, contactosMap) {
+    let csv = "Profesional,Email,Teléfono,Visitas,Contactos,Pendientes,Pagados,Ingreso Potencial,Tasa Conversión,Fecha Registro\n";
+    
+    for (const p of profesionales) {
+        const stats = statsMap[p.id] || { visitas: 0, contactos: 0 };
+        const contactos = contactosMap[p.id] || { total: 0, pendientes: 0, pagados: 0 };
+        const tasa = stats.visitas > 0 ? ((contactos.total / stats.visitas) * 100).toFixed(1) : 0;
+        const ingreso = contactos.pendientes * 3;
+        const fechaRegistro = p.created_at ? new Date(p.created_at).toLocaleDateString() : 'N/A';
+        
+        csv += `"${escapeCsv(p.nombre)}","${escapeCsv(p.email || 'No registrado')}","${escapeCsv(p.telefono || 'N/A')}",${stats.visitas || 0},${contactos.total},${contactos.pendientes},${contactos.pagados},$${ingreso},${tasa}%,"${fechaRegistro}"\n`;
+    }
+    
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute("download", `estadisticas_profesionales_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    mostrarToast('✅ Estadísticas exportadas a Excel', 'success');
+}
 
+function escapeCsv(text) {
+    if (!text) return '';
+    return String(text).replace(/"/g, '""');
+}
 async function init() { 
     cargarProvincias();
     document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
