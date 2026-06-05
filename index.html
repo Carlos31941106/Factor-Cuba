@@ -1242,7 +1242,7 @@ async function cargarProfesionales() {
         const provincia = document.getElementById('provinciaFilter').value;
         const municipio = document.getElementById('municipioFilter').value;
         
-        // NUEVOS FILTROS POR CATEGORÍA Y SUBCATEGORÍA
+                // NUEVOS FILTROS POR CATEGORÍA Y SUBCATEGORÍA
         const categoriaPrincipal = document.getElementById('categoriaPrincipalFilter').value;
         const subcategoria = document.getElementById('subcategoriaFilter').value;
         
@@ -1263,9 +1263,18 @@ async function cargarProfesionales() {
             if (subcatInfo) {
                 serviciosMostrar = serviciosMostrar.filter(s => 
                     s.categoria === subcatInfo.categoria_bd ||
-                    (s.especialidad && s.especialidad.toLowerCase().includes(subcategoria.toLowerCase()))
+                    (s.especialidad && s.especialidad.toLowerCase().includes(subcategoria.toLowerCase())) ||
+                    (s.categoria && s.categoria.toLowerCase().includes(subcategoria.toLowerCase()))
                 );
             }
+        }
+        else if (categoriaPrincipal && categoriasYSubcategorias[categoriaPrincipal]) {
+            const categoriasBD = [...new Set(categoriasYSubcategorias[categoriaPrincipal].subcategorias.map(s => s.categoria_bd))];
+            serviciosMostrar = serviciosMostrar.filter(s => 
+                categoriasBD.includes(s.categoria) ||
+                (s.especialidad && categoriasBD.some(cat => s.especialidad.toLowerCase().includes(cat)))
+            );
+        }
         }
         else if (categoriaPrincipal && categoriasYSubcategorias[categoriaPrincipal]) {
             const categoriasBD = [...new Set(categoriasYSubcategorias[categoriaPrincipal].subcategorias.map(s => s.categoria_bd))];
