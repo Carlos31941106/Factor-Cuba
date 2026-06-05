@@ -1267,7 +1267,7 @@ async function cargarProfesionales() {
                     (s.categoria && s.categoria.toLowerCase().includes(subcategoria.toLowerCase()))
                 );
             }
-        }
+               }
         else if (categoriaPrincipal && categoriasYSubcategorias[categoriaPrincipal]) {
             const categoriasBD = [...new Set(categoriasYSubcategorias[categoriaPrincipal].subcategorias.map(s => s.categoria_bd))];
             serviciosMostrar = serviciosMostrar.filter(s => 
@@ -1275,15 +1275,9 @@ async function cargarProfesionales() {
                 (s.especialidad && categoriasBD.some(cat => s.especialidad.toLowerCase().includes(cat)))
             );
         }
-        }
-        else if (categoriaPrincipal && categoriasYSubcategorias[categoriaPrincipal]) {
-            const categoriasBD = [...new Set(categoriasYSubcategorias[categoriaPrincipal].subcategorias.map(s => s.categoria_bd))];
-            serviciosMostrar = serviciosMostrar.filter(s => categoriasBD.includes(s.categoria));
-        }
         
         const container = document.getElementById('listaProfesionales');
         if (serviciosMostrar.length === 0) { container.innerHTML = '<div style="text-align:center;padding:60px;"><i class="fas fa-store-slash" style="font-size:48px;"></i><h3>No hay profesionales</h3></div>'; actualizarMapa(); return; }
-        
         container.innerHTML = serviciosMostrar.map(s => `
             <div class="professional-card">
                 <div class="card-header">
