@@ -2270,18 +2270,23 @@ if (subCat) {
 
 async function init() { 
     cargarProvincias();
+    
+    // Verificar que los elementos existan antes de asignar eventos
     const pubProvincia = document.getElementById('pubProvincia');
     if (pubProvincia) {
         pubProvincia.onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
     }
+    
     const editProvincia = document.getElementById('editProvincia');
     if (editProvincia) {
         editProvincia.onchange = function() { actualizarMunicipios('editProvincia', 'editMunicipio'); };
     }
+    
     const provinciaFilter = document.getElementById('provinciaFilter');
     if (provinciaFilter) {
         provinciaFilter.onchange = function() { actualizarMunicipios('provinciaFilter', 'municipioFilter'); cargarProfesionales(); };
     }
+    
     const { data: { session } } = await supabase.auth.getSession(); 
     currentUser = session?.user || null; 
     if (currentUser) await verificarTipoUsuario();
