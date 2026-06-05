@@ -2226,7 +2226,6 @@ document.getElementById('btnCloseEditarPerfil').onclick = () => document.getElem
 document.getElementById('btnLoginSubmit').onclick = manejarAuth;
 document.getElementById('btnBuscar').onclick = cargarProfesionales;
 document.getElementById('searchInput').onkeyup = (e) => { if(e.key === 'Enter') cargarProfesionales(); };
-document.getElementById('categoriaFilter').onchange = cargarProfesionales;
 
 document.querySelectorAll('.popular-tab').forEach(tab => { tab.onclick = () => { document.querySelectorAll('.popular-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const tabName = tab.dataset.tab; document.getElementById('popularServicios').style.display = tabName === 'servicios' ? 'grid' : 'none'; document.getElementById('popularProfesionales').style.display = tabName === 'profesionales' ? 'grid' : 'none'; }; });
 
