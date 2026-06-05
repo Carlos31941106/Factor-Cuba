@@ -515,27 +515,37 @@
     
     <div class="map-container"><div id="mapa"></div></div>
     
-    <div class="filters">
-        <i class="fas fa-search" style="align-self: center; color: var(--primary);"></i>
-        <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, oficio o zona...">
-        <select id="provinciaFilter">
-            <option value="">Todas las provincias</option>
-        </select>
-        <select id="municipioFilter">
-            <option value="">Todos los municipios</option>
-        </select>
-        <select id="categoriaFilter">
-            <option value="">Todas las categorías</option>
-            <option value="carpinteria">Carpintería</option>
-            <option value="construccion">Construcción</option>
-            <option value="electricidad">Electricidad</option>
-            <option value="soldadura">Soldadura</option>
-            <option value="reparaciones">Reparaciones</option>
-            <option value="transporte">Transporte</option>
-            <option value="otros">Otros Servicios</option>
-        </select>
-        <button class="btn btn-primary" id="btnBuscar"><i class="fas fa-search"></i> Buscar</button>
-    </div>
+   <div class="filters">
+    <i class="fas fa-search" style="align-self: center; color: var(--primary);"></i>
+    <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, oficio o servicio...">
+    
+    <select id="provinciaFilter">
+        <option value="">Todas las provincias</option>
+    </select>
+    
+    <select id="municipioFilter">
+        <option value="">Todos los municipios</option>
+    </select>
+    
+    <!-- NUEVO: Selector de categoría principal -->
+    <select id="categoriaPrincipalFilter">
+        <option value="">Todas las categorías</option>
+        <option value="gastronomia">🍽️ Gastronomía</option>
+        <option value="oficios">🛠️ Oficios</option>
+        <option value="transporte">🚗 Transporte</option>
+        <option value="digitales">💻 Servicios Digitales</option>
+        <option value="alojamiento">🏠 Alojamiento</option>
+        <option value="artesania">🎨 Artesanía</option>
+        <option value="belleza">💈 Belleza y Salud</option>
+    </select>
+    
+    <!-- NUEVO: Selector de subcategoría (oculto inicialmente) -->
+    <select id="subcategoriaFilter" style="display: none;">
+        <option value="">Todas las subcategorías</option>
+    </select>
+    
+    <button class="btn btn-primary" id="btnBuscar"><i class="fas fa-search"></i> Buscar</button>
+</div>
     
     <div class="section-title"><i class="fas fa-users"></i> Profesionales Destacados</div>
     <div class="professionals-grid" id="listaProfesionales"><div style="text-align: center; padding: 60px;"><i class="fas fa-spinner fa-pulse" style="font-size: 48px; color: var(--primary);"></i><p>Cargando...</p></div></div>
@@ -699,6 +709,70 @@ let mapaUbicacionInstance = null;
 let marcadorUbicacion = null;
 let editMapaInstance = null;
 let editMarcador = null;
+// ==================== CATEGORÍAS Y SUBCATEGORÍAS ====================
+const categoriasYSubcategorias = {
+    gastronomia: {
+        nombre: '🍽️ Gastronomía',
+        subcategorias: [
+            { valor: 'comida_criolla', nombre: '🍛 Comida Criolla', categoria_bd: 'carpinteria' },
+            { valor: 'reposteria', nombre: '🎂 Repostería', categoria_bd: 'carpinteria' },
+            { valor: 'delivery', nombre: '📦 Delivery', categoria_bd: 'carpinteria' },
+            { valor: 'catering', nombre: '🍽️ Catering', categoria_bd: 'carpinteria' }
+        ]
+    },
+    oficios: {
+        nombre: '🛠️ Oficios',
+        subcategorias: [
+            { valor: 'electricista', nombre: '⚡ Electricista', categoria_bd: 'electricidad' },
+            { valor: 'fontanero', nombre: '🔧 Fontanero', categoria_bd: 'carpinteria' },
+            { valor: 'carpintero', nombre: '🔨 Carpintero', categoria_bd: 'carpinteria' },
+            { valor: 'albanil', nombre: '🧱 Albañil', categoria_bd: 'construccion' },
+            { valor: 'soldador', nombre: '🔥 Soldador', categoria_bd: 'soldadura' },
+            { valor: 'aire_acondicionado', nombre: '❄️ Aire Acondicionado', categoria_bd: 'reparaciones' },
+            { valor: 'mecanico', nombre: '🚗 Mecánico', categoria_bd: 'transporte' },
+            { valor: 'reparacion_celulares', nombre: '📱 Reparación Celulares', categoria_bd: 'reparaciones' }
+        ]
+    },
+    transporte: {
+        nombre: '🚗 Transporte',
+        subcategorias: [
+            { valor: 'taxi', nombre: '🚖 Taxi', categoria_bd: 'transporte' },
+            { valor: 'carga', nombre: '📦 Carga', categoria_bd: 'transporte' }
+        ]
+    },
+    digitales: {
+        nombre: '💻 Servicios Digitales',
+        subcategorias: [
+            { valor: 'programador', nombre: '💻 Programador', categoria_bd: 'otros' },
+            { valor: 'disenador', nombre: '🎨 Diseñador Gráfico', categoria_bd: 'otros' },
+            { valor: 'fotografo', nombre: '📷 Fotógrafo', categoria_bd: 'otros' },
+            { valor: 'community_manager', nombre: '📱 Community Manager', categoria_bd: 'otros' }
+        ]
+    },
+    alojamiento: {
+        nombre: '🏠 Alojamiento',
+        subcategorias: [
+            { valor: 'casa_completa', nombre: '🏠 Casa completa', categoria_bd: 'otros' },
+            { valor: 'habitacion', nombre: '🛌 Habitación', categoria_bd: 'otros' }
+        ]
+    },
+    artesania: {
+        nombre: '🎨 Artesanía',
+        subcategorias: [
+            { valor: 'madera', nombre: '🪵 Madera', categoria_bd: 'carpinteria' },
+            { valor: 'joyeria', nombre: '📿 Joyería', categoria_bd: 'otros' },
+            { valor: 'textiles', nombre: '🧵 Textiles', categoria_bd: 'otros' }
+        ]
+    },
+    belleza: {
+        nombre: '💈 Belleza y Salud',
+        subcategorias: [
+            { valor: 'peluqueria', nombre: '✂️ Peluquería', categoria_bd: 'otros' },
+            { valor: 'manicura', nombre: '💅 Manicura', categoria_bd: 'otros' },
+            { valor: 'masajes', nombre: '💆 Masajes', categoria_bd: 'otros' }
+        ]
+    }
+};
 
 // ==================== PROVINCIAS Y MUNICIPIOS ====================
 const provinciasYMunicipios = {
@@ -2268,6 +2342,35 @@ function escapeCsv(text) {
     if (!text) return '';
     return String(text).replace(/"/g, '""');
 }
+    // ==================== MANEJAR CATEGORÍAS Y SUBCATEGORÍAS ====================
+function actualizarSubcategorias() {
+    const categoriaPrincipal = document.getElementById('categoriaPrincipalFilter').value;
+    const subcategoriaSelect = document.getElementById('subcategoriaFilter');
+    
+    if (categoriaPrincipal && categoriasYSubcategorias[categoriaPrincipal]) {
+        subcategoriaSelect.innerHTML = '<option value="">Todas las subcategorías</option>';
+        categoriasYSubcategorias[categoriaPrincipal].subcategorias.forEach(sub => {
+            const option = document.createElement('option');
+            option.value = sub.valor;
+            option.innerHTML = sub.nombre;
+            subcategoriaSelect.appendChild(option);
+        });
+        subcategoriaSelect.style.display = 'inline-block';
+    } else {
+        subcategoriaSelect.style.display = 'none';
+        subcategoriaSelect.innerHTML = '<option value="">Todas las subcategorías</option>';
+    }
+}
+
+// Eventos
+document.getElementById('categoriaPrincipalFilter').addEventListener('change', function() {
+    actualizarSubcategorias();
+    cargarProfesionales();
+});
+
+document.getElementById('subcategoriaFilter').addEventListener('change', function() {
+    cargarProfesionales();
+});
 async function init() { 
     cargarProvincias();
     document.getElementById('pubProvincia').onchange = function() { actualizarMunicipios('pubProvincia', 'pubMunicipio'); };
