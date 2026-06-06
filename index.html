@@ -2499,7 +2499,361 @@ function limpiarFiltros() {
     cargarProfesionales();
     mostrarToast('Filtros limpiados', 'info');
 }
+// ==================== ADMIN PANEL ====================
+document.getElementById('btnAdmin').onclick = async () => {
+    if (!currentUser) {
+        mostrarToast('Debes iniciar sesión primero', 'error');
+        return;
+    }
+    
+    const admin = await esAdmin();
+    if (!admin) {
+        mostrarToast('No tienes permisos de administrador', 'error');
+        return;
+    }
+    
+    adminAuthenticated = true;
+    sessionStorage.setItem('adminAutenticado', 'true');
+    mostrarToast('✅ Modo administrador activado', 'success');
+    await cargarAdminPanel();
+};
 
+async function cargarAdminPanel() {
+    const modal = document.getElementById('modalAdmin');
+    const content = document.getElementById('adminContent');
+    modal.style.display = 'flex';
+    content.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-pulse"></i> Cargando estadísticas...</div>';
+    
+    try {
+        const { count: totalClientes } = await supabase.from('clientes').select('*', { count: 'exact', head: true });
+        const { count: totalProfesionales } = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'aprobado');
+        const { count: totalPendientesProf } = await supabase.from('oferentes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+        
+        const { data: contactosPendientes } = await supabase.from('contactos').select('*').eq('estado', 'pendiente');
+        const totalContactosPendientes = contactosPendientes?.length || 0;
+        
+        const { data: estadisticasVisitas } = await supabase.from('estadisticas_profesional').select('visitas, contactos');
+        let totalVisitas = 0, totalContactosStats = 0;
+        if (estadisticasVisitas) {
+            estadisticasVisitas.forEach(stat => {
+                totalVisitas += stat.visitas || 0;
+                totalContactosStats += stat.contactos || 0;
+            });
+        }
+        
+        const tasaConversion = totalVisitas > 0 ? ((totalContactosStats / totalVisitas) * 100).toFixed(1) : 0;
+        const leadsPotenciales = totalContactosPendientes;
+        
+        const ingresosPorDia = {};
+        const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        for (let i = 6; i >= 0; i--) {
+            const fecha = new Date();
+            fecha.setDate(fecha.getDate() - i);
+            const key = fecha.toISOString().split('T')[0];
+            ingresosPorDia[key] = 0;
+        }
+        
+        if (contactosPendientes) {
+            contactosPendientes.forEach(c => {
+                const diaKey = new Date(c.fecha_contacto).toISOString().split('T')[0];
+                if (ingresosPorDia[diaKey] !== undefined) ingresosPorDia[diaKey] += 3;
+            });
+        }
+        
+        const labelsIngresos = Object.keys(ingresosPorDia).map(d => {
+            const fecha = new Date(d);
+            return `${diasSemana[fecha.getDay()]} ${fecha.getDate()}/${fecha.getMonth()+1}`;
+        });
+        const dataIngresos = Object.values(ingresosPorDia);
+        
+        const { data: topProfesionales } = await supabase
+            .from('oferentes')
+            .select('nombre, promedio_puntuacion')
+            .eq('estado', 'aprobado')
+            .not('promedio_puntuacion', 'is', null)
+            .order('promedio_puntuacion', { ascending: false })
+            .limit(5);
+        
+        const labelsProfesionales = (topProfesionales || []).map(p => p.nombre.length > 15 ? p.nombre.substring(0,12)+'...' : p.nombre);
+        const dataPuntuaciones = (topProfesionales || []).map(p => p.promedio_puntuacion?.toFixed(1) || 0);
+        
+        const { count: totalServiciosCount } = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
+        const { count: cambiosCount } = await supabase.from('cambios_pendientes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
+        
+        let html = `
+            <div class="dashboard-kpi-grid">
+                <div class="kpi-card"><div class="kpi-title">Total Usuarios</div><div class="kpi-value">${totalClientes || 0}</div><div class="kpi-sub">${totalProfesionales || 0} profesionales</div></div>
+                <div class="kpi-card"><div class="kpi-title">Leads Potenciales</div><div class="kpi-value">${leadsPotenciales}</div><div class="kpi-sub">contactos pendientes</div></div>
+                <div class="kpi-card"><div class="kpi-title">Profesionales Activos</div><div class="kpi-value">${totalProfesionales || 0}</div><div class="kpi-sub">+${totalPendientesProf || 0} pendientes</div></div>
+                <div class="kpi-card"><div class="kpi-title">Tasa de Conversión</div><div class="kpi-value">${tasaConversion}%</div><div class="kpi-sub">${totalContactosStats} contactos / ${totalVisitas} visitas</div></div>
+            </div>
+            <div class="dashboard-charts-grid">
+                <div class="chart-card"><div class="chart-title"><i class="fas fa-chart-line"></i> Ingreso Proyectado (últimos 7 días)</div><canvas id="revenueChart"></canvas></div>
+                <div class="chart-card"><div class="chart-title"><i class="fas fa-star"></i> Top 5 Profesionales mejor valorados</div><canvas id="topProfessionalsChart"></canvas></div>
+            </div>
+            <div class="admin-stats">
+                <div class="admin-stat"><div class="stat-number">${totalServiciosCount || 0}</div><div>Total Servicios</div></div>
+                <div class="admin-stat"><div class="stat-number" style="color:#f59e0b;">${totalPendientesProf || 0}</div><div>Pendientes</div></div>
+                <div class="admin-stat"><div class="stat-number" style="color:#10b981;">${totalProfesionales || 0}</div><div>Aprobados</div></div>
+                <div class="admin-stat"><div class="stat-number" style="color:#3b82f6;">${cambiosCount || 0}</div><div>Cambios pendientes</div></div>
+                <div class="admin-stat"><div class="stat-number" style="color:#8b5cf6;">${totalContactosPendientes || 0}</div><div>Contactos</div></div>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+                <button class="btn btn-outline" id="adminTabPendientes" style="background:#f59e0b; color:white;">⏳ Servicios Pendientes</button>
+                <button class="btn btn-outline" id="adminTabAprobados">✅ Aprobados</button>
+                <button class="btn btn-outline" id="adminTabTodos">📋 Todos</button>
+                <button class="btn btn-outline" id="adminTabCambios">🔄 Cambios</button>
+                <button class="btn btn-outline" id="adminTabContactos" style="background:#8b5cf6; color:white;">📞 Contactos</button>
+                <button class="btn btn-outline" id="adminTabEstadisticas" style="background:#10b981; color:white;">📊 Estadísticas</button>
+            </div>
+            <div id="adminLista"></div>
+        `;
+        content.innerHTML = html;
+        
+        const ctxRevenue = document.getElementById('revenueChart')?.getContext('2d');
+        if (ctxRevenue) {
+            new Chart(ctxRevenue, {
+                type: 'line',
+                data: { labels: labelsIngresos, datasets: [{ label: 'Ingreso Proyectado (USD)', data: dataIngresos, borderColor: '#2c5f8a', backgroundColor: 'rgba(44,95,138,0.05)', borderWidth: 2, fill: true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: true, plugins: { tooltip: { callbacks: { label: (ctx) => `$${ctx.raw} USD` } } } }
+            });
+        }
+        
+        const ctxTop = document.getElementById('topProfessionalsChart')?.getContext('2d');
+        if (ctxTop) {
+            new Chart(ctxTop, {
+                type: 'bar',
+                data: { labels: labelsProfesionales, datasets: [{ label: 'Promedio de Calificación (⭐)', data: dataPuntuaciones, backgroundColor: '#f59e0b', borderRadius: 8 }] },
+                options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, max: 5, title: { display: true, text: 'Puntuación' } } } }
+            });
+        }
+        
+        await cargarAdminLista('pendiente');
+        
+        document.getElementById('adminTabPendientes').onclick = () => cargarAdminLista('pendiente');
+        document.getElementById('adminTabAprobados').onclick = () => cargarAdminLista('aprobado');
+        document.getElementById('adminTabTodos').onclick = () => cargarAdminLista('todos');
+        document.getElementById('adminTabCambios').onclick = () => cargarAdminLista('cambios');
+        document.getElementById('adminTabContactos').onclick = () => cargarAdminLista('contactos');
+        document.getElementById('adminTabEstadisticas').onclick = () => cargarAdminLista('estadisticas');
+        
+    } catch (error) {
+        console.error("Error cargando dashboard:", error);
+        content.innerHTML = '<div style="text-align:center;padding:40px;color:red;">❌ Error al cargar el panel de control.</div>';
+    }
+}
+
+async function cargarAdminLista(tipo) {
+    const listaDiv = document.getElementById('adminLista');
+    if (!listaDiv) return;
+    
+    if (tipo === 'contactos') {
+        const { data: contactos, error } = await supabase.from('contactos').select('*').order('fecha_contacto', { ascending: false });
+        if (error || !contactos || contactos.length === 0) {
+            listaDiv.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-phone-slash" style="font-size:48px;color:#cbd5e1;"></i><p>No hay contactos registrados aún</p></div>';
+            return;
+        }
+        const profesionalIds = [...new Set(contactos.map(c => c.profesional_id).filter(id => id))];
+        let profesionalesMap = {};
+        if (profesionalIds.length > 0) {
+            const { data: profesionales } = await supabase.from('oferentes').select('id, nombre, especialidad, telefono').in('id', profesionalIds);
+            if (profesionales) profesionales.forEach(p => { profesionalesMap[p.id] = p; });
+        }
+        const total = contactos.length;
+        const pendientes = contactos.filter(c => c.estado === 'pendiente').length;
+        const pagados = contactos.filter(c => c.estado === 'pagado').length;
+        listaDiv.innerHTML = `
+            <div style="background:var(--primary-light); padding:16px; border-radius:var(--radius-lg); margin-bottom:20px;">
+                <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; text-align:center;">
+                    <div><strong style="font-size:24px;">${total}</strong><br>Total</div>
+                    <div><strong style="font-size:24px; color:#f59e0b;">${pendientes}</strong><br>Pendientes</div>
+                    <div><strong style="font-size:24px; color:#10b981;">${pagados}</strong><br>Pagados</div>
+                    <div><strong style="font-size:24px; color:#8b5cf6;">${pendientes * 3}</strong><br>Ingreso potencial</div>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="contactos-table">
+                    <thead><tr><th>Fecha</th><th>Cliente</th><th>Profesional</th><th>Teléfono</th><th>Estado</th><th>Acción</th></tr></thead>
+                    <tbody>
+                        ${contactos.map(c => {
+                            const profesional = profesionalesMap[c.profesional_id];
+                            return `<tr>
+                                <td>${new Date(c.fecha_contacto).toLocaleString()}</td>
+                                <td>${escapeHtml(c.cliente_id?.substring(0,8) || 'N/A')}</td>
+                                <td><strong>${escapeHtml(profesional?.nombre || 'N/A')}</strong><br><small>${escapeHtml(profesional?.especialidad || 'N/A')}</small></td>
+                                <td>${escapeHtml(profesional?.telefono || 'N/A')}</td>
+                                <td><span class="estado-${c.estado === 'pendiente' ? 'pendiente' : 'pagado'}">${c.estado === 'pendiente' ? '⏳ Pendiente' : '✅ Pagado'}</span></td>
+                                <td>${c.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="window.marcarContactoPagado('${c.id}')">💰 Pagar</button>` : '—'}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        return;
+    }
+    
+    if (tipo === 'cambios') {
+        const { data: cambios, error } = await supabase.from('cambios_pendientes').select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
+        if (error || !cambios || cambios.length === 0) {
+            listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay cambios pendientes de aprobación</div>';
+            return;
+        }
+        const profesionalIds = [...new Set(cambios.map(c => c.servicio_id))];
+        let profesionalesMap = {};
+        if (profesionalIds.length > 0) {
+            const { data: profesionales } = await supabase.from('oferentes').select('id, nombre, telefono, foto').in('id', profesionalIds);
+            if (profesionales) profesionales.forEach(p => { profesionalesMap[p.id] = p; });
+        }
+        let html = '<div style="display:flex; flex-direction:column; gap:15px;">';
+        for (const cambio of cambios) {
+            const profesional = profesionalesMap[cambio.servicio_id];
+            html += `
+                <div class="service-item service-pendiente" style="padding:15px; border-left:4px solid #f59e0b; background:#fef3c7; border-radius:12px;">
+                    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:10px;">
+                        <div>
+                            <strong>${escapeHtml(profesional?.nombre || 'Profesional desconocido')}</strong>
+                            <br><small>📞 ${escapeHtml(profesional?.telefono || 'Sin teléfono')}</small>
+                            <br><small>📅 ${new Date(cambio.created_at).toLocaleString()}</small>
+                            ${profesional?.foto ? `<div style="margin-top:10px;"><img src="${escapeHtml(profesional.foto)}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;"></div>` : ''}
+                        </div>
+                        <div>
+                            <button class="btn btn-success btn-sm" onclick="window.aprobarCambioIndividual('${cambio.id}', '${cambio.servicio_id}', '${cambio.campo}', '${escapeJsString(cambio.valor_nuevo)}')">✅ Aprobar</button>
+                            <button class="btn btn-danger btn-sm" onclick="window.rechazarCambioIndividual('${cambio.id}')">❌ Rechazar</button>
+                        </div>
+                    </div>
+                    <div><strong>📝 Cambio solicitado:</strong></div>
+                    <div style="margin-top:5px;"><strong>Campo:</strong> ${cambio.campo}<br><strong>Valor actual:</strong> "${escapeHtml(cambio.valor_viejo || 'Vacío')}"<br><strong>Nuevo valor:</strong> "${escapeHtml(cambio.valor_nuevo || 'Vacío')}"</div>
+                </div>
+            `;
+        }
+        html += '</div>';
+        listaDiv.innerHTML = html;
+        return;
+    }
+    
+    if (tipo === 'estadisticas') {
+        const { data: profesionales, error } = await supabase.from('oferentes').select('id, nombre, telefono, email, created_at').eq('estado', 'aprobado').order('nombre', { ascending: true });
+        if (error || !profesionales || profesionales.length === 0) {
+            listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay profesionales registrados</div>';
+            return;
+        }
+        const { data: todosContactos } = await supabase.from('contactos').select('profesional_id, estado');
+        const contactosMap = {};
+        if (todosContactos) {
+            todosContactos.forEach(c => {
+                if (!contactosMap[c.profesional_id]) contactosMap[c.profesional_id] = { total: 0, pendientes: 0, pagados: 0 };
+                contactosMap[c.profesional_id].total++;
+                if (c.estado === 'pendiente') contactosMap[c.profesional_id].pendientes++;
+                if (c.estado === 'pagado') contactosMap[c.profesional_id].pagados++;
+            });
+        }
+        const profesionalIds = profesionales.map(p => p.id);
+        const { data: estadisticas } = await supabase.from('estadisticas_profesional').select('*').in('profesional_id', profesionalIds);
+        const statsMap = {};
+        if (estadisticas) estadisticas.forEach(s => { statsMap[s.profesional_id] = s; });
+        let html = `<div style="overflow-x: auto;"><table class="contactos-table" style="min-width: 1000px;"><thead><tr><th>Profesional</th><th>Email</th><th>Teléfono</th><th>Visitas</th><th>Contactos</th><th>Pendientes</th><th>Pagados</th><th>Fecha Reg.</th></tr></thead><tbody>`;
+        for (const p of profesionales) {
+            const stats = statsMap[p.id] || { visitas: 0 };
+            const contactos = contactosMap[p.id] || { total: 0, pendientes: 0, pagados: 0 };
+            const fechaRegistro = p.created_at ? new Date(p.created_at).toLocaleDateString() : 'N/A';
+            html += `<tr><td><strong>${escapeHtml(p.nombre)}</strong></td><td>${escapeHtml(p.email || 'No registrado')}</td><td>${escapeHtml(p.telefono || 'N/A')}</td><td style="text-align:center;">${stats.visitas || 0}</td><td style="text-align:center;">${contactos.total || 0}</td><td style="text-align:center; color:#f59e0b;">${contactos.pendientes || 0}</td><td style="text-align:center; color:#10b981;">${contactos.pagados || 0}</td><td style="text-align:center;">${fechaRegistro}</td></tr>`;
+        }
+        html += '</tbody></table></div>';
+        listaDiv.innerHTML = html;
+        return;
+    }
+    
+    let query = supabase.from('oferentes').select('*');
+    if (tipo === 'pendiente') query = query.eq('estado', 'pendiente');
+    else if (tipo === 'aprobado') query = query.eq('estado', 'aprobado');
+    const { data } = await query.order('created_at', { ascending: false });
+    if (!data || data.length === 0) {
+        listaDiv.innerHTML = '<div style="text-align:center;padding:40px;">✅ No hay servicios en esta categoría</div>';
+        return;
+    }
+    listaDiv.innerHTML = data.map(s => `
+        <div class="service-item ${s.estado === 'pendiente' ? 'service-pendiente' : 'service-aprobado'}">
+            <div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;">
+                <div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small><br><small>📍 ${escapeHtml(s.municipio || s.zona || '')}, ${escapeHtml(s.provincia || '')}</small></div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    ${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="window.aprobarServicio('${s.id}')">✅ Aprobar</button> <button class="btn btn-danger btn-sm" onclick="window.rechazarServicio('${s.id}')">❌ Rechazar</button>` : ''}
+                    <button class="btn btn-outline btn-sm" onclick="window.eliminarServicioAdmin('${s.id}')">🗑️ Eliminar</button>
+                </div>
+            </div>
+            <div>📞 ${escapeHtml(s.telefono)}</div>
+            ${s.foto ? `<div style="margin-top:10px;"><img src="${escapeHtml(s.foto)}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;"></div>` : ''}
+            ${s.descripcion ? `<div style="margin-top:8px;">📝 ${escapeHtml(s.descripcion)}</div>` : ''}
+        </div>
+    `).join('');
+}
+
+// Funciones admin globales
+window.marcarContactoPagado = async function(contactoId) {
+    const confirmado = await mostrarConfirmacion('¿Marcar este contacto como pagado?', 'Confirmar pago');
+    if (!confirmado) return;
+    try {
+        const { error } = await supabase.from('contactos').update({ estado: 'pagado' }).eq('id', contactoId);
+        if (error) throw error;
+        mostrarToast('✅ Contacto marcado como pagado', 'success');
+        await cargarAdminLista('contactos');
+        await cargarAdminPanel();
+        await cargarProfesionales();
+    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
+};
+
+window.aprobarServicio = async function(id) {
+    const confirmado = await mostrarConfirmacion('¿Aprobar este servicio?', 'Aprobar servicio');
+    if (!confirmado) return;
+    await supabase.from('oferentes').update({ estado: 'aprobado' }).eq('id', id);
+    mostrarToast('✅ Servicio aprobado', 'success');
+    await cargarAdminLista('pendiente');
+    await cargarProfesionales();
+};
+
+window.rechazarServicio = async function(id) {
+    const confirmado = await mostrarConfirmacion('¿Rechazar este servicio?', 'Rechazar servicio');
+    if (!confirmado) return;
+    await supabase.from('oferentes').update({ estado: 'rechazado' }).eq('id', id);
+    mostrarToast('❌ Servicio rechazado', 'warning');
+    await cargarAdminLista('pendiente');
+    await cargarProfesionales();
+};
+
+window.eliminarServicioAdmin = async function(id) {
+    const confirmado = await mostrarConfirmacion('¿Eliminar permanentemente este servicio?', 'Eliminar servicio');
+    if (!confirmado) return;
+    try {
+        await supabase.from('oferentes').delete().eq('id', id);
+        mostrarToast('✅ Servicio eliminado', 'success');
+        await cargarAdminLista('pendiente');
+        await cargarProfesionales();
+    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
+};
+
+window.aprobarCambioIndividual = async function(cambioId, servicioId, campo, nuevoValor) {
+    const confirmado = await mostrarConfirmacion('¿Aprobar este cambio?', 'Aprobar cambio');
+    if (!confirmado) return;
+    try {
+        const updates = {};
+        updates[campo] = nuevoValor;
+        await supabase.from('oferentes').update(updates).eq('id', servicioId);
+        await supabase.from('cambios_pendientes').update({ estado: 'aprobado' }).eq('id', cambioId);
+        mostrarToast('✅ Cambio aprobado y aplicado', 'success');
+        await cargarAdminLista('cambios');
+        await cargarProfesionales();
+    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
+};
+
+window.rechazarCambioIndividual = async function(cambioId) {
+    const confirmado = await mostrarConfirmacion('¿Rechazar este cambio?', 'Rechazar cambio');
+    if (!confirmado) return;
+    try {
+        await supabase.from('cambios_pendientes').update({ estado: 'rechazado' }).eq('id', cambioId);
+        mostrarToast('❌ Cambio rechazado', 'warning');
+        await cargarAdminLista('cambios');
+    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
+};
 // ====================== NUEVAS FUNCIONES PARA SISTEMA DE PAGOS ======================
 
 // Función para cargar tasa de cambio desde ElToque
