@@ -2859,7 +2859,7 @@ window.rechazarCambioIndividual = async function(cambioId) {
 // Función para cargar tasa de cambio desde ElToque
 async function cargarTasaElToque() {
     try {
-        const response = await fetch('https://api.eltoque.com/v1/rates');
+        const response = await fetch('https://tasa-cambio-proxy.vercel.app/api/exchange-rate');
         if (response.ok) {
             const data = await response.json();
             if (data && data.usd) {
