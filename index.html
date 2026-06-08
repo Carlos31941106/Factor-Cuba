@@ -123,11 +123,23 @@
             gap: 16px;
         }
 
+       .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 700;
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+    background-clip: unset;
+    color: var(--text-primary);
+}
         .logo {
             display: flex;
             align-items: center;
         }
-
+  
 
         .logo-icon {
             width: 44px;
@@ -651,9 +663,12 @@
 <body>
 
 <header class="header">
+   <div class="logo" style="display: flex; align-items: center; gap: 8px;">
   <div class="logo">
     <img src="https://raw.githubusercontent.com/Carlos31941106/Factor-Cuba/main/1780705461586.png" 
          alt="Factor Cuba" 
+         style="height: 38px; width: auto;">
+    <span style="font-size: 20px; font-weight: 700; white-space: nowrap;">Factor <span style="color:var(--primary);">Cuba</span></span>
          style="height: 65px; width: auto;">
 </div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
@@ -2791,71 +2806,14 @@ async function cargarAdminLista(tipo) {
 window.marcarContactoPagado = async function(contactoId) {
     const confirmado = await mostrarConfirmacion('¿Marcar este contacto como pagado?', 'Confirmar pago');
     if (!confirmado) return;
-    
     try {
         const { error } = await supabase.from('contactos').update({ estado: 'pagado' }).eq('id', contactoId);
         if (error) throw error;
-        // 1. Obtener el contacto para saber qué profesional es
-        const { data: contacto, error: fetchError } = await supabase
-            .from('contactos')
-            .select('profesional_id, fecha_contacto')
-            .eq('id', contactoId)
-            .single();
-        
-        if (fetchError) throw fetchError;
-        
-        // 2. Marcar el contacto como pagado
-        const { error: updateError } = await supabase
-            .from('contactos')
-            .update({ estado: 'pagado' })
-            .eq('id', contactoId);
-        
-        if (updateError) throw updateError;
-        
-        // 3. Actualizar el contador semanal (marcar la semana como pagada para ese profesional)
-        // Calcular la semana de ese contacto
-        const fechaContacto = new Date(contacto.fecha_contacto);
-        const diaSemana = fechaContacto.getDay();
-        const diffLunes = diaSemana === 0 ? 6 : diaSemana - 1;
-        const lunes = new Date(fechaContacto);
-        lunes.setDate(fechaContacto.getDate() - diffLunes);
-        lunes.setHours(0, 0, 0, 0);
-        const semanaInicio = lunes.toISOString().split('T')[0];
-        
-        // 4. Verificar si todos los contactos de esa semana están pagados
-        const { data: contactosSemana } = await supabase
-            .from('contactos')
-            .select('id, estado')
-            .eq('profesional_id', contacto.profesional_id)
-            .gte('fecha_contacto', lunes.toISOString())
-            .lt('fecha_contacto', new Date(lunes.getTime() + 7*24*60*60*1000).toISOString());
-        
-        const todosPagados = contactosSemana?.every(c => c.estado === 'pagado') || false;
-        
-        // 5. Actualizar el registro semanal
-        if (todosPagados) {
-            await supabase
-                .from('contactos_semanales')
-                .update({ 
-                    estado_pago: 'pagado',
-                    fecha_pago: new Date().toISOString()
-                })
-                .eq('profesional_id', contacto.profesional_id)
-                .eq('semana_inicio', semanaInicio);
-        }
-        
         mostrarToast('✅ Contacto marcado como pagado', 'success');
-        
-        // 6. Recargar todas las vistas
         await cargarAdminLista('contactos');
         await cargarAdminPanel();
-        await cargarAdminPanel();  // Esto recarga la sección de cobros
         await cargarProfesionales();
     } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
-        
-    } catch (err) { 
-        mostrarToast('Error: ' + err.message, 'error'); 
-    }
 };
 
 window.aprobarServicio = async function(id) {
