@@ -3096,110 +3096,157 @@ async function exportarEstadisticasCompletas() {
 async function cargarSeccionCobrosAdmin() {
     try {
         const semana = obtenerSemanaActual();
-        const { data: profesionales } = await supabase.from('oferentes').select('id, nombre, email, telefono').eq('estado', 'aprobado');
-        const { data: contactosSem } = await supabase.from('contactos_semanales').select('*').eq('semana_inicio', semana.inicio);
+        
+        // Obtener todos los profesionales aprobados
+        const { data: profesionales, error: profError } = await supabase
+            .from('oferentes')
+            .select('id, nombre, email, telefono')
+            .eq('estado', 'aprobado');
+        
+        if (profError) throw profError;
+        if (!profesionales || profesionales.length === 0) {
+            document.getElementById('adminSeccionCobros').innerHTML = '<div style="text-align:center;padding:20px;">No hay profesionales registrados</div>';
+            return;
+        }
+        
+        // Obtener los contactos semanales
+        const { data: contactosSem, error: contactosError } = await supabase
+            .from('contactos_semanales')
+            .select('*')
+            .eq('semana_inicio', semana.inicio);
+        
+        if (contactosError) throw contactosError;
+        
+        // Crear un mapa para acceso rápido
         const contactosMap = {};
-        contactosSem?.forEach(c => contactosMap[c.profesional_id] = c);
-        let totalUSD = 0, totalCUP = 0, totalContactos = 0, pendientes = 0, pagados = 0;
-        let html = `<div class="pagos-resumen"><div class="pagos-grid">
-            <div class="pago-card"><div class="valor">${contactosSem?.length || 0}</div><div class="label">Profesionales con contactos</div></div>
-            <div class="pago-card"><div class="valor">${totalContactos}</div><div class="label">Contactos esta semana</div></div>
-            <div class="pago-card"><div class="valor">${totalUSD.toFixed(2)} USD</div><div class="label">Total a cobrar</div></div>
-            <div class="pago-card"><div class="valor">${pendientes}</div><div class="label">Pendientes de pago</div></div>
-        </div><div style="margin-bottom:16px; text-align:center;"><button class="btn btn-excel" id="btnExportarCobrosAdmin"><i class="fas fa-file-excel"></i> Exportar Cobros a Excel</button></div>`;
-        html += `<div style="overflow-x:auto;"><table class="contactos-table"><thead><tr><th>Profesional</th><th>Email</th><th>Teléfono</th><th>Contactos</th><th>USD</th><th>CUP</th><th>Estado</th><th>Acción</th></tr></thead><tbody>`;
+        if (contactosSem) {
+            contactosSem.forEach(c => {
+                contactosMap[c.profesional_id] = c;
+            });
+        }
+        
+        // Calcular totales
+        let totalContactos = 0;
+        let totalUSD = 0;
+        let totalCUP = 0;
+        let pendientes = 0;
+        let pagados = 0;
+        
+        // Construir la tabla
+        let html = `
+            <div class="pagos-resumen">
+                <div class="pagos-grid">
+                    <div class="pago-card">
+                        <div class="valor">${profesionales.length}</div>
+                        <div class="label">Profesionales activos</div>
+                    </div>
+                    <div class="pago-card">
+                        <div class="valor" id="totalContactosSemana">0</div>
+                        <div class="label">Contactos esta semana</div>
+                    </div>
+                    <div class="pago-card">
+                        <div class="valor" id="totalUSDSemana">0.00 USD</div>
+                        <div class="label">Total a cobrar (USD)</div>
+                    </div>
+                    <div class="pago-card">
+                        <div class="valor" id="totalCUPSemana">0 CUP</div>
+                        <div class="label">Total a cobrar (CUP)</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 16px; text-align: center;">
+                    <button class="btn btn-excel" id="btnExportarCobrosAdmin">
+                        <i class="fas fa-file-excel"></i> Exportar Cobros a Excel
+                    </button>
+                    <button class="btn btn-outline" id="btnRecalcularCobros" style="margin-left: 10px;">
+                        <i class="fas fa-sync-alt"></i> Recalcular
+                    </button>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="contactos-table" style="min-width: 800px;">
+                    <thead>
+                        <tr>
+                            <th>Profesional</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Contactos</th>
+                            <th>USD</th>
+                            <th>CUP</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
         for (const p of profesionales) {
-            const c = contactosMap[p.id] || { contactos: 0, monto_usd: 0, monto_cup: 0, estado_pago: 'pendiente' };
+            const c = contactosMap[p.id] || { 
+                contactos: 0, 
+                monto_usd: 0, 
+                monto_cup: 0, 
+                estado_pago: 'pendiente' 
+            };
+            
             totalContactos += c.contactos || 0;
             totalUSD += c.monto_usd || 0;
             totalCUP += c.monto_cup || 0;
             if (c.estado_pago === 'pendiente') pendientes++;
             if (c.estado_pago === 'pagado') pagados++;
-            html += `<tr><td><strong>${escapeHtml(p.nombre)}</strong></td><td>${escapeHtml(p.email || '')}</td><td>${escapeHtml(p.telefono)}</td><td style="text-align:center;">${c.contactos}</td><td style="text-align:center;">${c.monto_usd?.toFixed(2) || '0'} USD</td><td style="text-align:center;">${Math.round(c.monto_cup || 0).toLocaleString()} CUP</td><td><span class="${c.estado_pago === 'pagado' ? 'estado-pagado' : 'estado-pendiente'}">${c.estado_pago === 'pagado' ? '✅ Pagado' : '⏳ Pendiente'}</span></td>
-            <td>${c.estado_pago !== 'pagado' && c.contactos > 0 ? `<button class="btn btn-success btn-sm" onclick="marcarPagoSemanal('${p.id}')">💰 Marcar Pagado</button>` : c.contactos > 0 ? '✅ Cobrado' : '—'}</td></tr>`;
+            
+            const estadoClass = c.estado_pago === 'pagado' ? 'estado-pagado' : 'estado-pendiente';
+            const estadoText = c.estado_pago === 'pagado' ? '✅ Pagado' : '⏳ Pendiente';
+            
+            // Calcular montos
+            const montoUSD = (c.monto_usd || 0).toFixed(2);
+            const montoCUP = Math.round(c.monto_cup || 0).toLocaleString();
+            
+            html += `
+                <tr>
+                    <td><strong>${escapeHtml(p.nombre)}</strong></td>
+                    <td>${escapeHtml(p.email || '—')}</td>
+                    <td>${escapeHtml(p.telefono || '—')}</td>
+                    <td style="text-align: center; font-weight: 600;">${c.contactos || 0}</td>
+                    <td style="text-align: center;">${montoUSD} USD</td>
+                    <td style="text-align: center;">${montoCUP} CUP</td>
+                    <td style="text-align: center;"><span class="${estadoClass}">${estadoText}</span></td>
+                    <td style="text-align: center;">
+                        ${c.estado_pago !== 'pagado' && c.contactos > 0 ? 
+                            `<button class="btn btn-success btn-sm" onclick="marcarPagoSemanal('${p.id}')">💰 Marcar Pagado</button>` : 
+                            c.contactos > 0 ? '✅ Cobrado' : '—'}
+                    </td>
+                </tr>
+            `;
         }
-        html += `</tbody></table></div></div>`;
         
-        // Actualizar los totales en el resumen
-        html = html.replace('class="valor">0</div><div class="label">Profesionales con contactos', `class="valor">${contactosSem?.length || 0}</div><div class="label">Profesionales con contactos`);
-        html = html.replace('class="valor">0</div><div class="label">Contactos esta semana', `class="valor">${totalContactos}</div><div class="label">Contactos esta semana`);
-        html = html.replace('class="valor">0.00 USD</div><div class="label">Total a cobrar', `class="valor">${totalUSD.toFixed(2)} USD</div><div class="label">Total a cobrar`);
-        html = html.replace('class="valor">0</div><div class="label">Pendientes de pago', `class="valor">${pendientes}</div><div class="label">Pendientes de pago`);
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
         
+        // Actualizar el DOM
         const seccion = document.getElementById('adminSeccionCobros');
-        if (seccion) seccion.innerHTML = html;
+        if (seccion) {
+            seccion.innerHTML = html;
+            
+            // Actualizar los totales en los cards
+            document.getElementById('totalContactosSemana').textContent = totalContactos;
+            document.getElementById('totalUSDSemana').textContent = totalUSD.toFixed(2) + ' USD';
+            document.getElementById('totalCUPSemana').textContent = totalCUP.toLocaleString() + ' CUP';
+        }
+        
+        // Eventos de botones
         document.getElementById('btnExportarCobrosAdmin')?.addEventListener('click', exportarCobrosExcel);
-    } catch (error) { console.error('Error cargando cobros:', error); }
-}
-
-// Marcar pago semanal
-window.marcarPagoSemanal = async function(profesionalId) {
-    const confirmado = await mostrarConfirmacion('¿Marcar esta semana como pagada para este profesional?', 'Confirmar pago');
-    if (!confirmado) return;
-    try {
-        const semana = obtenerSemanaActual();
-        await supabase.from('contactos_semanales').update({ estado_pago: 'pagado', fecha_pago: new Date().toISOString() })
-            .eq('profesional_id', profesionalId).eq('semana_inicio', semana.inicio);
-        const { data: contacto } = await supabase.from('contactos_semanales').select('monto_usd, monto_cup, tasa_cambio_used')
-            .eq('profesional_id', profesionalId).eq('semana_inicio', semana.inicio).single();
-        if (contacto) {
-            await supabase.from('historial_pagos').insert([{
-                profesional_id: profesionalId, monto_usd: contacto.monto_usd, monto_cup: contacto.monto_cup,
-                tasa_cambio: contacto.tasa_cambio_used, fecha_pago: new Date().toISOString()
-            }]);
-        }
-        mostrarToast('✅ Pago registrado', 'success');
-        cargarAdminPanel();
-    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
-}
-
-// Agregar sección de cobros al admin
-async function agregarSeccionCobrosAlAdmin() {
-    const adminContent = document.getElementById('adminContent');
-    if (adminContent && !document.getElementById('adminSeccionCobros')) {
-        const seccion = document.createElement('div');
-        seccion.id = 'adminSeccionCobros';
-        seccion.className = 'pagos-section';
-        seccion.innerHTML = '<div style="text-align:center;padding:20px;"><i class="fas fa-spinner fa-pulse"></i> Cargando cobros semanales...</div>';
-        adminContent.appendChild(seccion);
-        await cargarSeccionCobrosAdmin();
-    } else if (adminContent && document.getElementById('adminSeccionCobros')) {
-        await cargarSeccionCobrosAdmin();
-    }
-}
-
-// Modificar la función de admin panel para incluir la sección de cobros
-const originalCargarAdminPanel = cargarAdminPanel;
-async function cargarAdminPanelConCobros() {
-    await originalCargarAdminPanel();
-    await agregarSeccionCobrosAlAdmin();
-}
-window.cargarAdminPanel = cargarAdminPanelConCobros;
-
-// Modificar la función cargarAdminLista para añadir botón de exportar en contactos
-const originalCargarAdminLista = cargarAdminLista;
-async function cargarAdminListaConExport(tipo, ...args) {
-    await originalCargarAdminLista(tipo, ...args);
-    if (tipo === 'contactos') {
-        const listaDiv = document.getElementById('adminLista');
-        if (listaDiv && !document.getElementById('btnExportarContactosAdmin')) {
-            const exportBtn = document.createElement('div');
-            exportBtn.style.marginBottom = '16px';
-            exportBtn.style.textAlign = 'right';
-            exportBtn.innerHTML = '<button class="btn btn-excel" id="btnExportarContactosAdmin"><i class="fas fa-file-excel"></i> Exportar Contactos a Excel</button>';
-            const tabla = listaDiv.querySelector('.contactos-table');
-            if (tabla) tabla.parentNode.insertBefore(exportBtn, tabla);
-            document.getElementById('btnExportarContactosAdmin')?.addEventListener('click', exportarContactosExcelCompleto);
-        }
-        const statsDiv = listaDiv?.querySelector('.admin-stats');
-        if (statsDiv && !document.getElementById('btnExportarEstadisticasAdmin')) {
-            const exportStatsBtn = document.createElement('button');
-            exportStatsBtn.id = 'btnExportarEstadisticasAdmin';
-            exportStatsBtn.className = 'btn btn-excel';
-            exportStatsBtn.style.marginLeft = '10px';
-            exportStatsBtn.innerHTML = '<i class="fas fa-file-excel"></i> Exportar Estadísticas';
-            exportStatsBtn.onclick = exportarEstadisticasCompletas;
-            statsDiv.parentNode?.insertBefore(exportStatsBtn, statsDiv.nextSibling);
+        document.getElementById('btnRecalcularCobros')?.addEventListener('click', () => {
+            cargarSeccionCobrosAdmin();
+            mostrarToast('Datos recalculados', 'info');
+        });
+        
+    } catch (error) {
+        console.error('Error cargando sección cobros:', error);
+        const seccion = document.getElementById('adminSeccionCobros');
+        if (seccion) {
+            seccion.innerHTML = '<div style="text-align:center;padding:20px;color:red;">❌ Error al cargar los datos de cobros</div>';
         }
     }
 }
