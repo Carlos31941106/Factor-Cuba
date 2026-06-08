@@ -123,18 +123,11 @@
             gap: 16px;
         }
         
-       .logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 20px;
-    font-weight: 700;
-    background: none;
-    -webkit-background-clip: unset;
-    -webkit-text-fill-color: unset;
-    background-clip: unset;
-    color: var(--text-primary);
-}
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+  
         
         .logo-icon {
             width: 44px;
@@ -648,16 +641,20 @@
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-secondary); }
         ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        @media (max-width: 768px) {
+    .logo img {
+        height: 45px !important;
+    }
+}
     </style>
 </head>
 <body>
 
 <header class="header">
-   <div class="logo" style="display: flex; align-items: center; gap: 8px;">
+  <div class="logo">
     <img src="https://raw.githubusercontent.com/Carlos31941106/Factor-Cuba/main/1780705461586.png" 
          alt="Factor Cuba" 
-         style="height: 38px; width: auto;">
-    <span style="font-size: 20px; font-weight: 700; white-space: nowrap;">Factor <span style="color:var(--primary);">Cuba</span></span>
+         style="height: 65px; width: auto;">
 </div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
             <div id="userInfo" style="display: none; align-items: center; gap: 16px;">
