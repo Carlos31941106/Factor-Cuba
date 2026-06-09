@@ -3094,6 +3094,7 @@ async function cargarSeccionCobrosAdmin() {
         const seccion = document.getElementById('adminSeccionCobros');
         if (seccion) seccion.innerHTML = html;
         document.getElementById('btnExportarCobrosAdmin')?.addEventListener('click', exportarCobrosExcel);
+        document.getElementById('btnActualizarTasaAdmin')?.addEventListener('click', actualizarTasaManualAdmin);
     } catch (error) { console.error('Error cargando cobros:', error); }
 }
 
@@ -3521,7 +3522,36 @@ async function init() {
 }
 
 init();
-  
+async function actualizarTasaManualAdmin() {
+    const { value: nuevaTasa } = await Swal.fire({
+        title: 'Actualizar tasa de cambio',
+        html: 'Ingresa la tasa actual del mercado informal (CUP por 1 USD)<br><small>Puedes consultarla en <a href="https://eltoque.com" target="_blank">elToque.com</a></small>',
+        input: 'number',
+        inputValue: tasaCambioActual,
+        inputPlaceholder: 'Ejemplo: 545',
+        confirmButtonText: 'Guardar',
+        cancelButtonText: 'Cancelar',
+        showCancelButton: true
+    });
+    
+    if (nuevaTasa && nuevaTasa > 0) {
+        try {
+            await supabase
+                .from('configuracion')
+                .upsert({ clave: 'tasa_cambio_usd_cup', valor: nuevaTasa.toString() });
+            
+            tasaCambioActual = parseFloat(nuevaTasa);
+            mostrarToast(`✅ Tasa actualizada a 1 USD = ${tasaCambioActual} CUP`, 'success');
+            
+            if (typeof cargarSeccionCobrosAdmin === 'function') {
+                await cargarSeccionCobrosAdmin();
+            }
+        } catch (error) {
+            console.error('Error guardando tasa:', error);
+            mostrarToast('❌ Error al guardar la tasa', 'error');
+        }
+    }
+}  
 </script>
 </body>
 </html>
