@@ -3069,7 +3069,9 @@ async function cargarSeccionCobrosAdmin() {
             <div class="pago-card"><div class="valor">${totalContactos}</div><div class="label">Contactos esta semana</div></div>
             <div class="pago-card"><div class="valor">${totalUSD.toFixed(2)} USD</div><div class="label">Total a cobrar</div></div>
             <div class="pago-card"><div class="valor">${pendientes}</div><div class="label">Pendientes de pago</div></div>
-        </div><div style="margin-bottom:16px; text-align:center;"><button class="btn btn-excel" id="btnExportarCobrosAdmin"><i class="fas fa-file-excel"></i> Exportar Cobros a Excel</button></div>`;
+        </div><div style="margin-bottom:16px; text-align:center;"><button class="btn btn-excel" id="btnExportarCobrosAdmin"><i class="fas fa-file-excel"></i> Exportar Cobros a Excel</button>
+    <button class="btn btn-primary" id="btnActualizarTasaAdmin" style="margin-left:10px;"><i class="fas fa-dollar-sign"></i> Actualizar Tasa</button>
+</div>`;
         html += `<div style="overflow-x:auto;"><table class="contactos-table"><thead><tr><th>Profesional</th><th>Email</th><th>Teléfono</th><th>Contactos</th><th>USD</th><th>CUP</th><th>Estado</th><th>Acción</th></tr></thead><tbody>`;
         for (const p of profesionales) {
             const c = contactosMap[p.id] || { contactos: 0, monto_usd: 0, monto_cup: 0, estado_pago: 'pendiente' };
