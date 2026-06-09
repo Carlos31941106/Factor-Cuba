@@ -3536,22 +3536,42 @@ async function actualizarTasaManualAdmin() {
     
     if (nuevaTasa && nuevaTasa > 0) {
         try {
-            await supabase
+            // Primero intentamos actualizar
+            const { error: updateError } = await supabase
                 .from('configuracion')
-                .upsert({ clave: 'tasa_cambio_usd_cup', valor: nuevaTasa.toString() });
+                .update({ valor: nuevaTasa.toString(), updated_at: new Date().toISOString() })
+                .eq('clave', 'tasa_cambio_usd_cup');
+            
+            // Si no existía, entonces insertamos
+            if (updateError && updateError.code === 'PGRST116') {
+                const { error: insertError } = await supabase
+                    .from('configuracion')
+                    .insert({ clave: 'tasa_cambio_usd_cup', valor: nuevaTasa.toString() });
+                
+                if (insertError) throw insertError;
+            } else if (updateError) {
+                throw updateError;
+            }
             
             tasaCambioActual = parseFloat(nuevaTasa);
             mostrarToast(`✅ Tasa actualizada a 1 USD = ${tasaCambioActual} CUP`, 'success');
             
+            // Recargar la sección de cobros
             if (typeof cargarSeccionCobrosAdmin === 'function') {
                 await cargarSeccionCobrosAdmin();
             }
+            
+            // También recargar el panel admin completo
+            if (typeof cargarAdminPanel === 'function') {
+                await cargarAdminPanel();
+            }
+            
         } catch (error) {
             console.error('Error guardando tasa:', error);
-            mostrarToast('❌ Error al guardar la tasa', 'error');
+            mostrarToast('❌ Error al guardar la tasa: ' + error.message, 'error');
         }
     }
-}  
+}
 </script>
 </body>
 </html>
