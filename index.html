@@ -1531,30 +1531,28 @@ function actualizarMapa() {
 // ==================== ACTUALIZAR ESTADÍSTICAS ====================
 async function actualizarEstadisticas(profesionalId, tipo) {
     if (!profesionalId) return;
-
+    
     try {
         if (tipo === 'visita') {
-            await supabase.rpc('incrementar_visitas', { p_profesional_id: profesionalId }).catch(async () => {
-                // Si la función RPC no existe, hacerlo manualmente
-                const { data: stats } = await supabase
-                    .from('estadisticas_profesional')
-                    .select('*')
-                    .eq('profesional_id', profesionalId)
-                    .maybeSingle();
-
-                if (stats) {
-                    await supabase.from('estadisticas_profesional').update({
-                        visitas: (stats.visitas || 0) + 1,
-                        ultima_actualizacion: new Date().toISOString()
-                    }).eq('profesional_id', profesionalId);
-                } else {
-                    await supabase.from('estadisticas_profesional').insert([{
-                        profesional_id: profesionalId,
-                        visitas: 1,
-                        contactos: 0
-                    }]);
-                }
-            });
+            // Versión manual sin RPC
+            const { data: stats } = await supabase
+                .from('estadisticas_profesional')
+                .select('*')
+                .eq('profesional_id', profesionalId)
+                .maybeSingle();
+            
+            if (stats) {
+                await supabase.from('estadisticas_profesional').update({
+                    visitas: (stats.visitas || 0) + 1,
+                    ultima_actualizacion: new Date().toISOString()
+                }).eq('profesional_id', profesionalId);
+            } else {
+                await supabase.from('estadisticas_profesional').insert([{
+                    profesional_id: profesionalId,
+                    visitas: 1,
+                    contactos: 0
+                }]);
+            }
         }
     } catch (err) {
         console.error('Error actualizando estadísticas:', err);
