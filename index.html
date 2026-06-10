@@ -1587,16 +1587,6 @@ async function cargarProfesionales() {
 
         todosLosServicios = data || [];
 
-        // Estadísticas públicas (sin mostrar pendientes)
-        const aprobados = todosLosServicios.filter(s => s.estado === 'aprobado').length;
-        document.getElementById('totalProfesionales').textContent = aprobados;
-
-        // Contar contactos totales
-        const { count: totalContactos } = await supabase
-            .from('contactos')
-            .select('*', { count: 'exact', head: true });
-        document.getElementById('totalContactos').textContent = totalContactos || 0;
-
         // Cargar categorías populares
         const categoriasCount = {};
         todosLosServicios.forEach(s => {
