@@ -786,28 +786,28 @@
                 <p style="font-size: 13px; line-height: 1.6;">Conectamos profesionales y clientes en toda Cuba. Tu talento, a un clic de distancia.</p>
             </div>
             
-            <!-- Columna 2: Enlaces rápidos -->
+            <!-- Columna 2: Enlaces rápidos (funcionales) -->
             <div>
                 <h3 style="color: var(--primary); margin-bottom: 15px;">Enlaces</h3>
                 <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 8px;"><a href="#" onclick="document.getElementById('btnPublicar').click(); return false;" style="color: var(--text-secondary); text-decoration: none;">📢 Publicar servicio</a></li>
-                    <li style="margin-bottom: 8px;"><a href="#" onclick="document.getElementById('btnLogin').click(); return false;" style="color: var(--text-secondary); text-decoration: none;">🔑 Iniciar sesión</a></li>
-                    <li style="margin-bottom: 8px;"><a href="#" id="footerContacto" style="color: var(--text-secondary); text-decoration: none;">📞 Contacto</a></li>
+                    <li style="margin-bottom: 8px;"><a href="#" onclick="event.preventDefault(); document.getElementById('btnPublicar').click(); return false;" style="color: var(--text-secondary); text-decoration: none; cursor: pointer;">📢 Publicar servicio</a></li>
+                    <li style="margin-bottom: 8px;"><a href="#" onclick="event.preventDefault(); document.getElementById('btnLogin').click(); return false;" style="color: var(--text-secondary); text-decoration: none; cursor: pointer;">🔑 Iniciar sesión</a></li>
                 </ul>
             </div>
             
-            <!-- Columna 3: Contacto y redes -->
+            <!-- Columna 3: Contacto y redes (funcional) -->
             <div>
                 <h3 style="color: var(--primary); margin-bottom: 15px;">Contacto</h3>
                 <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 8px;"><i class="fab fa-whatsapp" style="color: #25D366;"></i> <a href="#" style="color: var(--text-secondary); text-decoration: none;">+53 5XXXXXXXX</a></li>
+                    <li style="margin-bottom: 8px;"><i class="fab fa-whatsapp" style="color: #25D366;"></i> <span style="color: var(--text-secondary);">+53 55007966</span></li>
                     <li style="margin-bottom: 8px;"><i class="fas fa-envelope"></i> <a href="mailto:info@factorcuba.com" style="color: var(--text-secondary); text-decoration: none;">info@factorcuba.com</a></li>
                 </ul>
                 <div style="display: flex; gap: 15px; margin-top: 15px;">
-                    <a href="#" style="color: var(--text-secondary); font-size: 20px;"><i class="fab fa-instagram"></i></a>
-                    <a href="#" style="color: var(--text-secondary); font-size: 20px;"><i class="fab fa-telegram"></i></a>
-                    <a href="#" style="color: var(--text-secondary); font-size: 20px;"><i class="fab fa-facebook"></i></a>
+                    <span style="color: var(--text-secondary); font-size: 20px;"><i class="fab fa-instagram"></i></span>
+                    <span style="color: var(--text-secondary); font-size: 20px;"><i class="fab fa-telegram"></i></span>
+                    <span style="color: var(--text-secondary); font-size: 20px;"><i class="fab fa-facebook"></i></span>
                 </div>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 10px;">Próximamente</p>
             </div>
         </div>
         
@@ -819,7 +819,6 @@
         <p style="font-size: 12px; margin-top: 10px;">© 2026 - Todos los derechos reservados</p>
     </div>
 </footer>
-
 <!-- MODALES -->
 <div id="modalLogin" class="modal">
     <div class="modal-content">
