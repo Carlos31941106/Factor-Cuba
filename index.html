@@ -666,6 +666,16 @@
 .swal2-popup {
     z-index: 10000 !important;
 }
+        /* Estilos para el footer enriquecido */
+.footer a:hover {
+    color: var(--primary) !important;
+    transition: color 0.2s ease;
+}
+
+.footer h3 {
+    font-size: 16px;
+    font-weight: 600;
+}
     </style>
 </head>
 <body>
@@ -766,7 +776,49 @@
     </div>
 </div>
 
-<footer class="footer"><div class="container"><p>Factor Cuba - Conectando la economía cubana</p><p style="margin-top: 10px;">© 2025 - Todos los derechos reservados</p></div></footer>
+<footer class="footer">
+    <div class="container">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; text-align: left; margin-bottom: 30px;">
+            
+            <!-- Columna 1: Información -->
+            <div>
+                <h3 style="color: var(--primary); margin-bottom: 15px;">Factor Cuba</h3>
+                <p style="font-size: 13px; line-height: 1.6;">Conectamos profesionales y clientes en toda Cuba. Tu talento, a un clic de distancia.</p>
+            </div>
+            
+            <!-- Columna 2: Enlaces rápidos -->
+            <div>
+                <h3 style="color: var(--primary); margin-bottom: 15px;">Enlaces</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 8px;"><a href="#" onclick="document.getElementById('btnPublicar').click(); return false;" style="color: var(--text-secondary); text-decoration: none;">📢 Publicar servicio</a></li>
+                    <li style="margin-bottom: 8px;"><a href="#" onclick="document.getElementById('btnLogin').click(); return false;" style="color: var(--text-secondary); text-decoration: none;">🔑 Iniciar sesión</a></li>
+                    <li style="margin-bottom: 8px;"><a href="#" id="footerContacto" style="color: var(--text-secondary); text-decoration: none;">📞 Contacto</a></li>
+                </ul>
+            </div>
+            
+            <!-- Columna 3: Contacto y redes -->
+            <div>
+                <h3 style="color: var(--primary); margin-bottom: 15px;">Contacto</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 8px;"><i class="fab fa-whatsapp" style="color: #25D366;"></i> <a href="#" style="color: var(--text-secondary); text-decoration: none;">+53 5XXXXXXXX</a></li>
+                    <li style="margin-bottom: 8px;"><i class="fas fa-envelope"></i> <a href="mailto:info@factorcuba.com" style="color: var(--text-secondary); text-decoration: none;">info@factorcuba.com</a></li>
+                </ul>
+                <div style="display: flex; gap: 15px; margin-top: 15px;">
+                    <a href="#" style="color: var(--text-secondary); font-size: 20px;"><i class="fab fa-instagram"></i></a>
+                    <a href="#" style="color: var(--text-secondary); font-size: 20px;"><i class="fab fa-telegram"></i></a>
+                    <a href="#" style="color: var(--text-secondary); font-size: 20px;"><i class="fab fa-facebook"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Línea divisoria -->
+        <hr style="border-color: var(--border); margin: 20px 0;">
+        
+        <!-- Copyright -->
+        <p style="font-size: 12px;">Factor Cuba - Conectando la economía cubana</p>
+        <p style="font-size: 12px; margin-top: 10px;">© 2026 - Todos los derechos reservados</p>
+    </div>
+</footer>
 
 <!-- MODALES -->
 <div id="modalLogin" class="modal">
