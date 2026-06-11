@@ -681,11 +681,14 @@
 <body>
 
 <header class="header">
-   <div class="logo" style="display: flex; align-items: center; gap: 8px;">
-  <div class="logo">
+<div class="logo" style="display: flex; align-items: center; gap: 8px;">
     <img src="https://raw.githubusercontent.com/Carlos31941106/Factor-Cuba/main/1780705461586.png" 
          alt="Factor Cuba" 
-         style="height: 55px; width: auto;">
+         style="height: 55px; width: auto;"
+         onerror="this.style.display='none'; this.nextSibling.style.display='flex';">
+    <span style="display: none; align-items: center; font-size: 22px; font-weight: 700; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        Factor Cuba
+    </span>
 </div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
             <div id="userInfo" style="display: none; align-items: center; gap: 16px;">
