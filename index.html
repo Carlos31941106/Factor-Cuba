@@ -3215,43 +3215,6 @@ async function agregarSeccionCobrosAlAdmin() {
     }
 }
 
-// Modificar la función de admin panel para incluir la sección de cobros
-const originalCargarAdminPanel = cargarAdminPanel;
-async function cargarAdminPanelConCobros() {
-    await originalCargarAdminPanel();
-    await agregarSeccionCobrosAlAdmin();
-}
-window.cargarAdminPanel = cargarAdminPanelConCobros;
-
-// Modificar la función cargarAdminLista para añadir botón de exportar en contactos
-const originalCargarAdminLista = cargarAdminLista;
-async function cargarAdminListaConExport(tipo, ...args) {
-    await originalCargarAdminLista(tipo, ...args);
-    if (tipo === 'contactos') {
-        const listaDiv = document.getElementById('adminLista');
-        if (listaDiv && !document.getElementById('btnExportarContactosAdmin')) {
-            const exportBtn = document.createElement('div');
-            exportBtn.style.marginBottom = '16px';
-            exportBtn.style.textAlign = 'right';
-            exportBtn.innerHTML = '<button class="btn btn-excel" id="btnExportarContactosAdmin"><i class="fas fa-file-excel"></i> Exportar Contactos a Excel</button>';
-            const tabla = listaDiv.querySelector('.contactos-table');
-            if (tabla) tabla.parentNode.insertBefore(exportBtn, tabla);
-            document.getElementById('btnExportarContactosAdmin')?.addEventListener('click', exportarContactosExcelCompleto);
-        }
-        const statsDiv = listaDiv?.querySelector('.admin-stats');
-        if (statsDiv && !document.getElementById('btnExportarEstadisticasAdmin')) {
-            const exportStatsBtn = document.createElement('button');
-            exportStatsBtn.id = 'btnExportarEstadisticasAdmin';
-            exportStatsBtn.className = 'btn btn-excel';
-            exportStatsBtn.style.marginLeft = '10px';
-            exportStatsBtn.innerHTML = '<i class="fas fa-file-excel"></i> Exportar Estadísticas';
-            exportStatsBtn.onclick = exportarEstadisticasCompletas;
-            statsDiv.parentNode?.insertBefore(exportStatsBtn, statsDiv.nextSibling);
-        }
-    }
-}
-window.cargarAdminLista = cargarAdminListaConExport;
-
 // ==================== EVENTOS Y EVENT LISTENERS ====================
 document.getElementById('btnLogin').onclick = () => document.getElementById('modalLogin').style.display = 'flex';
 document.getElementById('btnLogout').onclick = logout;
