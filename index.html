@@ -2592,7 +2592,7 @@ async function cargarAdminPanel() {
         const { count: totalServiciosCount } = await supabase.from('oferentes').select('*', { count: 'exact', head: true });
         const { count: cambiosCount } = await supabase.from('cambios_pendientes').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
 
-        let html = `
+               let html = `
             <div class="dashboard-kpi-grid">
                 <div class="kpi-card"><div class="kpi-title">Total Usuarios</div><div class="kpi-value">${totalClientes || 0}</div><div class="kpi-sub">${totalProfesionales || 0} profesionales</div></div>
                 <div class="kpi-card"><div class="kpi-title">Leads Potenciales</div><div class="kpi-value">${leadsPotenciales}</div><div class="kpi-sub">contactos pendientes</div></div>
@@ -2618,6 +2618,9 @@ async function cargarAdminPanel() {
                 <button class="btn btn-outline" id="adminTabContactos" style="background:#8b5cf6; color:white;">📞 Contactos</button>
                 <button class="btn btn-outline" id="adminTabEstadisticas" style="background:#10b981; color:white;">📊 Estadísticas</button>
             </div>
+            <div style="margin: 16px 0; text-align: right;">
+                <button class="btn btn-primary" id="btnActualizarTasaAdmin"><i class="fas fa-dollar-sign"></i> Actualizar Tasa</button>
+            </div>
             <div id="adminLista"></div>
         `;
         content.innerHTML = html;
@@ -2639,6 +2642,18 @@ async function cargarAdminPanel() {
                 options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, max: 5, title: { display: true, text: 'Puntuación' } } } }
             });
         }
+
+        // Evento del botón Actualizar Tasa
+        document.getElementById('btnActualizarTasaAdmin')?.addEventListener('click', actualizarTasaManualAdmin);
+
+        await cargarAdminLista('pendiente');
+
+        document.getElementById('adminTabPendientes').onclick = () => cargarAdminLista('pendiente');
+        document.getElementById('adminTabAprobados').onclick = () => cargarAdminLista('aprobado');
+        document.getElementById('adminTabTodos').onclick = () => cargarAdminLista('todos');
+        document.getElementById('adminTabCambios').onclick = () => cargarAdminLista('cambios');
+        document.getElementById('adminTabContactos').onclick = () => cargarAdminLista('contactos');
+        document.getElementById('adminTabEstadisticas').onclick = () => cargarAdminLista('estadisticas');
 
         await cargarAdminLista('pendiente');
 
@@ -3164,7 +3179,151 @@ async function cargarAdminListaConExport(tipo, ...args) {
     }
 }
 window.cargarAdminLista = cargarAdminListaConExport;
+// Función para actualizar la tasa manualmente desde el admin
+async function actualizarTasaManualAdmin() {
+    const { value: nuevaTasa } = await Swal.fire({
+        title: 'Actualizar tasa de cambio',
+        html: 'Ingresa la tasa actual del mercado informal (CUP por 1 USD)<br><small>Puedes consultarla en <a href="https://eltoque.com" target="_blank">elToque.com</a></small>',
+        input: 'number',
+        inputValue: tasaCambioActual,
+        inputPlaceholder: 'Ejemplo: 545',
+        confirmButtonText: 'Guardar',
+        cancelButtonText: 'Cancelar',
+        showCancelButton: true
+    });
+    
+    if (nuevaTasa && nuevaTasa > 0) {
+        try {
+            // Actualizar en Supabase
+            await supabase
+                .from('configuracion')
+                .upsert({ clave: 'tasa_cambio_usd_cup', valor: nuevaTasa.toString() });
+            
+            tasaCambioActual = parseFloat(nuevaTasa);
+            mostrarToast(`✅ Tasa actualizada a 1 USD = ${tasaCambioActual} CUP`, 'success');
+            
+            // Recargar la sección de cobros si está visible
+            if (typeof cargarSeccionCobrosAdmin === 'function') {
+                await cargarSeccionCobrosAdmin();
+            }
+        } catch (error) {
+            console.error('Error guardando tasa:', error);
+            mostrarToast('❌ Error al guardar la tasa', 'error');
+        }
+    }
+}
+    // ====================== SECCIÓN DE COBROS ======================
 
+// Cargar sección de cobros en admin
+async function cargarSeccionCobrosAdmin() {
+    try {
+        const semana = obtenerSemanaActual();
+        const { data: profesionales } = await supabase.from('oferentes').select('id, nombre, email, telefono').eq('estado', 'aprobado');
+        const { data: contactosSem } = await supabase.from('contactos_semanales').select('*').eq('semana_inicio', semana.inicio);
+        const contactosMap = {};
+        contactosSem?.forEach(c => contactosMap[c.profesional_id] = c);
+        let totalUSD = 0, totalCUP = 0, totalContactos = 0, pendientes = 0, pagados = 0;
+        let html = `<div class="pagos-resumen"><div class="pagos-grid">
+            <div class="pago-card"><div class="valor">${contactosSem?.length || 0}</div><div class="label">Profesionales con contactos</div></div>
+            <div class="pago-card"><div class="valor">${totalContactos}</div><div class="label">Contactos esta semana</div></div>
+            <div class="pago-card"><div class="valor">${totalUSD.toFixed(2)} USD</div><div class="label">Total a cobrar</div></div>
+            <div class="pago-card"><div class="valor">${pendientes}</div><div class="label">Pendientes de pago</div></div>
+        </div><div style="margin-bottom:16px; text-align:center;">
+            <button class="btn btn-excel" id="btnExportarCobrosAdmin"><i class="fas fa-file-excel"></i> Exportar Cobros a Excel</button>
+            <button class="btn btn-primary" id="btnActualizarTasaAdmin" style="margin-left:10px;"><i class="fas fa-dollar-sign"></i> Actualizar Tasa</button>
+        </div>`;
+        html += `<div style="overflow-x:auto;"><table class="contactos-table"><thead><tr><th>Profesional</th><th>Email</th><th>Teléfono</th><th>Contactos</th><th>USD</th><th>CUP</th><th>Estado</th><th>Acción</th></tr></thead><tbody>`;
+        for (const p of profesionales) {
+            const c = contactosMap[p.id] || { contactos: 0, monto_usd: 0, monto_cup: 0, estado_pago: 'pendiente' };
+            totalContactos += c.contactos || 0;
+            totalUSD += c.monto_usd || 0;
+            totalCUP += c.monto_cup || 0;
+            if (c.estado_pago === 'pendiente') pendientes++;
+            if (c.estado_pago === 'pagado') pagados++;
+            html += `<tr>
+                <td><strong>${escapeHtml(p.nombre)}</strong></td>
+                <td>${escapeHtml(p.email || '')}</td>
+                <td>${escapeHtml(p.telefono)}</td>
+                <td style="text-align:center;">${c.contactos}</td>
+                <td style="text-align:center;">${c.monto_usd?.toFixed(2) || '0'} USD</td>
+                <td style="text-align:center;">${Math.round(c.monto_cup || 0).toLocaleString()} CUP</td>
+                <td style="text-align:center;"><span class="${c.estado_pago === 'pagado' ? 'estado-pagado' : 'estado-pendiente'}">${c.estado_pago === 'pagado' ? '✅ Pagado' : '⏳ Pendiente'}</span></td>
+                <td style="text-align:center;">${c.estado_pago !== 'pagado' && c.contactos > 0 ? `<button class="btn btn-success btn-sm" onclick="marcarPagoSemanal('${p.id}')">💰 Marcar Pagado</button>` : c.contactos > 0 ? '✅ Cobrado' : '—'}</td>
+            </td>`;
+        }
+        html += `</tbody></table></div></div>`;
+
+        // Actualizar los totales en el resumen
+        html = html.replace('class="valor">0</div><div class="label">Profesionales con contactos', `class="valor">${contactosSem?.length || 0}</div><div class="label">Profesionales con contactos`);
+        html = html.replace('class="valor">0</div><div class="label">Contactos esta semana', `class="valor">${totalContactos}</div><div class="label">Contactos esta semana`);
+        html = html.replace('class="valor">0.00 USD</div><div class="label">Total a cobrar', `class="valor">${totalUSD.toFixed(2)} USD</div><div class="label">Total a cobrar`);
+        html = html.replace('class="valor">0</div><div class="label">Pendientes de pago', `class="valor">${pendientes}</div><div class="label">Pendientes de pago`);
+
+        const seccion = document.getElementById('adminSeccionCobros');
+        if (seccion) seccion.innerHTML = html;
+        document.getElementById('btnExportarCobrosAdmin')?.addEventListener('click', exportarCobrosExcel);
+        document.getElementById('btnActualizarTasaAdmin')?.addEventListener('click', actualizarTasaManualAdmin);
+        
+    } catch (error) { console.error('Error cargando cobros:', error); }
+}
+
+// Función para exportar cobros a Excel
+async function exportarCobrosExcel() {
+    try {
+        const semana = obtenerSemanaActual();
+        const { data: profesionales } = await supabase.from('oferentes').select('id, nombre, email, telefono').eq('estado', 'aprobado');
+        const { data: contactosSem } = await supabase.from('contactos_semanales').select('*').eq('semana_inicio', semana.inicio);
+        const contactosMap = {};
+        contactosSem?.forEach(c => contactosMap[c.profesional_id] = c);
+        const data = profesionales.map(p => ({
+            'Profesional': p.nombre, 'Email': p.email || '', 'Teléfono': p.telefono,
+            'Contactos Semana': contactosMap[p.id]?.contactos || 0,
+            'Monto USD': (contactosMap[p.id]?.monto_usd || 0).toFixed(2),
+            'Monto CUP': Math.round(contactosMap[p.id]?.monto_cup || 0),
+            'Estado': contactosMap[p.id]?.estado_pago === 'pagado' ? 'Pagado' : 'Pendiente'
+        }));
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Cobros Semanales');
+        XLSX.writeFile(wb, `cobros_${semana.inicio}.xlsx`);
+        mostrarToast('✅ Exportado a Excel', 'success');
+    } catch (error) { mostrarToast('Error al exportar', 'error'); }
+}
+
+// Marcar pago semanal
+window.marcarPagoSemanal = async function(profesionalId) {
+    const confirmado = await mostrarConfirmacion('¿Marcar esta semana como pagada para este profesional?', 'Confirmar pago');
+    if (!confirmado) return;
+    try {
+        const semana = obtenerSemanaActual();
+        await supabase.from('contactos_semanales').update({ estado_pago: 'pagado', fecha_pago: new Date().toISOString() })
+            .eq('profesional_id', profesionalId).eq('semana_inicio', semana.inicio);
+        const { data: contacto } = await supabase.from('contactos_semanales').select('monto_usd, monto_cup, tasa_cambio_used')
+            .eq('profesional_id', profesionalId).eq('semana_inicio', semana.inicio).single();
+        if (contacto) {
+            await supabase.from('historial_pagos').insert([{
+                profesional_id: profesionalId, monto_usd: contacto.monto_usd, monto_cup: contacto.monto_cup,
+                tasa_cambio: contacto.tasa_cambio_used, fecha_pago: new Date().toISOString()
+            }]);
+        }
+        mostrarToast('✅ Pago registrado', 'success');
+        cargarAdminPanel();
+    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
+};
+
+// Agregar sección de cobros al admin
+async function agregarSeccionCobrosAlAdmin() {
+    const adminContent = document.getElementById('adminContent');
+    if (adminContent && !document.getElementById('adminSeccionCobros')) {
+        const seccion = document.createElement('div');
+        seccion.id = 'adminSeccionCobros';
+        seccion.className = 'pagos-section';
+        adminContent.appendChild(seccion);
+        await cargarSeccionCobrosAdmin();
+    } else if (adminContent && document.getElementById('adminSeccionCobros')) {
+        await cargarSeccionCobrosAdmin();
+    }
+}
 // ==================== EVENTOS Y EVENT LISTENERS ====================
 document.getElementById('btnLogin').onclick = () => document.getElementById('modalLogin').style.display = 'flex';
 document.getElementById('btnLogout').onclick = logout;
