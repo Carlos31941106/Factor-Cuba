@@ -2655,14 +2655,7 @@ async function cargarAdminPanel() {
         document.getElementById('adminTabContactos').onclick = () => cargarAdminLista('contactos');
         document.getElementById('adminTabEstadisticas').onclick = () => cargarAdminLista('estadisticas');
 
-        await cargarAdminLista('pendiente');
-
-        document.getElementById('adminTabPendientes').onclick = () => cargarAdminLista('pendiente');
-        document.getElementById('adminTabAprobados').onclick = () => cargarAdminLista('aprobado');
-        document.getElementById('adminTabTodos').onclick = () => cargarAdminLista('todos');
-        document.getElementById('adminTabCambios').onclick = () => cargarAdminLista('cambios');
-        document.getElementById('adminTabContactos').onclick = () => cargarAdminLista('contactos');
-        document.getElementById('adminTabEstadisticas').onclick = () => cargarAdminLista('estadisticas');
+        
 
     } catch (error) {
         console.error("Error cargando dashboard:", error);
