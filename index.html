@@ -658,6 +658,19 @@
         height: 45px !important;
     }
 }
+        /* Forzar SweetAlert por encima del modal de admin */
+.swal2-container {
+    z-index: 99999 !important;
+}
+
+.swal2-popup {
+    z-index: 100000 !important;
+}
+
+/* También forzar el backdrop */
+.swal2-backdrop-show {
+    z-index: 99998 !important;
+}
     </style>
 </head>
 <body>
