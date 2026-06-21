@@ -3223,7 +3223,6 @@ async function cargarSeccionCobrosAdmin() {
             <div class="pago-card"><div class="valor">${pendientes}</div><div class="label">Pendientes de pago</div></div>
         </div><div style="margin-bottom:16px; text-align:center;">
             <button class="btn btn-excel" id="btnExportarCobrosAdmin"><i class="fas fa-file-excel"></i> Exportar Cobros a Excel</button>
-            <button class="btn btn-primary" id="btnActualizarTasaAdmin" style="margin-left:10px;"><i class="fas fa-dollar-sign"></i> Actualizar Tasa</button>
         </div>`;
         html += `<div style="overflow-x:auto;"><table class="contactos-table"><thead><tr><th>Profesional</th><th>Email</th><th>Teléfono</th><th>Contactos</th><th>USD</th><th>CUP</th><th>Estado</th><th>Acción</th></tr></thead><tbody>`;
         for (const p of profesionales) {
@@ -3255,7 +3254,6 @@ async function cargarSeccionCobrosAdmin() {
         const seccion = document.getElementById('adminSeccionCobros');
         if (seccion) seccion.innerHTML = html;
         document.getElementById('btnExportarCobrosAdmin')?.addEventListener('click', exportarCobrosExcel);
-        document.getElementById('btnActualizarTasaAdmin')?.addEventListener('click', actualizarTasaManualAdmin);
         
     } catch (error) { console.error('Error cargando cobros:', error); }
 }
