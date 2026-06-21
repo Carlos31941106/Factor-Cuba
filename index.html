@@ -1699,7 +1699,6 @@ async function cargarProfesionales() {
             const subcategoriasDeCategoria = categoriasYSubcategorias[categoriaPrincipal].subcategorias.map(s => s.valor);
 
             if (subcategoria && subcategoriasDeCategoria.includes(subcategoria)) {
-                // Filtrar por subcategoría específica
                 const categoriaBD = subcategoriaToCategoriaBD[subcategoria];
                 if (categoriaBD) {
                     serviciosMostrar = serviciosMostrar.filter(s => 
@@ -1708,7 +1707,6 @@ async function cargarProfesionales() {
                     );
                 }
             } else {
-                // Filtrar por categoría principal (cualquiera de sus subcategorías)
                 const categoriasBD = [...new Set(subcategoriasDeCategoria.map(sc => subcategoriaToCategoriaBD[sc]).filter(Boolean))];
                 serviciosMostrar = serviciosMostrar.filter(s => 
                     categoriasBD.includes(s.categoria) ||
@@ -1723,6 +1721,7 @@ async function cargarProfesionales() {
             return;
         }
 
+        // ========== AQUÍ ESTÁ EL CAMBIO: LA TARJETA DEL PROFESIONAL ==========
         container.innerHTML = serviciosMostrar.map(s => `
             <div class="professional-card">
                 <div class="card-header">
@@ -1734,13 +1733,24 @@ async function cargarProfesionales() {
                 </div>
                 <div class="card-body">
                     ${renderStars(s.promedio_puntuacion, s.total_calificaciones)}
-                    <p><i class="fas fa-map-marker-alt" data-tooltip="Ubicación"></i> ${escapeHtml(s.municipio || s.zona || '')}, ${escapeHtml(s.provincia || '')}</p>
-                    <p><i class="fab fa-whatsapp" data-tooltip="WhatsApp"></i> ${escapeHtml(s.telefono)}</p>
+                    <p><i class="fas fa-map-marker-alt" data-tooltip="Ubicación"></i> ${escapeHtml(s.municipio || s.zona || ''), escapeHtml(s.provincia || '')}</p>
+                    
+                    <!-- ===== TELÉFONO OCULTO PARA NO REGISTRADOS ===== -->
+                    ${currentUser ? 
+                        `<p><i class="fab fa-whatsapp" data-tooltip="WhatsApp"></i> ${escapeHtml(s.telefono)}</p>` :
+                        `<p><i class="fas fa-lock" style="color: var(--warning);"></i> <span style="color: var(--text-muted);">Inicia sesión para ver el teléfono</span></p>`
+                    }
+                    
                     ${s.descripcion ? `<p><i class="fas fa-info-circle" data-tooltip="Descripción"></i> ${escapeHtml(s.descripcion.substring(0, 80))}${s.descripcion.length > 80 ? '...' : ''}</p>` : ''}
                 </div>
                 <div class="card-footer">
                     <button class="btn btn-outline" onclick="verPerfil('${s.id}')"><i class="fas fa-user"></i> Ver Perfil</button>
-                    <button class="btn btn-primary" onclick="abrirWhatsAppConRegistro('${escapeJsString(s.telefono)}', '${escapeJsString(s.nombre)}', '${s.id}')" style="background:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    
+                    <!-- ===== BOTÓN WHATSAPP OCULTO PARA NO REGISTRADOS ===== -->
+                    ${currentUser ? 
+                        `<button class="btn btn-primary" onclick="abrirWhatsAppConRegistro('${escapeJsString(s.telefono)}', '${escapeJsString(s.nombre)}', '${s.id}')" style="background:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp</button>` :
+                        `<button class="btn btn-warning" onclick="mostrarToast('Inicia sesión para contactar', 'info'); document.getElementById('modalLogin').style.display='flex';"><i class="fas fa-lock"></i> Inicia sesión</button>`
+                    }
                 </div>
             </div>
         `).join('');
@@ -1753,7 +1763,6 @@ async function cargarProfesionales() {
         mostrarToast('Error al cargar profesionales', 'error');
     }
 }
-
 function aplicarFiltroCategoria(categoria) {
     const selectCategoria = document.getElementById('categoriaPrincipalFilter');
     if (selectCategoria) {
@@ -1842,12 +1851,33 @@ window.verPerfil = async function(servicioId) {
                 </div>
                 <h3>${escapeHtml(servicio.nombre)}</h3>
                 <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(servicio.municipio || servicio.zona || '')}, ${escapeHtml(servicio.provincia || '')}</p>
-                <p><i class="fab fa-whatsapp"></i> ${escapeHtml(servicio.telefono)}</p>
+                
+                <!-- ===== TELÉFONO OCULTO PARA NO REGISTRADOS EN EL PERFIL ===== -->
+                ${currentUser ? 
+                    `<p><i class="fab fa-whatsapp"></i> ${escapeHtml(servicio.telefono)}</p>` :
+                    `<p><i class="fas fa-lock" style="color: var(--warning);"></i> <span style="color: var(--text-muted);">Inicia sesión para ver el teléfono</span></p>`
+                }
+                
                 ${servicio.descripcion ? `<p><i class="fas fa-info-circle"></i> ${escapeHtml(servicio.descripcion)}</p>` : ''}
+                
                 <div style="margin:15px 0;">
-                    <button class="btn btn-primary" onclick="abrirWhatsAppConRegistro('${escapeJsString(servicio.telefono)}', '${escapeJsString(servicio.nombre)}', '${servicio.id}')" style="background:#25D366;">
-                        💬 Contactar por WhatsApp
-                    </button>
+                    <!-- ===== BOTÓN WHATSAPP OCULTO PARA NO REGISTRADOS EN EL PERFIL ===== -->
+                    ${currentUser ? 
+                        `<button class="btn btn-primary" onclick="abrirWhatsAppConRegistro('${escapeJsString(servicio.telefono)}', '${escapeJsString(servicio.nombre)}', '${servicio.id}')" style="background:#25D366;">
+                            💬 Contactar por WhatsApp
+                        </button>` :
+                        `<div style="background: var(--warning-light); padding: 16px; border-radius: 12px; margin: 10px 0; text-align: center;">
+                            <i class="fas fa-lock" style="color: var(--warning); font-size: 24px;"></i>
+                            <p style="margin: 8px 0;"><strong>Regístrate para ver el teléfono y contactar al profesional</strong></p>
+                            <button class="btn btn-primary" onclick="document.getElementById('modalLogin').style.display='flex'">
+                                <i class="fas fa-sign-in-alt"></i> Iniciar sesión
+                            </button>
+                            <button class="btn btn-outline" onclick="document.getElementById('modalRegistro').style.display='flex'">
+                                <i class="fas fa-user-plus"></i> Registrarme
+                            </button>
+                        </div>`
+                    }
+                    
                     ${puedeCalificar ? `<button class="btn btn-warning" style="margin-top:10px; width:100%;" onclick="window.mostrarModalResena('${servicio.id}', '${escapeJsString(servicio.nombre)}')"><i class="fas fa-star"></i> Calificar servicio</button>` : ''}
                     ${esMiPerfil ? `<button class="btn btn-outline" id="btnEditarPerfilDesdeVista" style="margin-top:10px;"><i class="fas fa-edit"></i> Editar Perfil</button>` : ''}
                     ${esMiPerfil ? `<button class="btn btn-outline" id="btnGestionServiciosDesdeVista" style="margin-top:10px;"><i class="fas fa-list-ul"></i> Gestionar Servicios</button>` : ''}
@@ -1875,7 +1905,6 @@ window.verPerfil = async function(servicioId) {
         });
     }
 };
-
 // ==================== ABRIR EDITAR PERFIL ====================
 window.abrirEditarPerfil = async function(servicioId) {
     const servicio = todosLosServicios.find(s => s.id === servicioId);
