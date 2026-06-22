@@ -1,0 +1,38 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create config.js with Supabase keys
+        run: |
+          echo "// ⚠️ Este archivo es generado automáticamente por GitHub Actions" > config.js
+          echo "// No modificar manualmente" >> config.js
+          echo "" >> config.js
+          echo "window.SUPABASE_URL = '${{ secrets.SUPABASE_URL }}';" >> config.js
+          echo "window.SUPABASE_ANON_KEY = '${{ secrets.SUPABASE_ANON_KEY }}';" >> config.js
+          echo "" >> config.js
+          echo "console.log('✅ Configuración de Supabase cargada');" >> config.js
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          publish_branch: gh-pages
+          keep_files: false
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Deploy automático con configuración segura'
