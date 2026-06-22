@@ -1,0 +1,6 @@
+# Configuración de Supabase (generada automáticamente)
+config.js
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
