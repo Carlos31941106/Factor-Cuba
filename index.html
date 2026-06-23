@@ -2979,6 +2979,8 @@ window.rechazarCambioIndividual = async function(cambioId) {
 
 // ==================== TASA DE CAMBIO (100% MANUAL) ====================
 // Cargar tasa desde Supabase (sin internet)
+// ==================== TASA DE CAMBIO (100% MANUAL) ====================
+// Cargar tasa desde Supabase (sin internet)
 async function cargarTasaElToque() {
     try {
         const { data: config, error } = await supabase
@@ -2999,7 +3001,7 @@ async function cargarTasaElToque() {
             console.log('ℹ️ Tasa inicial creada: 1 USD = 450 CUP');
         }
     } catch (error) {
-        console.error('Error cargando tasa:', error);
+        console.error('❌ Error cargando tasa:', error);
         if (!tasaCambioActual) tasaCambioActual = 450;
     }
 }
