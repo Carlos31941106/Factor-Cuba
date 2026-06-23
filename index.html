@@ -1256,6 +1256,54 @@ async function registrarContacto(profesionalId, profesionalNombre, servicioNombr
         return false;
     }
 }
+    // ==================== ABRIR WHATSAPP ====================
+async function abrirWhatsAppConRegistro(telefono, nombre, profesionalId, servicioNombre = null) {
+    if (!currentUser) {
+        mostrarToast('⚠️ Debes iniciar sesión para contactar al profesional', 'info');
+        document.getElementById('modalLogin').style.display = 'flex';
+        return;
+    }
+
+    if (!telefono) {
+        mostrarToast('❌ El profesional no tiene número de teléfono registrado', 'error');
+        return;
+    }
+
+    try {
+        // Registrar el contacto
+        const registrado = await registrarContacto(profesionalId, nombre, servicioNombre);
+        if (!registrado) {
+            mostrarToast('⚠️ No se pudo registrar el contacto, pero puedes intentar de nuevo', 'warning');
+        }
+
+        // Limpiar número de teléfono
+        let numeroLimpio = telefono.replace(/[^0-9]/g, '');
+        if (!numeroLimpio.startsWith('53')) {
+            numeroLimpio = '53' + numeroLimpio;
+        }
+        const numeroFormateado = '+' + numeroLimpio;
+
+        // Construir mensaje
+        let mensaje = `Hola, vi tu perfil "${nombre}" en Factor Cuba y me interesa tu servicio.`;
+        if (servicioNombre) {
+            mensaje = `Hola, vi tu perfil "${nombre}" en Factor Cuba y me interesa tu servicio de "${servicioNombre}".`;
+        }
+
+        const mensajeEncoded = encodeURIComponent(mensaje);
+        const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // Abrir WhatsApp
+        if (esMovil) {
+            window.location.href = `whatsapp://send?phone=${numeroFormateado}&text=${mensajeEncoded}`;
+        } else {
+            window.open(`https://web.whatsapp.com/send?phone=${numeroFormateado}&text=${mensajeEncoded}`, '_blank');
+        }
+
+    } catch (error) {
+        console.error('❌ Error al abrir WhatsApp:', error);
+        mostrarToast('❌ Error al contactar al profesional. Intenta de nuevo.', 'error');
+    }
+}
 // ==================== RECUPERAR CONTRASEÑA ====================
 async function enviarRecuperacion() {
     const email = document.getElementById('recuperarEmail').value.trim();
