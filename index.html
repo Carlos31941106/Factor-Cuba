@@ -3047,17 +3047,59 @@ async function registrarContactoSemanal(profesionalId) {
 
 // Obtener información de pago para profesional
 async function obtenerInfoPagoProfesional(profesionalId) {
-    const semana = obtenerSemanaActual();
-    const { data: semanaActual } = await supabase.from('contactos_semanales').select('*')
-        .eq('profesional_id', profesionalId).eq('semana_inicio', semana.inicio).maybeSingle();
-    const { data: historial } = await supabase.from('contactos_semanales').select('*')
-        .eq('profesional_id', profesionalId).order('semana_inicio', { ascending: false }).limit(5);
-    return {
-        semanaActual: semanaActual || { contactos: 0, monto_usd: 0, monto_cup: 0, estado_pago: 'pendiente' },
-        historial: historial || [],
-        tarifa: tarifaContactoUSD,
-        tasa: tasaCambioActual
-    };
+    if (!profesionalId) {
+        console.error('❌ profesionalId es requerido');
+        return {
+            semanaActual: { contactos: 0, monto_usd: 0, monto_cup: 0, estado_pago: 'pendiente' },
+            historial: [],
+            tarifa: tarifaContactoUSD,
+            tasa: tasaCambioActual
+        };
+    }
+
+    try {
+        const semana = obtenerSemanaActual();
+
+        // Obtener semana actual
+        const { data: semanaActual, error: semanaError } = await supabase
+            .from('contactos_semanales')
+            .select('*')
+            .eq('profesional_id', profesionalId)
+            .eq('semana_inicio', semana.inicio)
+            .maybeSingle();
+
+        if (semanaError) throw semanaError;
+
+        // Obtener historial
+        const { data: historial, error: historialError } = await supabase
+            .from('contactos_semanales')
+            .select('*')
+            .eq('profesional_id', profesionalId)
+            .order('semana_inicio', { ascending: false })
+            .limit(5);
+
+        if (historialError) throw historialError;
+
+        return {
+            semanaActual: semanaActual || { 
+                contactos: 0, 
+                monto_usd: 0, 
+                monto_cup: 0, 
+                estado_pago: 'pendiente' 
+            },
+            historial: historial || [],
+            tarifa: tarifaContactoUSD,
+            tasa: tasaCambioActual
+        };
+    } catch (error) {
+        console.error('❌ Error obteniendo info de pago:', error);
+        return {
+            semanaActual: { contactos: 0, monto_usd: 0, monto_cup: 0, estado_pago: 'pendiente' },
+            historial: [],
+            tarifa: tarifaContactoUSD,
+            tasa: tasaCambioActual
+        };
+    }
 }
 
 // Ver historial de pagos del profesional
