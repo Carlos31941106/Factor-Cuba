@@ -2243,10 +2243,18 @@ async function abrirPanelProfesional() {
         verHistorialPagosProfesional(profesional.id, profesional.nombre);
     };
     // ✅ Botón para actualizar datos
-document.getElementById('panelActualizarDatos').onclick = () => {
-    modal.remove();
+document.getElementById('panelActualizarDatos').onclick = function() {
+    // Cerrar el modal actual
+    const modalActual = this.closest('.modal');
+    if (modalActual) {
+        modalActual.style.display = 'none';
+        modalActual.remove();
+    }
     mostrarToast('🔄 Actualizando datos...', 'info');
-    setTimeout(() => abrirPanelProfesional(), 300);
+    // Esperar medio segundo y reabrir
+    setTimeout(() => {
+        abrirPanelProfesional();
+    }, 500);
 };
 }
 
