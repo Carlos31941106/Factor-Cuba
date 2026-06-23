@@ -3247,25 +3247,105 @@ async function cargarSeccionCobrosAdmin() {
 
 // Marcar pago semanal
 window.marcarPagoSemanal = async function(profesionalId) {
-    const confirmado = await mostrarConfirmacion('¿Marcar esta semana como pagada para este profesional?', 'Confirmar pago');
-    if (!confirmado) return;
-    try {
-        const semana = obtenerSemanaActual();
-        await supabase.from('contactos_semanales').update({ estado_pago: 'pagado', fecha_pago: new Date().toISOString() })
-            .eq('profesional_id', profesionalId).eq('semana_inicio', semana.inicio);
-        const { data: contacto } = await supabase.from('contactos_semanales').select('monto_usd, monto_cup, tasa_cambio_used')
-            .eq('profesional_id', profesionalId).eq('semana_inicio', semana.inicio).single();
-        if (contacto) {
-            await supabase.from('historial_pagos').insert([{
-                profesional_id: profesionalId, monto_usd: contacto.monto_usd, monto_cup: contacto.monto_cup,
-                tasa_cambio: contacto.tasa_cambio_used, fecha_pago: new Date().toISOString()
-            }]);
-        }
-        mostrarToast('✅ Pago registrado', 'success');
-        cargarAdminPanel();
-    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
-};
+    if (!profesionalId) {
+        mostrarToast('❌ Profesional no válido', 'error');
+        return;
+    }
 
+    // Verificar si hay contactos esta semana
+    const semana = obtenerSemanaActual();
+    const { data: semanaData, error: semanaError } = await supabase
+        .from('contactos_semanales')
+        .select('contactos, id')
+        .eq('profesional_id', profesionalId)
+        .eq('semana_inicio', semana.inicio)
+        .maybeSingle();
+
+    if (semanaError) {
+        mostrarToast('❌ Error al verificar contactos', 'error');
+        return;
+    }
+
+    if (!semanaData || semanaData.contactos === 0) {
+        mostrarToast('⚠️ Este profesional no tiene contactos esta semana', 'warning');
+        return;
+    }
+
+    const confirmado = await mostrarConfirmacion(
+        `¿Marcar ${semanaData.contactos} contacto(s) como pagados para este profesional?`,
+        'Confirmar pago'
+    );
+    if (!confirmado) return;
+
+    try {
+        // 1. Actualizar pago semanal
+        const { error: updateError } = await supabase
+            .from('contactos_semanales')
+            .update({ 
+                estado_pago: 'pagado', 
+                fecha_pago: new Date().toISOString() 
+            })
+            .eq('profesional_id', profesionalId)
+            .eq('semana_inicio', semana.inicio);
+
+        if (updateError) throw updateError;
+
+        // 2. ✅ NUEVO: Actualizar TODOS los contactos individuales de esta semana
+        const { data: contactos, error: findError } = await supabase
+            .from('contactos')
+            .select('id')
+            .eq('profesional_id', profesionalId)
+            .gte('fecha_contacto', new Date(semana.inicio).toISOString())
+            .lte('fecha_contacto', new Date(semana.fin).toISOString())
+            .eq('estado', 'pendiente');
+
+        if (findError) throw findError;
+
+        if (contactos && contactos.length > 0) {
+            const ids = contactos.map(c => c.id);
+            const { error: updateContactosError } = await supabase
+                .from('contactos')
+                .update({ estado: 'pagado' })
+                .in('id', ids);
+
+            if (updateContactosError) throw updateContactosError;
+        }
+
+        // 3. Guardar en historial
+        const { data: contacto, error: histError } = await supabase
+            .from('contactos_semanales')
+            .select('monto_usd, monto_cup, tasa_cambio_used')
+            .eq('profesional_id', profesionalId)
+            .eq('semana_inicio', semana.inicio)
+            .single();
+
+        if (histError) throw histError;
+
+        if (contacto) {
+            const { error: insertHistError } = await supabase
+                .from('historial_pagos')
+                .insert([{
+                    profesional_id: profesionalId,
+                    monto_usd: contacto.monto_usd,
+                    monto_cup: contacto.monto_cup,
+                    tasa_cambio: contacto.tasa_cambio_used,
+                    fecha_pago: new Date().toISOString(),
+                    contactos: semanaData.contactos
+                }]);
+
+            if (insertHistError) throw insertHistError;
+        }
+
+        mostrarToast(`✅ Pago registrado: ${semanaData.contactos} contacto(s)`, 'success');
+        await cargarAdminPanel();
+        await cargarSeccionCobrosAdmin();
+        await cargarProfesionales();
+
+    } catch (err) {
+        console.error('❌ Error al marcar pago:', err);
+        mostrarToast('❌ Error al registrar el pago: ' + err.message, 'error');
+    }
+};
 // Agregar sección de cobros al admin
 async function agregarSeccionCobrosAlAdmin() {
     const adminContent = document.getElementById('adminContent');
