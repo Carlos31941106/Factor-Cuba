@@ -2242,6 +2242,12 @@ async function abrirPanelProfesional() {
         modal.remove();
         verHistorialPagosProfesional(profesional.id, profesional.nombre);
     };
+    // ✅ Botón para actualizar datos
+document.getElementById('panelActualizarDatos').onclick = () => {
+    modal.remove();
+    mostrarToast('🔄 Actualizando datos...', 'info');
+    setTimeout(() => abrirPanelProfesional(), 300);
+};
 }
 
 // ==================== ESTADÍSTICAS PROFESIONALES ====================
