@@ -2160,7 +2160,13 @@ async function abrirPanelProfesional() {
         return;
     }
 
-    const infoPago = await obtenerInfoPagoProfesional(profesional.id);
+    // ✅ Asegurar que infoPago siempre tenga un valor
+const infoPago = await obtenerInfoPagoProfesional(profesional.id) || {
+    semanaActual: { contactos: 0, monto_usd: 0, monto_cup: 0, estado_pago: 'pendiente' },
+    historial: [],
+    tarifa: tarifaContactoUSD,
+    tasa: tasaCambioActual
+};
     const semana = obtenerSemanaActual();
     const fechaVencimiento = new Date(semana.fin);
     const diasRestantes = Math.ceil((fechaVencimiento - new Date()) / (1000 * 60 * 60 * 24));
