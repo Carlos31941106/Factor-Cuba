@@ -1244,36 +1244,44 @@ async function registrarContacto(profesionalId, profesionalNombre, servicioNombr
     }
 }
 
-async function abrirWhatsAppConRegistro(telefono, nombre, profesionalId, servicioNombre = null) {
+async function registrarContacto(profesionalId, profesionalNombre, servicioNombre = null) {
     if (!currentUser) {
-        mostrarToast('⚠️ Debes iniciar sesión para contactar al profesional', 'info');
+        mostrarToast('Debes iniciar sesión para contactar al profesional', 'info');
         document.getElementById('modalLogin').style.display = 'flex';
-        return;
+        return false;
     }
-    
-    await registrarContacto(profesionalId, nombre, servicioNombre);
-    
-    let numeroLimpio = telefono.replace(/[^0-9]/g, '');
-    if (!numeroLimpio.startsWith('53')) {
-        numeroLimpio = '53' + numeroLimpio;
-    }
-    const numeroFormateado = '+' + numeroLimpio;
-    
-    let mensaje = `Hola, vi tu perfil "${nombre}" en Factor Cuba y me interesa tu servicio.`;
-    if (servicioNombre) {
-        mensaje = `Hola, vi tu perfil "${nombre}" en Factor Cuba y me interesa tu servicio de "${servicioNombre}".`;
-    }
-    
-    const mensajeEncoded = encodeURIComponent(mensaje);
-    const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (esMovil) {
-        window.location.href = `whatsapp://send?phone=${numeroFormateado}&text=${mensajeEncoded}`;
-    } else {
-        window.open(`https://web.whatsapp.com/send?phone=${numeroFormateado}&text=${mensajeEncoded}`);
+
+    try {
+        // Insertar contacto con estado 'pendiente'
+        const { error: insertError } = await supabase.from('contactos').insert([{
+            profesional_id: profesionalId,
+            cliente_id: currentUser.id,
+            fecha_contacto: new Date().toISOString(),
+            estado: 'pendiente'
+        }]);
+
+        if (insertError) throw insertError;
+
+        // Registrar contacto semanal
+        const semanalOk = await registrarContactoSemanal(profesionalId);
+        if (!semanalOk) {
+            console.warn('⚠️ Contacto semanal no registrado, pero el contacto principal sí');
+        }
+
+        // Incrementar contador (si existe la función RPC)
+        try {
+            await supabase.rpc('incrementar_contactos', { p_profesional_id: profesionalId });
+        } catch (rpcError) {
+            console.warn('⚠️ RPC incrementar_contactos no disponible:', rpcError);
+        }
+
+        return true;
+    } catch (err) {
+        console.error('❌ Error registrando contacto:', err);
+        mostrarToast('❌ Error al registrar el contacto. Intenta de nuevo.', 'error');
+        return false;
     }
 }
-
 // ==================== RECUPERAR CONTRASEÑA ====================
 async function enviarRecuperacion() {
     const email = document.getElementById('recuperarEmail').value.trim();
