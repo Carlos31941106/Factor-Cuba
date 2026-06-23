@@ -2988,27 +2988,61 @@ function obtenerSemanaActual() {
 
 // Registrar contacto semanal
 async function registrarContactoSemanal(profesionalId) {
+    if (!profesionalId) {
+        console.error('❌ profesionalId es requerido');
+        return false;
+    }
+
     try {
         const semana = obtenerSemanaActual();
-        const { data: existing } = await supabase.from('contactos_semanales').select('id, contactos')
-            .eq('profesional_id', profesionalId).eq('semana_inicio', semana.inicio).maybeSingle();
+        
+        // Buscar si ya existe registro para esta semana
+        const { data: existing, error: findError } = await supabase
+            .from('contactos_semanales')
+            .select('id, contactos')
+            .eq('profesional_id', profesionalId)
+            .eq('semana_inicio', semana.inicio)
+            .maybeSingle();
+
+        if (findError) throw findError;
+
         if (existing) {
+            // Actualizar registro existente
             const nuevosContactos = (existing.contactos || 0) + 1;
-            await supabase.from('contactos_semanales').update({
-                contactos: nuevosContactos,
-                monto_usd: nuevosContactos * tarifaContactoUSD,
-                monto_cup: nuevosContactos * tarifaContactoUSD * tasaCambioActual
-            }).eq('id', existing.id);
+            const { error: updateError } = await supabase
+                .from('contactos_semanales')
+                .update({
+                    contactos: nuevosContactos,
+                    monto_usd: nuevosContactos * tarifaContactoUSD,
+                    monto_cup: nuevosContactos * tarifaContactoUSD * tasaCambioActual,
+                    estado_pago: 'pendiente' // ✅ Siempre pendiente al actualizar
+                })
+                .eq('id', existing.id);
+
+            if (updateError) throw updateError;
         } else {
-            await supabase.from('contactos_semanales').insert([{
-                profesional_id: profesionalId,
-                semana_inicio: semana.inicio, semana_fin: semana.fin,
-                contactos: 1, monto_usd: tarifaContactoUSD,
-                monto_cup: tarifaContactoUSD * tasaCambioActual,
-                tasa_cambio_used: tasaCambioActual, estado_pago: 'pendiente'
-            }]);
+            // Crear nuevo registro
+            const { error: insertError } = await supabase
+                .from('contactos_semanales')
+                .insert([{
+                    profesional_id: profesionalId,
+                    semana_inicio: semana.inicio,
+                    semana_fin: semana.fin,
+                    contactos: 1,
+                    monto_usd: tarifaContactoUSD,
+                    monto_cup: tarifaContactoUSD * tasaCambioActual,
+                    tasa_cambio_used: tasaCambioActual,
+                    estado_pago: 'pendiente' // ✅ Siempre pendiente al crear
+                }]);
+
+            if (insertError) throw insertError;
         }
-    } catch (error) { console.error('Error registro semanal:', error); }
+
+        return true;
+    } catch (error) {
+        console.error('❌ Error registro semanal:', error);
+        return false;
+    }
 }
 
 // Obtener información de pago para profesional
