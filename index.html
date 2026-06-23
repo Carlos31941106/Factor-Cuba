@@ -1226,32 +1226,6 @@ async function registrarContacto(profesionalId, profesionalNombre, servicioNombr
     }
 
     try {
-        await supabase.from('contactos').insert([{
-            profesional_id: profesionalId,
-            cliente_id: currentUser.id,
-            fecha_contacto: new Date().toISOString(),
-            estado: 'pendiente'
-        }]);
-
-        await registrarContactoSemanal(profesionalId);
-
-        await supabase.rpc('incrementar_contactos', { p_profesional_id: profesionalId }).catch(() => {});
-
-        return true;
-    } catch (err) {
-        console.error('Error registrando contacto:', err);
-        return true;
-    }
-}
-
-async function registrarContacto(profesionalId, profesionalNombre, servicioNombre = null) {
-    if (!currentUser) {
-        mostrarToast('Debes iniciar sesión para contactar al profesional', 'info');
-        document.getElementById('modalLogin').style.display = 'flex';
-        return false;
-    }
-
-    try {
         // Insertar contacto con estado 'pendiente'
         const { error: insertError } = await supabase.from('contactos').insert([{
             profesional_id: profesionalId,
