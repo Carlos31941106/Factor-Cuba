@@ -2874,16 +2874,52 @@ async function cargarAdminLista(tipo) {
 
 // Funciones admin globales
 window.marcarContactoPagado = async function(contactoId) {
-    const confirmado = await mostrarConfirmacion('¿Marcar este contacto como pagado?', 'Confirmar pago');
+    if (!contactoId) {
+        mostrarToast('❌ Contacto no válido', 'error');
+        return;
+    }
+
+    const confirmado = await mostrarConfirmacion(
+        '¿Marcar este contacto como pagado?',
+        'Confirmar pago'
+    );
     if (!confirmado) return;
+
     try {
-        const { error } = await supabase.from('contactos').update({ estado: 'pagado' }).eq('id', contactoId);
-        if (error) throw error;
+        // Verificar que el contacto existe y está pendiente
+        const { data: contacto, error: findError } = await supabase
+            .from('contactos')
+            .select('profesional_id, estado')
+            .eq('id', contactoId)
+            .single();
+
+        if (findError || !contacto) {
+            mostrarToast('❌ Contacto no encontrado', 'error');
+            return;
+        }
+
+        if (contacto.estado === 'pagado') {
+            mostrarToast('⚠️ Este contacto ya está marcado como pagado', 'warning');
+            return;
+        }
+
+        // Actualizar el contacto
+        const { error: updateError } = await supabase
+            .from('contactos')
+            .update({ estado: 'pagado' })
+            .eq('id', contactoId);
+
+        if (updateError) throw updateError;
+
         mostrarToast('✅ Contacto marcado como pagado', 'success');
         await cargarAdminLista('contactos');
         await cargarAdminPanel();
         await cargarProfesionales();
-    } catch (err) { mostrarToast('Error: ' + err.message, 'error'); }
+
+    } catch (err) {
+        console.error('❌ Error al marcar contacto:', err);
+        mostrarToast('❌ Error: ' + err.message, 'error');
+    }
 };
 
 window.aprobarServicio = async function(id) {
