@@ -2228,19 +2228,23 @@ const infoPago = await obtenerInfoPagoProfesional(profesional.id) || {
             <div class="pago-profesional-card">
                 <div class="titulo"><i class="fas fa-dollar-sign"></i> Resumen de Cobros</div>
                 <div class="pago-detalle">
-                    <div>
-                        <div style="font-size:24px; font-weight:800; color:var(--primary);">${infoPago?.semanaActual.contactos || 0}</div>
-                        <div style="font-size:12px;">Contactos esta semana</div>
-                    </div>
-                    <div>
-                        <div style="font-size:24px; font-weight:800; color:var(--success);">${(infoPago?.semanaActual.monto_usd || 0).toFixed(2)} USD</div>
-                        <div style="font-size:12px;">Monto a pagar</div>
-                    </div>
-                    <div>
-                        <div style="font-size:24px; font-weight:800; color:var(--warning);">${Math.round(infoPago?.semanaActual.monto_cup || 0).toLocaleString()} CUP</div>
-                        <div style="font-size:12px;">≈ al cambio (1 USD = ${tasaCambioActual} CUP)</div>
-                    </div>
-                </div>
+    <div>
+        <div style="font-size:24px; font-weight:800; color:var(--primary);">${infoPago?.semanaActual.contactos_pendientes || 0}</div>
+        <div style="font-size:12px;">Contactos pendientes</div>
+    </div>
+    <div>
+        <div style="font-size:20px; font-weight:600; color:var(--text-muted);">${infoPago?.detalle?.pagados || 0}</div>
+        <div style="font-size:12px; color:var(--text-muted);">Ya pagados</div>
+    </div>
+    <div>
+        <div style="font-size:24px; font-weight:800; color:var(--success);">${(infoPago?.semanaActual.monto_usd || 0).toFixed(2)} USD</div>
+        <div style="font-size:12px;">Monto a pagar</div>
+    </div>
+    <div>
+        <div style="font-size:24px; font-weight:800; color:var(--warning);">${Math.round(infoPago?.semanaActual.monto_cup || 0).toLocaleString()} CUP</div>
+        <div style="font-size:12px;">≈ al cambio (1 USD = ${tasaCambioActual} CUP)</div>
+    </div>
+</div>
                 ${estadoPagoHtml}
                 <div style="margin-top:12px; font-size:11px; color:var(--text-muted); text-align:center;">
                     <i class="fas fa-info-circle"></i> Tarifa por contacto: ${tarifaContactoUSD} USD | 
@@ -3114,6 +3118,7 @@ async function registrarContactoSemanal(profesionalId) {
 }
 
 // Obtener información de pago para profesional
+// Obtener información de pago para profesional (CON RECARGA FORZADA)
 async function obtenerInfoPagoProfesional(profesionalId) {
     if (!profesionalId) {
         console.error('❌ profesionalId es requerido');
@@ -3121,14 +3126,15 @@ async function obtenerInfoPagoProfesional(profesionalId) {
             semanaActual: { contactos: 0, monto_usd: 0, monto_cup: 0, estado_pago: 'pendiente' },
             historial: [],
             tarifa: tarifaContactoUSD,
-            tasa: tasaCambioActual
+            tasa: tasaCambioActual,
+            detalle: { pendientes: 0, pagados: 0 }
         };
     }
 
     try {
         const semana = obtenerSemanaActual();
 
-        // Obtener semana actual
+        // ✅ Obtener semana actual (con estado de pago)
         const { data: semanaActual, error: semanaError } = await supabase
             .from('contactos_semanales')
             .select('*')
@@ -3138,7 +3144,33 @@ async function obtenerInfoPagoProfesional(profesionalId) {
 
         if (semanaError) throw semanaError;
 
-        // Obtener historial
+        // ✅ Obtener contactos PENDIENTES de esta semana
+        const { data: contactosPendientes, error: pendientesError } = await supabase
+            .from('contactos')
+            .select('*')
+            .eq('profesional_id', profesionalId)
+            .gte('fecha_contacto', new Date(semana.inicio).toISOString())
+            .lte('fecha_contacto', new Date(semana.fin).toISOString())
+            .eq('estado', 'pendiente');
+
+        if (pendientesError) throw pendientesError;
+
+        // ✅ Obtener contactos PAGADOS de esta semana
+        const { data: contactosPagados, error: pagadosError } = await supabase
+            .from('contactos')
+            .select('*')
+            .eq('profesional_id', profesionalId)
+            .gte('fecha_contacto', new Date(semana.inicio).toISOString())
+            .lte('fecha_contacto', new Date(semana.fin).toISOString())
+            .eq('estado', 'pagado');
+
+        if (pagadosError) throw pagadosError;
+
+        // ✅ Calcular montos solo con contactos pendientes
+        const totalPendientes = contactosPendientes?.length || 0;
+        const totalPagados = contactosPagados?.length || 0;
+
+        // ✅ Obtener historial actualizado
         const { data: historial, error: historialError } = await supabase
             .from('contactos_semanales')
             .select('*')
@@ -3148,16 +3180,41 @@ async function obtenerInfoPagoProfesional(profesionalId) {
 
         if (historialError) throw historialError;
 
+        // ✅ Construir objeto con información separada
+        const semanaData = semanaActual || {
+            contactos: 0,
+            contactos_pendientes: 0,
+            contactos_pagados: 0,
+            monto_usd: 0,
+            monto_cup: 0,
+            estado_pago: 'pendiente'
+        };
+
+        // ✅ Actualizar con los conteos reales
+        semanaData.contactos_pendientes = totalPendientes;
+        semanaData.contactos_pagados = totalPagados;
+        semanaData.contactos = totalPendientes; // Para mantener compatibilidad
+
+        // ✅ Recalcular montos solo con pendientes
+        semanaData.monto_usd = totalPendientes * tarifaContactoUSD;
+        semanaData.monto_cup = totalPendientes * tarifaContactoUSD * tasaCambioActual;
+
+        // ✅ Determinar estado de pago
+        if (totalPendientes === 0 && totalPagados > 0) {
+            semanaData.estado_pago = 'pagado';
+        } else if (totalPendientes > 0) {
+            semanaData.estado_pago = 'pendiente';
+        }
+
         return {
-            semanaActual: semanaActual || { 
-                contactos: 0, 
-                monto_usd: 0, 
-                monto_cup: 0, 
-                estado_pago: 'pendiente' 
-            },
+            semanaActual: semanaData,
             historial: historial || [],
             tarifa: tarifaContactoUSD,
-            tasa: tasaCambioActual
+            tasa: tasaCambioActual,
+            detalle: {
+                pendientes: totalPendientes,
+                pagados: totalPagados
+            }
         };
     } catch (error) {
         console.error('❌ Error obteniendo info de pago:', error);
@@ -3165,11 +3222,11 @@ async function obtenerInfoPagoProfesional(profesionalId) {
             semanaActual: { contactos: 0, monto_usd: 0, monto_cup: 0, estado_pago: 'pendiente' },
             historial: [],
             tarifa: tarifaContactoUSD,
-            tasa: tasaCambioActual
+            tasa: tasaCambioActual,
+            detalle: { pendientes: 0, pagados: 0 }
         };
     }
 }
-
 // Ver historial de pagos del profesional
 async function verHistorialPagosProfesional(profesionalId, profesionalNombre) {
     try {
