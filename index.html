@@ -2401,29 +2401,30 @@ const infoPago = await obtenerInfoPagoProfesional(profesional.id) || {
         modal.remove();
         verHistorialPagosProfesional(profesional.id, profesional.nombre);
     };
-    // ✅ Botón para actualizar datos
-document.getElementById('panelActualizarDatos').onclick = function() {
-    // Cerrar el modal actual
-    const modalActual = this.closest('.modal');
-    if (modalActual) {
-        modalActual.style.display = 'none';
-        modalActual.remove();
-    }
-    mostrarToast('🔄 Actualizando datos...', 'info');
-    // Esperar medio segundo y reabrir
-    setTimeout(() => {
-        abrirPanelProfesional();
-    }, 500);
-};
-// 📤 SUBIR COMPROBANTE (NUEVO - AGREGAR ESTO)
-document.getElementById('btnSubirComprobante').addEventListener('click', () => {
-    const profesionalId = profesional.id;
-    subirComprobante(profesionalId);
-});
 
-// 📋 CARGAR HISTORIAL DE COMPROBANTES (NUEVO - AGREGAR ESTO)
-cargarHistorialComprobantes(profesional.id);
-}
+    // ✅ Botón para actualizar datos
+    document.getElementById('panelActualizarDatos').onclick = function() {
+        const modalActual = this.closest('.modal');
+        if (modalActual) {
+            modalActual.style.display = 'none';
+            modalActual.remove();
+        }
+        mostrarToast('🔄 Actualizando datos...', 'info');
+        setTimeout(() => {
+            abrirPanelProfesional();
+        }, 500);
+    };
+
+    // 📤 SUBIR COMPROBANTE
+    document.getElementById('btnSubirComprobante').addEventListener('click', () => {
+        const profesionalId = profesional.id;
+        subirComprobante(profesionalId);
+    });
+
+    // 📋 CARGAR HISTORIAL DE COMPROBANTES
+    cargarHistorialComprobantes(profesional.id);
+    }
+}  // ✅ ESTA LLAVE CIERRA LA FUNCIÓN abrirPanelProfesional
 // ==================== ESTADÍSTICAS PROFESIONALES ====================
 async function abrirEstadisticas() {
     if (!currentUser || currentUserTipo !== 'profesional') {
