@@ -2251,7 +2251,125 @@ const infoPago = await obtenerInfoPagoProfesional(profesional.id) || {
                     Semana: ${semana.inicio.split('-').reverse().join('/')} al ${semana.fin.split('-').reverse().join('/')}
                 </div>
             </div>
+            <!-- 💳 TARJETAS DE PAGO -->
+<div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--border);">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+        <i class="fas fa-credit-card" style="color: #16a34a;"></i>
+        <strong style="font-size: 16px; color: var(--text-primary);">💳 ¿Cómo pagar?</strong>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        
+        <!-- ============================================ -->
+        <!-- TARJETA 1: BANCO METROPOLITANO               -->
+        <!-- ============================================ -->
+        <div style="background: linear-gradient(135deg, #1a2a6c, #2d4373); border-radius: 16px; padding: 20px; color: white; box-shadow: 0 8px 25px rgba(0,0,0,0.3); min-height: 200px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
+            <!-- Chip -->
+            <div style="position: absolute; top: 16px; right: 16px; opacity: 0.2; font-size: 40px;">💳</div>
+            <!-- Logo Banco Metropolitano -->
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <span style="font-weight: 700; font-size: 14px; letter-spacing: 1px;">🏦 Banco Metropolitano</span>
+                <span style="background: rgba(255,255,255,0.15); padding: 2px 10px; border-radius: 12px; font-size: 10px;">CUBA</span>
+            </div>
+            <!-- Número de cuenta -->
+            <div style="font-size: 18px; font-weight: 600; letter-spacing: 2px; margin: 8px 0; font-family: 'Courier New', monospace;">
+                9227 9598 7079 8944
+            </div>
+            <!-- Teléfono Transfermóvil -->
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-size: 10px; opacity: 0.7;">📱 Transfermóvil</div>
+                    <div style="font-weight: 600;">+53 55007966</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); border-radius: 20px; padding: 4px 12px; font-size: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                    Metropolitano
+                </div>
+            </div>
+            <!-- Botón copiar -->
+            <button onclick="copiarDatosPago('metropolitano')" style="margin-top: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; padding: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-weight: 500; width: 100%;" 
+                    onmouseover="this.style.background='rgba(255,255,255,0.2)'" 
+                    onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                <i class="fas fa-copy"></i> Copiar número de tarjeta
+            </button>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- TARJETA 2: BANCO BANDEC                       -->
+        <!-- ============================================ -->
+        <div style="background: linear-gradient(135deg, #0d4e2b, #1a7a3a); border-radius: 16px; padding: 20px; color: white; box-shadow: 0 8px 25px rgba(0,0,0,0.3); min-height: 200px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
+            <!-- Chip -->
+            <div style="position: absolute; top: 16px; right: 16px; opacity: 0.2; font-size: 40px;">💳</div>
+            <!-- Logo BANDEC -->
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <span style="font-weight: 700; font-size: 14px; letter-spacing: 1px;">🏦 Banco BANDEC</span>
+                <span style="background: rgba(255,255,255,0.15); padding: 2px 10px; border-radius: 12px; font-size: 10px;">CUBA</span>
+            </div>
+            <!-- Número de cuenta -->
+            <div style="font-size: 18px; font-weight: 600; letter-spacing: 2px; margin: 8px 0; font-family: 'Courier New', monospace;">
+                9227 0699 9392 0977
+            </div>
+            <!-- Teléfono Transfermóvil -->
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-size: 10px; opacity: 0.7;">📱 Transfermóvil</div>
+                    <div style="font-weight: 600;">+53 55007966</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); border-radius: 20px; padding: 4px 12px; font-size: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                    BANDEC
+                </div>
+            </div>
+            <!-- Botón copiar -->
+            <button onclick="copiarDatosPago('bandec')" style="margin-top: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; padding: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-weight: 500; width: 100%;" 
+                    onmouseover="this.style.background='rgba(255,255,255,0.2)'" 
+                    onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                <i class="fas fa-copy"></i> Copiar número de tarjeta
+            </button>
+        </div>
+    </div>
+
+    <!-- ⚠️ INSTRUCCIONES DE PAGO -->
+    <div style="background: #fef9c3; padding: 14px 16px; border-radius: 10px; margin-top: 16px; font-size: 13px; color: #854d0e; border: 1px solid #fde68a;">
+        <p style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <i class="fas fa-info-circle"></i>
+            <strong>Instrucciones de pago:</strong>
+        </p>
+        <ol style="margin: 0 0 0 18px; padding-left: 0; line-height: 1.8;">
+            <li>Transfiere el monto indicado a la tarjeta de tu banco</li>
+            <li>Haz una captura de pantalla del comprobante</li>
+            <li>Sube la captura en la sección de abajo</li>
+            <li>Recibirás confirmación en 24-48 horas</li>
+        </ol>
+    </div>
+
+    <!-- 📤 SUBIR COMPROBANTE -->
+    <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--border);">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <i class="fas fa-upload" style="color: #3b82f6;"></i>
+            <strong style="font-size: 16px; color: var(--text-primary);">📤 Enviar comprobante de pago</strong>
+        </div>
+        
+        <div style="background: #f8fafc; border: 2px dashed #94a3b8; border-radius: 12px; padding: 24px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 8px; color: #94a3b8;">📸</div>
+            <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">
+                <strong>Haz una captura de pantalla</strong> de tu comprobante de pago
+            </p>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
+                (Transfermóvil, Envío o cualquier otro comprobante)
+            </p>
             
+            <button class="btn btn-primary" id="btnSubirComprobante">
+                <i class="fas fa-camera"></i> Subir comprobante
+            </button>
+            
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 12px;">
+                ⚠️ Formatos permitidos: JPG, PNG, WEBP (máximo 2MB)
+            </p>
+        </div>
+        
+        <!-- 📋 Historial de comprobantes enviados -->
+        <div id="historialComprobantes" style="margin-top: 16px;"></div>
+    </div>
+</div>
             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">
                 <button class="btn btn-primary" id="panelEditarPerfil" style="flex:1;"><i class="fas fa-edit"></i> Editar Perfil</button>
                 <button class="btn btn-primary" id="panelGestionServicios" style="flex:1;"><i class="fas fa-list-ul"></i> Mis Servicios</button>
@@ -2298,7 +2416,14 @@ document.getElementById('panelActualizarDatos').onclick = function() {
         abrirPanelProfesional();
     }, 500);
 };
-}
+// 📤 SUBIR COMPROBANTE (NUEVO - AGREGAR ESTO)
+document.getElementById('btnSubirComprobante').addEventListener('click', () => {
+    const profesionalId = profesional.id;
+    subirComprobante(profesionalId);
+});
+
+// 📋 CARGAR HISTORIAL DE COMPROBANTES (NUEVO - AGREGAR ESTO)
+cargarHistorialComprobantes(profesional.id);
 
 // ==================== ESTADÍSTICAS PROFESIONALES ====================
 async function abrirEstadisticas() {
@@ -3836,7 +3961,167 @@ window.addEventListener('click', (e) => {
         e.target.style.display = 'none';
     }
 });
+// ==================== COPIAR DATOS DE PAGO ====================
 
+function copiarDatosPago(tipo) {
+    let datos = '';
+    let nombreTarjeta = '';
+    
+    if (tipo === 'metropolitano') {
+        nombreTarjeta = 'Banco Metropolitano';
+        datos = `
+🏦 Banco Metropolitano
+📱 Transfermóvil: +53 55007966
+📋 Cuenta: 9227 9598 7079 8944
+        `;
+    } else if (tipo === 'bandec') {
+        nombreTarjeta = 'Banco BANDEC';
+        datos = `
+🏦 Banco BANDEC
+📱 Transfermóvil: +53 55007966
+📋 Cuenta: 9227 0699 9392 0977
+        `;
+    }
+    
+    navigator.clipboard.writeText(datos.trim()).then(() => {
+        mostrarToast(`✅ Datos de ${nombreTarjeta} copiados al portapapeles`, 'success');
+    }).catch(() => {
+        mostrarToast(`📋 Datos de ${nombreTarjeta}: Revisa la tarjeta en el panel`, 'info');
+    });
+}
+    // ==================== SUBIR COMPROBANTE DE PAGO ====================
+
+async function subirComprobante(profesionalId) {
+    if (!profesionalId) {
+        mostrarToast('❌ Error: No se encontró tu perfil', 'error');
+        return;
+    }
+
+    // Crear input file oculto
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/jpeg,image/png,image/webp';
+    
+    fileInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // Validar tamaño (2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            mostrarToast('❌ La imagen no debe superar los 2MB', 'error');
+            return;
+        }
+        
+        // Validar tipo
+        const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!tiposPermitidos.includes(file.type)) {
+            mostrarToast('❌ Solo se permiten imágenes JPG, PNG o WEBP', 'error');
+            return;
+        }
+        
+        try {
+            mostrarToast('📤 Subiendo comprobante...', 'info');
+            
+            // Generar nombre único
+            const ext = file.name.split('.').pop().toLowerCase();
+            const fileName = `comprobante_${profesionalId}_${Date.now()}.${ext}`;
+            const filePath = `comprobantes/${fileName}`;
+            
+            // Subir a Supabase Storage
+            const { error: uploadError } = await supabase.storage
+                .from('comprobantes')
+                .upload(filePath, file);
+            
+            if (uploadError) throw uploadError;
+            
+            // Obtener URL pública
+            const { data: urlData } = supabase.storage
+                .from('comprobantes')
+                .getPublicUrl(filePath);
+            
+            const comprobanteUrl = urlData.publicUrl;
+            
+            // Guardar en la base de datos
+            const { error: insertError } = await supabase
+                .from('pagos')
+                .insert([{
+                    profesional_id: profesionalId,
+                    comprobante_url: comprobanteUrl,
+                    fecha_envio: new Date().toISOString(),
+                    estado: 'pendiente'
+                }]);
+            
+            if (insertError) throw insertError;
+            
+            mostrarToast('✅ Comprobante enviado correctamente. El administrador lo revisará.', 'success');
+            
+            // Recargar historial de comprobantes
+            cargarHistorialComprobantes(profesionalId);
+            
+        } catch (error) {
+            console.error('❌ Error subiendo comprobante:', error);
+            mostrarToast('❌ Error al subir el comprobante. Intenta de nuevo.', 'error');
+        }
+    };
+    
+    fileInput.click();
+}
+
+// ==================== CARGAR HISTORIAL DE COMPROBANTES ====================
+
+async function cargarHistorialComprobantes(profesionalId) {
+    const container = document.getElementById('historialComprobantes');
+    if (!container) return;
+    
+    try {
+        const { data: pagos, error } = await supabase
+            .from('pagos')
+            .select('*')
+            .eq('profesional_id', profesionalId)
+            .order('fecha_envio', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!pagos || pagos.length === 0) {
+            container.innerHTML = `
+                <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; text-align: center; color: var(--text-muted); font-size: 13px;">
+                    📭 No has enviado ningún comprobante aún
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = pagos.map(p => {
+            const estadoTexto = p.estado === 'verificado' ? '✅ Verificado' : 
+                                p.estado === 'rechazado' ? '❌ Rechazado' : '⏳ Pendiente';
+            const estadoColor = p.estado === 'verificado' ? '#10b981' : 
+                                p.estado === 'rechazado' ? '#ef4444' : '#f59e0b';
+            
+            return `
+                <div style="background: var(--bg-secondary); border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 4px solid ${estadoColor};">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 500;">📎 Comprobante #${p.id.slice(0, 8)}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">
+                                📅 ${new Date(p.fecha_envio).toLocaleDateString()}
+                                ${p.fecha_verificacion ? ` • Verificado: ${new Date(p.fecha_verificacion).toLocaleDateString()}` : ''}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="font-size: 12px; font-weight: 600; color: ${estadoColor};">${estadoTexto}</span>
+                            <a href="${p.comprobante_url}" target="_blank" class="btn btn-sm btn-outline" style="padding: 2px 10px; font-size: 11px;">
+                                <i class="fas fa-eye"></i> Ver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+    } catch (error) {
+        console.error('❌ Error cargando historial:', error);
+    }
+}
 // ==================== INICIALIZACIÓN ====================
 async function init() {
     cargarProvinciasSelects();
