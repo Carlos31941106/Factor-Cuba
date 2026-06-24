@@ -3614,6 +3614,34 @@ async function actualizarTasaManualAdmin() {
         }
     }
 }
+    // ==================== COPIAR DATOS DE PAGO ====================
+
+function copiarDatosPago(tipo) {
+    let datos = '';
+    let nombreTarjeta = '';
+    
+    if (tipo === 'metropolitano') {
+        nombreTarjeta = 'Banco Metropolitano';
+        datos = `
+🏦 Banco Metropolitano
+📱 Transfermóvil: +53 55007966
+📋 Cuenta: 9227 9598 7079 8944
+        `;
+    } else if (tipo === 'bandec') {
+        nombreTarjeta = 'Banco BANDEC';
+        datos = `
+🏦 Banco BANDEC
+📱 Transfermóvil: +53 55007966
+📋 Cuenta: 9227 0699 9392 0977
+        `;
+    }
+    
+    navigator.clipboard.writeText(datos.trim()).then(() => {
+        mostrarToast(`✅ Datos de ${nombreTarjeta} copiados al portapapeles`, 'success');
+    }).catch(() => {
+        mostrarToast(`📋 Datos de ${nombreTarjeta}: Revisa la tarjeta en el panel`, 'info');
+    });
+}
 // ==================== INICIALIZACIÓN ====================
 async function init() {
     cargarProvinciasSelects();
