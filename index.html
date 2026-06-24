@@ -2181,7 +2181,9 @@ async function abrirPanelProfesional() {
         mostrarToast('No se encontró tu perfil profesional', 'error');
         return;
     }
-
+// ✅ RECARGAR TASA DESDE SUPABASE
+    await cargarTasaElToque();
+    
     // ✅ Asegurar que infoPago siempre tenga un valor
 const infoPago = await obtenerInfoPagoProfesional(profesional.id) || {
     semanaActual: { contactos: 0, monto_usd: 0, monto_cup: 0, estado_pago: 'pendiente' },
