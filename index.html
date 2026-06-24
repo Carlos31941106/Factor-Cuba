@@ -3131,9 +3131,6 @@ window.rechazarCambioIndividual = async function(cambioId) {
 // ==================== SISTEMA DE PAGOS ====================
 
 // ==================== TASA DE CAMBIO (100% MANUAL) ====================
-// Cargar tasa desde Supabase (sin internet)
-// ==================== TASA DE CAMBIO (100% MANUAL) ====================
-// Cargar tasa desde Supabase (sin internet)
 async function cargarTasaElToque() {
     try {
         const { data: config, error } = await supabase
@@ -3146,7 +3143,6 @@ async function cargarTasaElToque() {
             tasaCambioActual = parseFloat(config.valor);
             console.log(`✅ Tasa cargada desde Supabase: 1 USD = ${tasaCambioActual} CUP`);
         } else {
-            // Si no existe, crear con valor 450
             tasaCambioActual = 450;
             await supabase
                 .from('configuracion')
@@ -3193,7 +3189,6 @@ async function registrarContactoSemanal(profesionalId) {
     try {
         const semana = obtenerSemanaActual();
         
-        // Buscar si ya existe registro para esta semana
         const { data: existing, error: findError } = await supabase
             .from('contactos_semanales')
             .select('id, contactos')
@@ -3204,7 +3199,6 @@ async function registrarContactoSemanal(profesionalId) {
         if (findError) throw findError;
 
         if (existing) {
-            // Actualizar registro existente
             const nuevosContactos = (existing.contactos || 0) + 1;
             const { error: updateError } = await supabase
                 .from('contactos_semanales')
@@ -3212,13 +3206,12 @@ async function registrarContactoSemanal(profesionalId) {
                     contactos: nuevosContactos,
                     monto_usd: nuevosContactos * tarifaContactoUSD,
                     monto_cup: nuevosContactos * tarifaContactoUSD * tasaCambioActual,
-                    estado_pago: 'pendiente' // ✅ Siempre pendiente al actualizar
+                    estado_pago: 'pendiente'
                 })
                 .eq('id', existing.id);
 
             if (updateError) throw updateError;
         } else {
-            // Crear nuevo registro
             const { error: insertError } = await supabase
                 .from('contactos_semanales')
                 .insert([{
@@ -3229,7 +3222,7 @@ async function registrarContactoSemanal(profesionalId) {
                     monto_usd: tarifaContactoUSD,
                     monto_cup: tarifaContactoUSD * tasaCambioActual,
                     tasa_cambio_used: tasaCambioActual,
-                    estado_pago: 'pendiente' // ✅ Siempre pendiente al crear
+                    estado_pago: 'pendiente'
                 }]);
 
             if (insertError) throw insertError;
@@ -3243,7 +3236,6 @@ async function registrarContactoSemanal(profesionalId) {
 }
 
 // Obtener información de pago para profesional
-// Obtener información de pago para profesional (CON RECARGA FORZADA)
 async function obtenerInfoPagoProfesional(profesionalId) {
     if (!profesionalId) {
         console.error('❌ profesionalId es requerido');
@@ -3259,7 +3251,6 @@ async function obtenerInfoPagoProfesional(profesionalId) {
     try {
         const semana = obtenerSemanaActual();
 
-        // ✅ Obtener semana actual (con estado de pago)
         const { data: semanaActual, error: semanaError } = await supabase
             .from('contactos_semanales')
             .select('*')
@@ -3269,7 +3260,6 @@ async function obtenerInfoPagoProfesional(profesionalId) {
 
         if (semanaError) throw semanaError;
 
-        // ✅ Obtener contactos PENDIENTES de esta semana
         const { data: contactosPendientes, error: pendientesError } = await supabase
             .from('contactos')
             .select('*')
@@ -3280,7 +3270,6 @@ async function obtenerInfoPagoProfesional(profesionalId) {
 
         if (pendientesError) throw pendientesError;
 
-        // ✅ Obtener contactos PAGADOS de esta semana
         const { data: contactosPagados, error: pagadosError } = await supabase
             .from('contactos')
             .select('*')
@@ -3291,11 +3280,9 @@ async function obtenerInfoPagoProfesional(profesionalId) {
 
         if (pagadosError) throw pagadosError;
 
-        // ✅ Calcular montos solo con contactos pendientes
         const totalPendientes = contactosPendientes?.length || 0;
         const totalPagados = contactosPagados?.length || 0;
 
-        // ✅ Obtener historial actualizado
         const { data: historial, error: historialError } = await supabase
             .from('contactos_semanales')
             .select('*')
@@ -3305,7 +3292,6 @@ async function obtenerInfoPagoProfesional(profesionalId) {
 
         if (historialError) throw historialError;
 
-        // ✅ Construir objeto con información separada
         const semanaData = semanaActual || {
             contactos: 0,
             contactos_pendientes: 0,
@@ -3315,16 +3301,12 @@ async function obtenerInfoPagoProfesional(profesionalId) {
             estado_pago: 'pendiente'
         };
 
-        // ✅ Actualizar con los conteos reales
         semanaData.contactos_pendientes = totalPendientes;
         semanaData.contactos_pagados = totalPagados;
-        semanaData.contactos = totalPendientes; // Para mantener compatibilidad
-
-        // ✅ Recalcular montos solo con pendientes
+        semanaData.contactos = totalPendientes;
         semanaData.monto_usd = totalPendientes * tarifaContactoUSD;
         semanaData.monto_cup = totalPendientes * tarifaContactoUSD * tasaCambioActual;
 
-        // ✅ Determinar estado de pago
         if (totalPendientes === 0 && totalPagados > 0) {
             semanaData.estado_pago = 'pagado';
         } else if (totalPendientes > 0) {
@@ -3352,6 +3334,7 @@ async function obtenerInfoPagoProfesional(profesionalId) {
         };
     }
 }
+
 // Ver historial de pagos del profesional
 async function verHistorialPagosProfesional(profesionalId, profesionalNombre) {
     try {
@@ -3449,7 +3432,7 @@ async function exportarEstadisticasCompletas() {
     } catch (error) { mostrarToast('Error al exportar', 'error'); }
 }
 
-// Cargar sección de cobros en admin (ÚNICA VERSIÓN - sin duplicación)
+// Cargar sección de cobros en admin
 async function cargarSeccionCobrosAdmin() {
     try {
         const semana = obtenerSemanaActual();
@@ -3477,7 +3460,6 @@ async function cargarSeccionCobrosAdmin() {
         }
         html += `</tbody></table></div></div>`;
 
-        // Actualizar los totales en el resumen
         html = html.replace('class="valor">0</div><div class="label">Profesionales con contactos', `class="valor">${contactosSem?.length || 0}</div><div class="label">Profesionales con contactos`);
         html = html.replace('class="valor">0</div><div class="label">Contactos esta semana', `class="valor">${totalContactos}</div><div class="label">Contactos esta semana`);
         html = html.replace('class="valor">0.00 USD</div><div class="label">Total a cobrar', `class="valor">${totalUSD.toFixed(2)} USD</div><div class="label">Total a cobrar`);
@@ -3496,7 +3478,6 @@ window.marcarPagoSemanal = async function(profesionalId) {
         return;
     }
 
-    // Verificar si hay contactos esta semana
     const semana = obtenerSemanaActual();
     const { data: semanaData, error: semanaError } = await supabase
         .from('contactos_semanales')
@@ -3522,7 +3503,6 @@ window.marcarPagoSemanal = async function(profesionalId) {
     if (!confirmado) return;
 
     try {
-        // 1. Actualizar pago semanal
         const { error: updateError } = await supabase
             .from('contactos_semanales')
             .update({ 
@@ -3534,7 +3514,6 @@ window.marcarPagoSemanal = async function(profesionalId) {
 
         if (updateError) throw updateError;
 
-        // 2. ✅ NUEVO: Actualizar TODOS los contactos individuales de esta semana
         const { data: contactos, error: findError } = await supabase
             .from('contactos')
             .select('id')
@@ -3555,7 +3534,6 @@ window.marcarPagoSemanal = async function(profesionalId) {
             if (updateContactosError) throw updateContactosError;
         }
 
-        // 3. Guardar en historial
         const { data: contacto, error: histError } = await supabase
             .from('contactos_semanales')
             .select('monto_usd, monto_cup, tasa_cambio_used')
@@ -3590,6 +3568,7 @@ window.marcarPagoSemanal = async function(profesionalId) {
         mostrarToast('❌ Error al registrar el pago: ' + err.message, 'error');
     }
 };
+
 // Agregar sección de cobros al admin
 async function agregarSeccionCobrosAlAdmin() {
     const adminContent = document.getElementById('adminContent');
@@ -3633,493 +3612,6 @@ async function actualizarTasaManualAdmin() {
             console.error('❌ Error guardando tasa:', error);
             mostrarToast('❌ Error al guardar la tasa: ' + error.message, 'error');
         }
-    }
-}
-
-// ==================== EVENTOS Y EVENT LISTENERS ====================
-// ✅ CORREGIDO: Todos los event listeners usan addEventListener (no mezcla)
-document.getElementById('btnLogin').addEventListener('click', () => document.getElementById('modalLogin').style.display = 'flex');
-document.getElementById('btnLogout').addEventListener('click', logout);
-document.getElementById('btnCompartir').addEventListener('click', abrirCompartir);
-document.getElementById('btnCloseCompartirModal').addEventListener('click', () => document.getElementById('modalCompartir').style.display = 'none');
-document.getElementById('btnCloseGestionServicios').addEventListener('click', () => document.getElementById('modalGestionServicios').style.display = 'none');
-document.getElementById('btnCloseFormServicio').addEventListener('click', () => document.getElementById('modalFormServicio').style.display = 'none');
-document.getElementById('btnCloseEditarPerfil').addEventListener('click', () => document.getElementById('modalEditarPerfil').style.display = 'none');
-document.getElementById('btnClosePublicar').addEventListener('click', () => document.getElementById('modalPublicar').style.display = 'none');
-document.getElementById('btnCloseLogin').addEventListener('click', () => document.getElementById('modalLogin').style.display = 'none');
-document.getElementById('btnCloseRegistro').addEventListener('click', () => document.getElementById('modalRegistro').style.display = 'none');
-document.getElementById('btnCloseAdmin').addEventListener('click', () => document.getElementById('modalAdmin').style.display = 'none');
-document.getElementById('btnCloseRecuperar').addEventListener('click', () => document.getElementById('modalRecuperar').style.display = 'none');
-
-document.getElementById('btnLoginSubmit').addEventListener('click', manejarAuth);
-document.getElementById('btnBuscar').addEventListener('click', cargarProfesionales);
-document.getElementById('btnLimpiarFiltros').addEventListener('click', limpiarFiltros);
-document.getElementById('btnGuardarServicio').addEventListener('click', publicarServicio);
-
-document.getElementById('btnAgregarServicio').addEventListener('click', () => {
-    document.getElementById('servicioId').value = '';
-    document.getElementById('servicioNombre').value = '';
-    document.getElementById('servicioDescripcion').value = '';
-    document.getElementById('servicioPrecio').value = '';
-    document.getElementById('servicioImagenPreview').innerHTML = '';
-    document.getElementById('formServicioTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Agregar Servicio';
-    document.getElementById('modalFormServicio').style.display = 'flex';
-});
-
-document.getElementById('btnPublicar').addEventListener('click', () => {
-    if (!currentUser) {
-        mostrarToast('Inicia sesión primero', 'error');
-        document.getElementById('modalLogin').style.display = 'flex';
-        return;
-    }
-    if (currentUserTipo !== 'profesional') {
-        mostrarToast('Debes ser profesional para publicar un servicio', 'error');
-        return;
-    }
-    document.getElementById('modalPublicar').style.display = 'flex';
-    setTimeout(() => iniciarMapaUbicacion(), 300);
-});
-
-document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
-    e.preventDefault();
-    document.getElementById('modalLogin').style.display = 'none';
-    document.getElementById('modalRecuperar').style.display = 'flex';
-});
-
-document.getElementById('btnRecuperarSubmit').addEventListener('click', enviarRecuperacion);
-
-document.getElementById('shareWhatsApp').addEventListener('click', () => {
-    const url = window.location.href;
-    window.open(`https://wa.me/?text=${encodeURIComponent('¡Conoce Factor Cuba! Conecta con profesionales en Cuba ' + url)}`, '_blank');
-});
-
-document.getElementById('shareTelegram').addEventListener('click', () => {
-    const url = window.location.href;
-    window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('¡Conoce Factor Cuba!')}`, '_blank');
-});
-
-document.getElementById('shareFacebook').addEventListener('click', () => {
-    const url = window.location.href;
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-});
-
-document.getElementById('copyLinkBtn').addEventListener('click', () => {
-    navigator.clipboard.writeText(window.location.href);
-    mostrarToast('✅ Enlace copiado al portapapeles', 'success');
-});
-
-document.getElementById('searchInput').addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') cargarProfesionales();
-});
-
-// Event listeners para archivos
-document.getElementById('fotoPerfil')?.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            document.getElementById('previewFoto').innerHTML = `<img src="${ev.target.result}" alt="preview">`;
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-document.getElementById('editFotoFile')?.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            document.getElementById('editPreviewFoto').innerHTML = `<img src="${ev.target.result}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`;
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-document.getElementById('servicioImagen')?.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            document.getElementById('servicioImagenPreview').innerHTML = `<img src="${ev.target.result}" style="width:70px;height:70px;border-radius:8px;object-fit:cover;">`;
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-// Formularios con addEventListener
-document.getElementById('editarPerfilForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('editId').value;
-    const servicioOriginal = todosLosServicios.find(s => s.id === id);
-    if (!servicioOriginal) return;
-
-    const nuevoNombre = document.getElementById('editNombre').value.trim();
-    const nuevaCategoria = document.getElementById('editCategoria').value;
-    const nuevaProvincia = document.getElementById('editProvincia').value;
-    const nuevoMunicipio = document.getElementById('editMunicipio').value;
-    const nuevoTelefono = document.getElementById('editTelefono').value.trim();
-    const nuevaDescripcion = document.getElementById('editDescripcion').value.trim();
-    const nuevaLatitud = document.getElementById('editLatitud').value;
-    const nuevaLongitud = document.getElementById('editLongitud').value;
-    const fotoFile = document.getElementById('editFotoFile').files[0];
-
-    const cambios = [];
-    if (nuevoNombre !== servicioOriginal.nombre) cambios.push({ campo: 'nombre', valor_viejo: servicioOriginal.nombre, valor_nuevo: nuevoNombre });
-    if (nuevaCategoria !== servicioOriginal.categoria) cambios.push({ campo: 'categoria', valor_viejo: servicioOriginal.categoria, valor_nuevo: nuevaCategoria });
-    if (nuevaProvincia !== servicioOriginal.provincia) cambios.push({ campo: 'provincia', valor_viejo: servicioOriginal.provincia, valor_nuevo: nuevaProvincia });
-    if (nuevoMunicipio !== servicioOriginal.municipio) cambios.push({ campo: 'municipio', valor_viejo: servicioOriginal.municipio, valor_nuevo: nuevoMunicipio });
-    if (nuevoTelefono !== servicioOriginal.telefono) cambios.push({ campo: 'telefono', valor_viejo: servicioOriginal.telefono, valor_nuevo: nuevoTelefono });
-    if (nuevaDescripcion !== servicioOriginal.descripcion) cambios.push({ campo: 'descripcion', valor_viejo: servicioOriginal.descripcion, valor_nuevo: nuevaDescripcion });
-    if (nuevaLatitud && nuevaLongitud) {
-        const latActual = servicioOriginal.latitud ? parseFloat(servicioOriginal.latitud) : null;
-        const lngActual = servicioOriginal.longitud ? parseFloat(servicioOriginal.longitud) : null;
-        const latNueva = parseFloat(nuevaLatitud);
-        const lngNueva = parseFloat(nuevaLongitud);
-        if (latActual !== latNueva || lngActual !== lngNueva) {
-            cambios.push({ campo: 'latitud', valor_viejo: servicioOriginal.latitud, valor_nuevo: nuevaLatitud });
-            cambios.push({ campo: 'longitud', valor_viejo: servicioOriginal.longitud, valor_nuevo: nuevaLongitud });
-        }
-    }
-
-    if (cambios.length === 0 && !fotoFile) {
-        mostrarToast('No se detectaron cambios', 'info');
-        document.getElementById('modalEditarPerfil').style.display = 'none';
-        return;
-    }
-
-    try {
-        let nuevaFotoUrl = null;
-        if (fotoFile) {
-            mostrarToast('Subiendo nueva imagen...', 'info');
-            nuevaFotoUrl = await subirImagen(fotoFile, currentUser.id);
-            cambios.push({ campo: 'foto', valor_viejo: servicioOriginal.foto, valor_nuevo: nuevaFotoUrl });
-        }
-
-        for (const cambio of cambios) {
-            await supabase.from('cambios_pendientes').insert([{
-                servicio_id: id,
-                usuario_id: currentUser.id,
-                campo: cambio.campo,
-                valor_viejo: cambio.valor_viejo,
-                valor_nuevo: cambio.valor_nuevo,
-                estado: 'pendiente'
-            }]);
-        }
-
-        mostrarToast('✅ Cambios enviados para revisión. Un administrador los aprobará.', 'success');
-        document.getElementById('modalEditarPerfil').style.display = 'none';
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
-});
-
-document.getElementById('formServicio').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('servicioId').value;
-    const nombre = document.getElementById('servicioNombre').value.trim();
-    const descripcion = document.getElementById('servicioDescripcion').value.trim();
-    const precio = document.getElementById('servicioPrecio').value.trim();
-    const imagenFile = document.getElementById('servicioImagen').files[0];
-
-    if (!nombre) {
-        mostrarToast('El nombre del servicio es obligatorio', 'error');
-        return;
-    }
-
-    const { data: profesional } = await supabase
-        .from('oferentes')
-        .select('id')
-        .eq('user_id', currentUser.id)
-        .single();
-
-    if (!profesional) return;
-
-    let imagenUrl = null;
-    if (imagenFile) {
-        mostrarToast('Subiendo imagen...', 'info');
-        imagenUrl = await subirImagen(imagenFile, currentUser.id, 'servicios');
-    }
-
-    if (id) {
-        const updates = { nombre, descripcion, precio_estimado: precio };
-        if (imagenUrl) updates.imagen = imagenUrl;
-        const { error } = await supabase.from('servicios').update(updates).eq('id', id);
-        if (error) throw error;
-        mostrarToast('✅ Servicio actualizado', 'success');
-    } else {
-        const { error } = await supabase.from('servicios').insert([{
-            profesional_id: profesional.id,
-            nombre,
-            descripcion,
-            precio_estimado: precio,
-            imagen: imagenUrl,
-            estado: 'activo'
-        }]);
-        if (error) throw error;
-        mostrarToast('✅ Servicio agregado', 'success');
-    }
-
-    document.getElementById('modalFormServicio').style.display = 'none';
-    abrirGestionServicios();
-});
-
-document.getElementById('registroForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('regEmail').value.trim();
-    const telefono = document.getElementById('regTelefono').value.trim();
-    const password = document.getElementById('regPassword').value;
-    const passwordConfirm = document.getElementById('regPasswordConfirm').value;
-
-    if (password !== passwordConfirm) {
-        mostrarToast('Las contraseñas no coinciden', 'error');
-        return;
-    }
-
-    if (password.length < 6) {
-        mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error');
-        return;
-    }
-
-    try {
-        const { data, error } = await supabase.auth.signUp({ 
-            email, 
-            password,
-            options: {
-                data: { role: 'cliente', telefono }
-            }
-        });
-
-        if (error) throw error;
-
-        await supabase.from('clientes').insert([{ 
-            user_id: data.user.id, 
-            email, 
-            telefono, 
-            email_verificado: false 
-        }]);
-
-        mostrarToast('✅ Registro exitoso. Ahora inicia sesión.', 'success');
-        document.getElementById('modalRegistro').style.display = 'none';
-
-        document.getElementById('regEmail').value = '';
-        document.getElementById('regTelefono').value = '';
-        document.getElementById('regPassword').value = '';
-        document.getElementById('regPasswordConfirm').value = '';
-
-    } catch (err) {
-        mostrarToast('Error: ' + err.message, 'error');
-    }
-});
-
-document.getElementById('switchAuthMode').addEventListener('click', (e) => {
-    e.preventDefault();
-    if (loginMode === 'login') {
-        loginMode = 'register';
-        document.getElementById('modalLoginTitle').innerHTML = 'Crear Cuenta';
-        document.getElementById('btnLoginSubmit').innerHTML = 'Registrarse';
-        document.getElementById('switchAuthMode').innerHTML = '¿Ya tienes cuenta? Inicia sesión';
-        document.getElementById('modalLogin').style.display = 'none';
-        document.getElementById('modalRegistro').style.display = 'flex';
-    } else {
-        loginMode = 'login';
-        document.getElementById('modalLoginTitle').innerHTML = 'Iniciar Sesión';
-        document.getElementById('btnLoginSubmit').innerHTML = 'Ingresar';
-        document.getElementById('switchAuthMode').innerHTML = '¿No tienes cuenta? Regístrate';
-        document.getElementById('modalRegistro').style.display = 'none';
-        document.getElementById('modalLogin').style.display = 'flex';
-    }
-});
-
-document.querySelectorAll('.popular-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-        document.querySelectorAll('.popular-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const tabName = tab.dataset.tab;
-        document.getElementById('popularServicios').style.display = tabName === 'servicios' ? 'grid' : 'none';
-        document.getElementById('popularProfesionales').style.display = tabName === 'profesionales' ? 'grid' : 'none';
-    });
-});
-
-const catPrincipal = document.getElementById('categoriaPrincipalFilter');
-if (catPrincipal) {
-    catPrincipal.addEventListener('change', () => {
-        actualizarSubcategorias();
-        cargarProfesionales();
-    });
-}
-
-const subCat = document.getElementById('subcategoriaFilter');
-if (subCat) {
-    subCat.addEventListener('change', () => {
-        cargarProfesionales();
-    });
-}
-
-// Cerrar modales al hacer clic fuera
-window.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal')) {
-        e.target.style.display = 'none';
-    }
-});
-// ==================== COPIAR DATOS DE PAGO ====================
-
-function copiarDatosPago(tipo) {
-    let datos = '';
-    let nombreTarjeta = '';
-    
-    if (tipo === 'metropolitano') {
-        nombreTarjeta = 'Banco Metropolitano';
-        datos = `
-🏦 Banco Metropolitano
-📱 Transfermóvil: +53 55007966
-📋 Cuenta: 9227 9598 7079 8944
-        `;
-    } else if (tipo === 'bandec') {
-        nombreTarjeta = 'Banco BANDEC';
-        datos = `
-🏦 Banco BANDEC
-📱 Transfermóvil: +53 55007966
-📋 Cuenta: 9227 0699 9392 0977
-        `;
-    }
-    
-    navigator.clipboard.writeText(datos.trim()).then(() => {
-        mostrarToast(`✅ Datos de ${nombreTarjeta} copiados al portapapeles`, 'success');
-    }).catch(() => {
-        mostrarToast(`📋 Datos de ${nombreTarjeta}: Revisa la tarjeta en el panel`, 'info');
-    });
-}
-    // ==================== SUBIR COMPROBANTE DE PAGO ====================
-
-async function subirComprobante(profesionalId) {
-    if (!profesionalId) {
-        mostrarToast('❌ Error: No se encontró tu perfil', 'error');
-        return;
-    }
-
-    // Crear input file oculto
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/jpeg,image/png,image/webp';
-    
-    fileInput.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        // Validar tamaño (2MB)
-        if (file.size > 2 * 1024 * 1024) {
-            mostrarToast('❌ La imagen no debe superar los 2MB', 'error');
-            return;
-        }
-        
-        // Validar tipo
-        const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!tiposPermitidos.includes(file.type)) {
-            mostrarToast('❌ Solo se permiten imágenes JPG, PNG o WEBP', 'error');
-            return;
-        }
-        
-        try {
-            mostrarToast('📤 Subiendo comprobante...', 'info');
-            
-            // Generar nombre único
-            const ext = file.name.split('.').pop().toLowerCase();
-            const fileName = `comprobante_${profesionalId}_${Date.now()}.${ext}`;
-            const filePath = `comprobantes/${fileName}`;
-            
-            // Subir a Supabase Storage
-            const { error: uploadError } = await supabase.storage
-                .from('comprobantes')
-                .upload(filePath, file);
-            
-            if (uploadError) throw uploadError;
-            
-            // Obtener URL pública
-            const { data: urlData } = supabase.storage
-                .from('comprobantes')
-                .getPublicUrl(filePath);
-            
-            const comprobanteUrl = urlData.publicUrl;
-            
-            // Guardar en la base de datos
-            const { error: insertError } = await supabase
-                .from('pagos')
-                .insert([{
-                    profesional_id: profesionalId,
-                    comprobante_url: comprobanteUrl,
-                    fecha_envio: new Date().toISOString(),
-                    estado: 'pendiente'
-                }]);
-            
-            if (insertError) throw insertError;
-            
-            mostrarToast('✅ Comprobante enviado correctamente. El administrador lo revisará.', 'success');
-            
-            // Recargar historial de comprobantes
-            cargarHistorialComprobantes(profesionalId);
-            
-        } catch (error) {
-            console.error('❌ Error subiendo comprobante:', error);
-            mostrarToast('❌ Error al subir el comprobante. Intenta de nuevo.', 'error');
-        }
-    };
-    
-    fileInput.click();
-}
-
-// ==================== CARGAR HISTORIAL DE COMPROBANTES ====================
-
-async function cargarHistorialComprobantes(profesionalId) {
-    const container = document.getElementById('historialComprobantes');
-    if (!container) return;
-    
-    try {
-        const { data: pagos, error } = await supabase
-            .from('pagos')
-            .select('*')
-            .eq('profesional_id', profesionalId)
-            .order('fecha_envio', { ascending: false });
-        
-        if (error) throw error;
-        
-        if (!pagos || pagos.length === 0) {
-            container.innerHTML = `
-                <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; text-align: center; color: var(--text-muted); font-size: 13px;">
-                    📭 No has enviado ningún comprobante aún
-                </div>
-            `;
-            return;
-        }
-        
-        container.innerHTML = pagos.map(p => {
-            const estadoTexto = p.estado === 'verificado' ? '✅ Verificado' : 
-                                p.estado === 'rechazado' ? '❌ Rechazado' : '⏳ Pendiente';
-            const estadoColor = p.estado === 'verificado' ? '#10b981' : 
-                                p.estado === 'rechazado' ? '#ef4444' : '#f59e0b';
-            
-            return `
-                <div style="background: var(--bg-secondary); border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 4px solid ${estadoColor};">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                        <div>
-                            <div style="font-size: 13px; font-weight: 500;">📎 Comprobante #${p.id.slice(0, 8)}</div>
-                            <div style="font-size: 11px; color: var(--text-muted);">
-                                📅 ${new Date(p.fecha_envio).toLocaleDateString()}
-                                ${p.fecha_verificacion ? ` • Verificado: ${new Date(p.fecha_verificacion).toLocaleDateString()}` : ''}
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px; align-items: center;">
-                            <span style="font-size: 12px; font-weight: 600; color: ${estadoColor};">${estadoTexto}</span>
-                            <a href="${p.comprobante_url}" target="_blank" class="btn btn-sm btn-outline" style="padding: 2px 10px; font-size: 11px;">
-                                <i class="fas fa-eye"></i> Ver
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
-    } catch (error) {
-        console.error('❌ Error cargando historial:', error);
     }
 }
 // ==================== INICIALIZACIÓN ====================
