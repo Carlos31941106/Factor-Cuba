@@ -2423,7 +2423,7 @@ const infoPago = await obtenerInfoPagoProfesional(profesional.id) || {
 
     // 📋 CARGAR HISTORIAL DE COMPROBANTES
     cargarHistorialComprobantes(profesional.id);
-}  // ✅ ESTA LLAVE CIERRA LA FUNCIÓN abrirPanelProfesional
+}  
 // ==================== ESTADÍSTICAS PROFESIONALES ====================
 async function abrirEstadisticas() {
     if (!currentUser || currentUserTipo !== 'profesional') {
