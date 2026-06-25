@@ -3669,7 +3669,107 @@ async function init() {
     }
 
     await cargarProfesionales();
+// ===== EVENT LISTENERS FALTANTES =====
+document.getElementById('btnLogin').onclick = () => {
+    document.getElementById('modalLogin').style.display = 'flex';
+};
+document.getElementById('btnLoginSubmit').onclick = manejarAuth;
+document.getElementById('btnLogout').onclick = logout;
+document.getElementById('btnCompartir').onclick = abrirCompartir;
+document.getElementById('btnBuscar').onclick = cargarProfesionales;
+document.getElementById('btnLimpiarFiltros').onclick = limpiarFiltros;
+document.getElementById('btnGuardarServicio').onclick = publicarServicio;
 
+// Cerrar modales
+document.getElementById('btnCloseLogin').onclick = () => document.getElementById('modalLogin').style.display = 'none';
+document.getElementById('btnCloseRegistro').onclick = () => document.getElementById('modalRegistro').style.display = 'none';
+document.getElementById('btnClosePublicar').onclick = () => document.getElementById('modalPublicar').style.display = 'none';
+document.getElementById('btnCloseAdmin').onclick = () => document.getElementById('modalAdmin').style.display = 'none';
+document.getElementById('btnCloseCompartirModal').onclick = () => document.getElementById('modalCompartir').style.display = 'none';
+document.getElementById('btnCloseRecuperar').onclick = () => document.getElementById('modalRecuperar').style.display = 'none';
+document.getElementById('btnCloseEditarPerfil').onclick = () => document.getElementById('modalEditarPerfil').style.display = 'none';
+document.getElementById('btnCloseGestionServicios').onclick = () => document.getElementById('modalGestionServicios').style.display = 'none';
+document.getElementById('btnCloseFormServicio').onclick = () => document.getElementById('modalFormServicio').style.display = 'none';
+
+// Registro y recuperación
+document.getElementById('switchAuthMode').onclick = (e) => {
+    e.preventDefault();
+    document.getElementById('modalLogin').style.display = 'none';
+    document.getElementById('modalRegistro').style.display = 'flex';
+};
+document.getElementById('forgotPasswordLink').onclick = (e) => {
+    e.preventDefault();
+    document.getElementById('modalLogin').style.display = 'none';
+    document.getElementById('modalRecuperar').style.display = 'flex';
+};
+document.getElementById('btnRecuperarSubmit').onclick = enviarRecuperacion;
+document.getElementById('registroForm').onsubmit = (e) => { e.preventDefault(); manejarAuth(); };
+
+// Tabs de servicios populares
+document.querySelectorAll('.popular-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.popular-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const tipo = tab.dataset.tab;
+        document.getElementById('popularServicios').style.display = tipo === 'servicios' ? 'grid' : 'none';
+        document.getElementById('popularProfesionales').style.display = tipo === 'profesionales' ? 'grid' : 'none';
+    });
+});
+
+// Compartir
+document.getElementById('shareWhatsApp').onclick = () => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(window.location.href)}`, '_blank');
+document.getElementById('shareTelegram').onclick = () => window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}`, '_blank');
+document.getElementById('shareFacebook').onclick = () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+document.getElementById('copyLinkBtn').onclick = () => { navigator.clipboard.writeText(window.location.href); mostrarToast('Enlace copiado', 'success'); };
+
+// Publicar modal
+document.getElementById('btnPublicar').onclick = () => {
+    iniciarMapaUbicacion();
+    document.getElementById('modalPublicar').style.display = 'flex';
+};
+
+// Foto preview
+document.getElementById('fotoPerfil').onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            document.getElementById('previewFoto').innerHTML = `<img src="${ev.target.result}">`;
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+document.getElementById('editFotoFile').onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            document.getElementById('editPreviewFoto').innerHTML = `<img src="${ev.target.result}">`;
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+// Subcategorias
+document.getElementById('categoriaPrincipalFilter').onchange = actualizarSubcategorias;
+
+// Editar perfil form
+document.getElementById('editarPerfilForm').onsubmit = async (e) => {
+    e.preventDefault();
+    // lógica de guardado de edición
+};
+
+// Agregar servicio
+document.getElementById('btnAgregarServicio').onclick = () => {
+    document.getElementById('servicioId').value = '';
+    document.getElementById('servicioNombre').value = '';
+    document.getElementById('servicioDescripcion').value = '';
+    document.getElementById('servicioPrecio').value = '';
+    document.getElementById('servicioImagenPreview').innerHTML = '';
+    document.getElementById('formServicioTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Agregar Servicio';
+    document.getElementById('modalFormServicio').style.display = 'flex';
+};
     setInterval(async () => { await cargarTasaElToque(); }, 6 * 60 * 60 * 1000);
 }
 
