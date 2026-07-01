@@ -2983,52 +2983,52 @@
             mostrarToast('Sesión cerrada', 'info');
         }
 
-        function actualizarUI() {
-            const userInfo = document.getElementById('userInfo');
-            const userName = document.getElementById('userName');
-            const btnLogin = document.getElementById('btnLogin');
-            const btnPublicar = document.getElementById('btnPublicar');
-            const btnAdmin = document.getElementById('btnAdmin');
-            const btnLogout = document.getElementById('btnLogout');
+      function actualizarUI() {
+    const userInfo = document.getElementById('userInfo');
+    const userName = document.getElementById('userName');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnPublicar = document.getElementById('btnPublicar');
+    const btnAdmin = document.getElementById('btnAdmin');
+    const btnLogout = document.getElementById('btnLogout');
 
-            if (currentUser) {
-                userInfo.style.display = 'flex';
-                userName.innerHTML = `<i class="fas fa-user-circle"></i> ${escapeHtml(currentUser.email.split('@')[0])}`;
-                btnLogin.style.display = 'none';
-                btnLogout.style.display = 'inline-block';
+    if (currentUser) {
+        userInfo.style.display = 'flex';
+        userName.innerHTML = `<i class="fas fa-user-circle"></i> ${escapeHtml(currentUser.email.split('@')[0])}`;
+        btnLogin.style.display = 'none';
+        btnLogout.style.display = 'inline-block';
 
-                esAdmin().then(isAdmin => {
-                    btnAdmin.style.display = isAdmin ? 'inline-block' : 'none';
-                });
+        // ✅ MOSTRAR "Publicar Servicio" PARA TODOS LOS USUARIOS LOGUEADOS
+        btnPublicar.style.display = 'inline-block';
 
-                if (currentUserTipo === 'profesional') {
-                    btnPublicar.style.display = 'inline-block';
+        esAdmin().then(isAdmin => {
+            btnAdmin.style.display = isAdmin ? 'inline-block' : 'none';
+        });
 
-                    if (!document.getElementById('btnPanelProfesional')) {
-                        const btnPanel = document.createElement('button');
-                        btnPanel.id = 'btnPanelProfesional';
-                        btnPanel.className = 'btn btn-outline';
-                        btnPanel.innerHTML = '<i class="fas fa-user-cog"></i> Mi Panel';
-                        btnPanel.onclick = abrirPanelProfesional;
-                        btnPublicar.parentNode.insertBefore(btnPanel, btnPublicar);
-                    }
-                } else {
-                    btnPublicar.style.display = 'none';
-                    const btnPanel = document.getElementById('btnPanelProfesional');
-                    if (btnPanel) btnPanel.remove();
-                }
-            } else {
-                userInfo.style.display = 'none';
-                btnLogin.style.display = 'inline-block';
-                btnPublicar.style.display = 'none';
-                btnAdmin.style.display = 'none';
-                btnLogout.style.display = 'none';
-
-                const btnPanel = document.getElementById('btnPanelProfesional');
-                if (btnPanel) btnPanel.remove();
+        // Solo mostrar "Mi Panel" si es profesional
+        if (currentUserTipo === 'profesional') {
+            if (!document.getElementById('btnPanelProfesional')) {
+                const btnPanel = document.createElement('button');
+                btnPanel.id = 'btnPanelProfesional';
+                btnPanel.className = 'btn btn-outline';
+                btnPanel.innerHTML = '<i class="fas fa-user-cog"></i> Mi Panel';
+                btnPanel.onclick = abrirPanelProfesional;
+                btnPublicar.parentNode.insertBefore(btnPanel, btnPublicar);
             }
+        } else {
+            const btnPanel = document.getElementById('btnPanelProfesional');
+            if (btnPanel) btnPanel.remove();
         }
+    } else {
+        userInfo.style.display = 'none';
+        btnLogin.style.display = 'inline-block';
+        btnPublicar.style.display = 'none';
+        btnAdmin.style.display = 'none';
+        btnLogout.style.display = 'none';
 
+        const btnPanel = document.getElementById('btnPanelProfesional');
+        if (btnPanel) btnPanel.remove();
+    }
+}
         // ============================================================
         // PANEL PROFESIONAL
         // ============================================================
