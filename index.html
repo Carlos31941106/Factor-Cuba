@@ -4814,6 +4814,7 @@ if (ctxRevenue) {
             // Registro y recuperación
             document.getElementById('switchAuthMode').onclick = (e) => {
                 e.preventDefault();
+                 loginMode = 'registro';
                 document.getElementById('modalLogin').style.display = 'none';
                 document.getElementById('modalRegistro').style.display = 'flex';
             };
