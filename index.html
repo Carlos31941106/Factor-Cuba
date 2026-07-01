@@ -2534,7 +2534,7 @@
                     } else {
                         const categoriasBD = [...new Set(subcategoriasDeCategoria.map(sc => subcategoriaToCategoriaBD[sc])
                             .filter(Boolean)
-                        ];
+                        )];
                         serviciosMostrar = serviciosMostrar.filter(s =>
                             categoriasBD.includes(s.categoria) ||
                             (s.especialidad && categoriasBD.some(cat => s.especialidad.toLowerCase().includes(cat)))
