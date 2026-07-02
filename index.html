@@ -2218,83 +2218,63 @@
         // ============================================================
         // MAPAS
         // ============================================================
-        function iniciarMapaUbicacion() {
-            if (mapaUbicacionInstance) {
-                mapaUbicacionInstance.remove();
-            }
+       function iniciarMapaUbicacion() {
+    // Eliminar instancia anterior si existe
+    if (mapaUbicacionInstance) {
+        mapaUbicacionInstance.remove();
+        mapaUbicacionInstance = null;
+    }
 
-            mapaUbicacionInstance = L.map('ubicacionMapa').setView([23.1, -82.4], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(mapaUbicacionInstance);
+    // Asegurar que el contenedor sea visible y tenga tamaño
+    const container = document.getElementById('ubicacionMapa');
+    container.style.display = 'block';
+    container.style.height = '250px';
+    container.style.width = '100%';
 
-            mapaUbicacionInstance.on('click', function(e) {
-                const lat = e.latlng.lat;
-                const lng = e.latlng.lng;
+    // Inicializar el mapa
+    mapaUbicacionInstance = L.map('ubicacionMapa', {
+        center: [23.1, -82.4],
+        zoom: 12,
+        zoomControl: true
+    });
 
-                if (marcadorUbicacion) {
-                    mapaUbicacionInstance.removeLayer(marcadorUbicacion);
-                }
+    // Agregar capa de tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(mapaUbicacionInstance);
 
-                marcadorUbicacion = L.marker([lat, lng]).addTo(mapaUbicacionInstance);
-                document.getElementById('pubLatitud').value = lat;
-                document.getElementById('pubLongitud').value = lng;
+    // Forzar actualización del tamaño después de un pequeño retraso
+    setTimeout(() => {
+        if (mapaUbicacionInstance) {
+            mapaUbicacionInstance.invalidateSize();
+        }
+    }, 300);
 
-                const infoDiv = document.getElementById('ubicacionInfo');
-                infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> Ubicación marcada: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-                infoDiv.style.background = '#10b981';
-            });
+    // Evento de clic en el mapa
+    mapaUbicacionInstance.on('click', function(e) {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+
+        if (marcadorUbicacion) {
+            mapaUbicacionInstance.removeLayer(marcadorUbicacion);
         }
 
-        function iniciarEditMapa(lat, lng) {
-            if (editMapaInstance) {
-                editMapaInstance.remove();
-            }
+        marcadorUbicacion = L.marker([lat, lng]).addTo(mapaUbicacionInstance);
+        document.getElementById('pubLatitud').value = lat;
+        document.getElementById('pubLongitud').value = lng;
 
-            const centerLat = lat ? parseFloat(lat) : 23.1;
-            const centerLng = lng ? parseFloat(lng) : -82.4;
-            const zoom = (lat && lng) ? 15 : 12;
+        const infoDiv = document.getElementById('ubicacionInfo');
+        infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> Ubicación marcada: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        infoDiv.style.background = '#10b981';
+    });
 
-            editMapaInstance = L.map('editMapa').setView([centerLat, centerLng], zoom);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(editMapaInstance);
-
-            if (lat && lng) {
-                editMarcador = L.marker([centerLat, centerLng]).addTo(editMapaInstance);
-                document.getElementById('editLatitud').value = centerLat;
-                document.getElementById('editLongitud').value = centerLng;
-
-                const infoDiv = document.getElementById('editUbicacionInfo');
-                infoDiv.innerHTML =
-                    `<i class="fas fa-check-circle"></i> Ubicación actual: ${centerLat.toFixed(6)}, ${centerLng.toFixed(6)}`;
-                infoDiv.style.background = '#10b981';
-            }
-
-            editMapaInstance.on('click', function(e) {
-                const newLat = e.latlng.lat;
-                const newLng = e.latlng.lng;
-
-                if (editMarcador) {
-                    editMapaInstance.removeLayer(editMarcador);
-                }
-
-                editMarcador = L.marker([newLat, newLng]).addTo(editMapaInstance);
-                document.getElementById('editLatitud').value = newLat;
-                document.getElementById('editLongitud').value = newLng;
-
-                const infoDiv = document.getElementById('editUbicacionInfo');
-                infoDiv.innerHTML =
-                    `<i class="fas fa-check-circle"></i> Nueva ubicación: ${newLat.toFixed(6)}, ${newLng.toFixed(6)}`;
-                infoDiv.style.background = '#10b981';
-            });
-
-            setTimeout(() => {
-                if (editMapaInstance) {
-                    editMapaInstance.invalidateSize();
-                }
-            }, 200);
+    // Forzar actualización adicional después de que el modal se muestre completamente
+    setTimeout(() => {
+        if (mapaUbicacionInstance) {
+            mapaUbicacionInstance.invalidateSize();
         }
+    }, 600);
+}
 
         function actualizarMapa() {
             if (!mapaInstance) {
@@ -4884,10 +4864,15 @@ if (ctxRevenue) {
                 mostrarToast('Enlace copiado', 'success'); };
 
             // Publicar modal
-            document.getElementById('btnPublicar').onclick = () => {
-                iniciarMapaUbicacion();
-                document.getElementById('modalPublicar').style.display = 'flex';
-            };
+           document.getElementById('btnPublicar').onclick = () => {
+    // Primero mostrar el modal
+    document.getElementById('modalPublicar').style.display = 'flex';
+    
+    // Esperar un momento para que el modal se renderice, luego iniciar el mapa
+    setTimeout(() => {
+        iniciarMapaUbicacion();
+    }, 300);
+};
 
             // Foto preview
             document.getElementById('fotoPerfil').onchange = (e) => {
