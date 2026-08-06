@@ -4258,6 +4258,20 @@ if (ctxRevenue) {
                         ${s.descripcion ? `<div style="margin-top:8px;">📝 ${escapeHtml(s.descripcion)}</div>` : ''}
                     </div>
                 `).join('');
+            // Asignar eventos a los botones de aprobar y rechazar
+document.querySelectorAll('.aprobar-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const id = this.dataset.id;
+        window.aprobarServicio(id);
+    });
+});
+
+document.querySelectorAll('.rechazar-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const id = this.dataset.id;
+        window.rechazarServicio(id);
+    });
+});
         }
 
         // Funciones admin globales
