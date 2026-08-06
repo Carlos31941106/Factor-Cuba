@@ -4249,7 +4249,7 @@ if (ctxRevenue) {
                         <div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:15px;">
                             <div><strong>${escapeHtml(s.nombre)}</strong><br><small>${escapeHtml(s.especialidad || s.categoria)}</small><br><small>📍 ${escapeHtml(s.municipio || s.zona || '')}, ${escapeHtml(s.provincia || '')}</small></div>
                             <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                                ${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm" onclick="window.aprobarServicio('${s.id}')">✅ Aprobar</button> <button class="btn btn-danger btn-sm" onclick="window.rechazarServicio('${s.id}')">❌ Rechazar</button>` : ''}
+                                ${s.estado === 'pendiente' ? `<button class="btn btn-success btn-sm aprobar-btn" data-id="${s.id}">✅ Aprobar</button> <button class="btn btn-danger btn-sm rechazar-btn" data-id="${s.id}">❌ Rechazar</button>` : ''}
                                 <button class="btn btn-outline btn-sm" onclick="window.eliminarServicioAdmin('${s.id}')">🗑️ Eliminar</button>
                             </div>
                         </div>
